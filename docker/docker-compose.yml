@@ -1,0 +1,202 @@
+# PROPOSED — pending ADR-001 approval
+# Versions from thesis Chapter 3: Flower 1.21.0, MLflow 3.4.0, Ultralytics 8.3.253
+# Client count: 4 (confirmed from thesis)
+# GPU: all containers share the host GPU (single-GPU host assumption).
+# For multi-GPU: assign device_ids per service.
+
+name: flops-research
+
+networks:
+  flwr-network:
+    driver: bridge
+
+x-gpu: &gpu
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: all        # change to device_ids: ["0"] for specific GPU
+            capabilities: [gpu]
+
+services:
+
+  # ── EXPERIMENT TRACKING ──────────────────────────────────────────────────
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.4.0
+    ports:
+      - "5000:5000"
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri /mlflow/mlruns --default-artifact-root /mlflow/artifacts
+    volumes:
+      - ../artifacts/mlruns:/mlflow/mlruns
+      - ../artifacts/mlflow-artifacts:/mlflow/artifacts
+    networks:
+      - flwr-network
+    restart: on-failure
+
+  # ── FLOWER INFRASTRUCTURE ────────────────────────────────────────────────
+
+  superlink:
+    image: flwr/superlink:1.21.0
+    command: --insecure   # replace with TLS config for non-local runs
+    ports:
+      - "9091:9091"       # ServerAppIO API
+      - "9092:9092"       # Fleet API (SuperNode connections)
+      - "9093:9093"       # Control API
+    networks:
+      - flwr-network
+    restart: on-failure
+
+  # ── SERVER APP (aggregation strategy) ───────────────────────────────────
+
+  serverapp:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.research
+    image: flops-research:latest
+    command: >
+      flwr-superexec
+        --insecure
+        --executor flwr.superexec.app:AppIoExecutor
+        --executor-config superlink="superlink:9091"
+        --app /app
+        --plugin-type serverapp
+    volumes:
+      - ../artifacts:/app/artifacts
+      - ../configs:/app/configs
+      - ../research:/app/research
+    networks:
+      - flwr-network
+    depends_on:
+      - superlink
+    <<: *gpu
+    restart: on-failure
+
+  # ── FLOWER CLIENT INFRASTRUCTURE ─────────────────────────────────────────
+
+  supernode-0:
+    image: flwr/supernode:1.21.0
+    command: --insecure --superlink superlink:9092 --clientappio-api-address 0.0.0.0:9094 --node-config "partition-id=0 num-partitions=4"
+    networks:
+      - flwr-network
+    depends_on:
+      - superlink
+    restart: on-failure
+
+  supernode-1:
+    image: flwr/supernode:1.21.0
+    command: --insecure --superlink superlink:9092 --clientappio-api-address 0.0.0.0:9094 --node-config "partition-id=1 num-partitions=4"
+    networks:
+      - flwr-network
+    depends_on:
+      - superlink
+    restart: on-failure
+
+  supernode-2:
+    image: flwr/supernode:1.21.0
+    command: --insecure --superlink superlink:9092 --clientappio-api-address 0.0.0.0:9094 --node-config "partition-id=2 num-partitions=4"
+    networks:
+      - flwr-network
+    depends_on:
+      - superlink
+    restart: on-failure
+
+  supernode-3:
+    image: flwr/supernode:1.21.0
+    command: --insecure --superlink superlink:9092 --clientappio-api-address 0.0.0.0:9094 --node-config "partition-id=3 num-partitions=4"
+    networks:
+      - flwr-network
+    depends_on:
+      - superlink
+    restart: on-failure
+
+  # ── CLIENT APPS (YOLOv8 local training) ──────────────────────────────────
+
+  clientapp-0:
+    image: flops-research:latest
+    command: >
+      flwr-superexec
+        --insecure
+        --executor flwr.superexec.app:AppIoExecutor
+        --executor-config supernode="supernode-0:9094"
+        --app /app
+        --plugin-type clientapp
+    environment:
+      - PARTITION_ID=0
+    volumes:
+      - ../artifacts:/app/artifacts
+      - ../configs:/app/configs
+      - ../data:/app/data:ro        # dataset mount (read-only)
+    networks:
+      - flwr-network
+    depends_on:
+      - supernode-0
+    <<: *gpu
+    restart: on-failure
+
+  clientapp-1:
+    image: flops-research:latest
+    command: >
+      flwr-superexec
+        --insecure
+        --executor flwr.superexec.app:AppIoExecutor
+        --executor-config supernode="supernode-1:9094"
+        --app /app
+        --plugin-type clientapp
+    environment:
+      - PARTITION_ID=1
+    volumes:
+      - ../artifacts:/app/artifacts
+      - ../configs:/app/configs
+      - ../data:/app/data:ro
+    networks:
+      - flwr-network
+    depends_on:
+      - supernode-1
+    <<: *gpu
+    restart: on-failure
+
+  clientapp-2:
+    image: flops-research:latest
+    command: >
+      flwr-superexec
+        --insecure
+        --executor flwr.superexec.app:AppIoExecutor
+        --executor-config supernode="supernode-2:9094"
+        --app /app
+        --plugin-type clientapp
+    environment:
+      - PARTITION_ID=2
+    volumes:
+      - ../artifacts:/app/artifacts
+      - ../configs:/app/configs
+      - ../data:/app/data:ro
+    networks:
+      - flwr-network
+    depends_on:
+      - supernode-2
+    <<: *gpu
+    restart: on-failure
+
+  clientapp-3:
+    image: flops-research:latest
+    command: >
+      flwr-superexec
+        --insecure
+        --executor flwr.superexec.app:AppIoExecutor
+        --executor-config supernode="supernode-3:9094"
+        --app /app
+        --plugin-type clientapp
+    environment:
+      - PARTITION_ID=3
+    volumes:
+      - ../artifacts:/app/artifacts
+      - ../configs:/app/configs
+      - ../data:/app/data:ro
+    networks:
+      - flwr-network
+    depends_on:
+      - supernode-3
+    <<: *gpu
+    restart: on-failure

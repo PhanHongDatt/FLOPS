@@ -1,0 +1,21 @@
+# Experiment Registry
+# Section 16 — CLAUDE.md
+# Status values: planned | running | completed | failed-valid | failed-technical | rejected
+# Never delete negative results.
+
+experiments: []
+
+# Example entry:
+# - id: EXP-001
+#   name: "S1 Missing-Class FedAvg Baseline"
+#   gate: G3
+#   scenario: S1
+#   method: FedAvg
+#   run_class: smoke | feasibility | main
+#   status: planned
+#   seed: 42
+#   partition_id: ""
+#   git_commit: ""
+#   config: ""
+#   environment: ""
+#   notes: ""

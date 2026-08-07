@@ -1,0 +1,43 @@
+# PROPOSED — pending ADR-001 approval.
+# Versions sourced from thesis Chapter 3 (Ultralytics, Flower, MLflow)
+# and proposed for PyTorch/CUDA (see ADR-001).
+#
+# After ADR-001 approved:
+#   pip install -r requirements.txt
+#   pip freeze > environment.lock
+
+# ── Object Detection ──────────────────────────────────────────────────────────
+# Source: thesis §3.3.3 "Framework Ultralytics YOLO v8.3.x"
+# Exact patch: 8.3.253 (latest 8.3.x, released 2026-01-13, verified PyPI)
+ultralytics==8.3.253
+
+# ── Federated Learning ───────────────────────────────────────────────────────
+# Source: thesis §3.3.4 "Framework Flower 1.21.x"
+# Exact patch: 1.21.0 (only patch in 1.21.x, released 2025-09-10, verified PyPI)
+flwr==1.21.0
+
+# ── Experiment Tracking ──────────────────────────────────────────────────────
+# Source: thesis §3.3.5 "Phiên bản MLflow 3.4.x"
+# Exact patch: 3.4.0 (released 2025-09-17, verified mlflow.org)
+mlflow==3.4.0
+
+# ── PyTorch ───────────────────────────────────────────────────────────────────
+# Source: proposed (ADR-001) — NOT in thesis, derived from Docker base image
+# pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
+# Inside Docker: do NOT reinstall — use base image torch.
+# Local dev (non-Docker): uncomment below and confirm CUDA variant manually.
+# torch==2.7.1
+# torchvision==0.22.0
+# torchaudio==2.7.0
+
+# ── Data / Numerics ───────────────────────────────────────────────────────────
+numpy>=1.26,<2.0
+pandas>=2.2,<3.0
+Pillow>=10.0,<11.0
+PyYAML>=6.0
+scipy>=1.13,<2.0
+opencv-python-headless>=4.9,<5.0
+
+# ── Dev / Test ───────────────────────────────────────────────────────────────
+pytest>=8.0
+pytest-cov>=5.0

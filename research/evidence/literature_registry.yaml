@@ -1,0 +1,220 @@
+# Literature & Source Registry
+# Section 16 — CLAUDE.md
+# Verified from authoritative sources (proceedings pages, arXiv abstract pages).
+# Do NOT add entries without source verification.
+#
+# Fields:
+#   title       : exact title from source
+#   authors     : full author list in publication order
+#   year        : year of publication (conference/journal, not arXiv submission)
+#   venue       : conference / journal / preprint
+#   source_url  : direct link to authoritative page verified
+#   arxiv_id    : arXiv identifier if available
+#   tag         : [LITERATURE] | [YOLO-DOC] | [FL-DOC] | [THESIS-HYPOTHESIS] | [ENGINEERING] | [NEEDS-VERIFICATION]
+#   verified    : true if fetched from proceedings/arXiv abstract page directly
+#   reused_concept : what concept is adopted from this work
+#   role        : reproduction | adaptation | extension | framework | dataset | motivation
+
+entries:
+
+  # ── FEDERATED LEARNING ALGORITHMS ─────────────────────────────────────────
+
+  - id: fedavg
+    title: "Communication-Efficient Learning of Deep Networks from Decentralized Data"
+    authors:
+      - "H. Brendan McMahan"
+      - "Eider Moore"
+      - "Daniel Ramage"
+      - "Seth Hampson"
+      - "Blaise Agüera y Arcas"
+    year: 2017
+    venue: "Proceedings of the 20th International Conference on Artificial Intelligence and Statistics (AISTATS 2017), PMLR vol. 54, pp. 1273–1282"
+    source_url: "https://proceedings.mlr.press/v54/mcmahan17a.html"
+    arxiv_id: "1602.05629"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      FedAvg aggregation algorithm: weighted averaging of client model updates
+      proportional to local dataset size. Primary baseline for this project.
+    role: reproduction
+
+  - id: fedprox
+    title: "Federated Optimization in Heterogeneous Networks"
+    authors:
+      - "Tian Li"
+      - "Anit Kumar Sahu"
+      - "Manzil Zaheer"
+      - "Maziar Sanjabi"
+      - "Ameet Talwalkar"
+      - "Virginia Smith"
+    year: 2020
+    venue: "Proceedings of Machine Learning and Systems (MLSys 2020)"
+    source_url: "https://arxiv.org/abs/1812.06127"
+    arxiv_id: "1812.06127"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      FedProx: adds a proximal regularization term μ/2 ||w - w_t||² to each
+      client's local objective to limit drift from the global model.
+      Used as FL baseline under heterogeneous / Non-IID settings.
+    role: reproduction
+
+  - id: scaffold
+    title: "SCAFFOLD: Stochastic Controlled Averaging for Federated Learning"
+    authors:
+      - "Sai Praneeth Karimireddy"
+      - "Satyen Kale"
+      - "Mehryar Mohri"
+      - "Sashank Reddi"
+      - "Sebastian Stich"
+      - "Ananda Theertha Suresh"
+    year: 2020
+    venue: "Proceedings of the 37th International Conference on Machine Learning (ICML 2020), PMLR vol. 119, pp. 5132–5143"
+    source_url: "https://proceedings.mlr.press/v119/karimireddy20a.html"
+    arxiv_id: "1910.06378"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      SCAFFOLD: control variates (variance reduction) to correct client drift
+      caused by data heterogeneity. Characterizes that Non-IID causes drift in
+      local updates. Used as FL baseline.
+    role: reproduction
+
+  - id: fednova
+    title: "Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization"
+    authors:
+      - "Jianyu Wang"
+      - "Qinghua Liu"
+      - "Hao Liang"
+      - "Gauri Joshi"
+      - "H. Vincent Poor"
+    year: 2020
+    venue: "Advances in Neural Information Processing Systems 33 (NeurIPS 2020)"
+    source_url: "https://proceedings.neurips.cc/paper/2020/hash/564127c03caab942e503ee6f810f54fd-Abstract.html"
+    arxiv_id: "2007.07481"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      FedNova: normalized averaging that eliminates objective inconsistency
+      arising from heterogeneous numbers of local update steps across clients.
+      Used as FL baseline.
+    role: reproduction
+
+  # ── NON-IID MOTIVATION ────────────────────────────────────────────────────
+
+  - id: zhao2018noniid
+    title: "Federated Learning with Non-IID Data"
+    authors:
+      - "Yue Zhao"
+      - "Meng Li"
+      - "Liangzhen Lai"
+      - "Naveen Suda"
+      - "Damon Civin"
+      - "Vikas Chandra"
+    year: 2018
+    venue: "arXiv preprint (no peer-reviewed venue confirmed)"
+    source_url: "https://arxiv.org/abs/1806.00582"
+    arxiv_id: "1806.00582"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      Demonstrates that data heterogeneity (Non-IID) causes significant
+      accuracy degradation in FedAvg. Introduces weight divergence as a
+      quantification of Non-IID degree. Provides motivation baseline for H1.
+    role: motivation
+    notes: >
+      Preprint only — not published at a peer-reviewed venue per arXiv record.
+      Use with awareness that it has not undergone formal peer review,
+      though it is widely cited. Verify claims against experimental evidence.
+
+  # ── FRAMEWORK ─────────────────────────────────────────────────────────────
+
+  - id: flower
+    title: "Flower: A Friendly Federated Learning Research Framework"
+    authors:
+      - "Daniel J. Beutel"
+      - "Taner Topal"
+      - "Akhil Mathur"
+      - "Xinchi Qiu"
+      - "Javier Fernandez-Marques"
+      - "Yan Gao"
+      - "Lorenzo Sani"
+      - "Kwing Hei Li"
+      - "Titouan Parcollet"
+      - "Pedro Porto Buarque de Gusmão"
+      - "Nicholas D. Lane"
+    year: 2020
+    venue: "arXiv preprint (no peer-reviewed venue confirmed on arXiv abstract page)"
+    source_url: "https://arxiv.org/abs/2007.14390"
+    arxiv_id: "2007.14390"
+    tag: "[FL-DOC]"
+    verified: true
+    reused_concept: >
+      Flower FL simulation framework. Used for implementing and running all
+      federated learning experiments in this project.
+    role: framework
+    notes: >
+      Verify the exact Flower version to be pinned via G1 ADR before use.
+      Framework API may differ significantly between versions.
+
+  # ── OBJECT DETECTION MODEL ────────────────────────────────────────────────
+
+  - id: yolov8
+    title: "Ultralytics YOLOv8"
+    authors:
+      - "Glenn Jocher"
+      - "Ayush Chaurasia"
+      - "Jing Qiu"
+    year: 2023
+    venue: "Software release — no peer-reviewed paper"
+    source_url: "https://github.com/ultralytics/ultralytics"
+    arxiv_id: null
+    tag: "[YOLO-DOC]"
+    verified: true
+    reused_concept: >
+      YOLOv8 object detection architecture. Backbone, neck (PAN-FPN), and
+      Detect head. Core model for all detection experiments.
+      Parameter mapping (F1) must be verified against the pinned version source.
+    role: reproduction
+    notes: >
+      No formal academic paper. Cite as software with version and DOI/URL.
+      Official BibTeX: @software{yolov8_ultralytics, author={Jocher, Glenn and
+      Chaurasia, Ayush and Qiu, Jing}, license={AGPL-3.0}, year={2023},
+      url={https://github.com/ultralytics/ultralytics}}
+      YOLO version must be pinned via G1 ADR — parameter names/shapes are
+      version-specific and cannot be assumed across releases.
+
+  # ── DATASET ───────────────────────────────────────────────────────────────
+
+  - id: bdd100k
+    title: "BDD100K: A Diverse Driving Dataset for Heterogeneous Multitask Learning"
+    authors:
+      - "Fisher Yu"
+      - "Haofeng Chen"
+      - "Xin Wang"
+      - "Wenqi Xian"
+      - "Yingying Chen"
+      - "Fangchen Liu"
+      - "Vashisht Madhavan"
+      - "Trevor Darrell"
+    year: 2020
+    venue: "IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2020)"
+    source_url: "https://arxiv.org/abs/1805.04687"
+    arxiv_id: "1805.04687"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      BDD100K driving dataset containing 100K diverse driving videos with
+      detection annotations for car, bus, truck, motorcycle (among other classes).
+      Primary dataset candidate for partitioning experiments (S0, S1, S1-Control).
+    role: dataset
+    notes: >
+      Must split by video sequence / recording segment to limit data leakage
+      across clients (Section 9, CLAUDE.md). Dataset version and download
+      source must be recorded in environment.lock before use.
+
+# ── ENTRIES REQUIRING ADDITIONAL VERIFICATION ──────────────────────────────
+# Add here if a source cannot currently be accessed.
+# Format: id, claim, what_to_verify, priority
+
+needs_verification: []

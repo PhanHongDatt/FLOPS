@@ -1,0 +1,61 @@
+# Base training configuration
+# Source: thesis Chapter 3, §3.3.3 and §3.3.4
+# Do NOT change values here without an ADR update.
+# Experiment-specific overrides go in configs/experiments/<exp_id>.yaml
+
+# ── Model ─────────────────────────────────────────────────────────────────────
+model:
+  name: yolov8n
+  weights: yolov8n.pt           # pretrained weights
+  image_size: 640               # px, square
+
+# ── Target classes ────────────────────────────────────────────────────────────
+classes:
+  - car
+  - bus
+  - truck
+  - motorcycle
+
+# ── Centralized training ──────────────────────────────────────────────────────
+train:
+  epochs: 100
+  batch_size: 16
+  optimizer: SGD
+  lr0: 0.01
+  conf: 0.25
+  iou: 0.70
+  device: 0                     # GPU index; "cpu" for CPU-only
+
+# ── Federated learning ────────────────────────────────────────────────────────
+federated:
+  num_clients: 4
+  num_rounds: 10
+  local_epochs: 1
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  algorithms:
+    - FedAvg
+    - FedProx
+    - SCAFFOLD
+    - FedNova
+
+# ── Evaluation ────────────────────────────────────────────────────────────────
+evaluation:
+  conf: 0.25
+  iou: 0.70
+  metrics:
+    - mAP50
+    - mAP50-95
+    - precision_per_class
+    - recall_per_class
+    - AP_per_class
+    - FP_per_class
+    - FN_per_class
+
+# ── Reproducibility ───────────────────────────────────────────────────────────
+reproducibility:
+  seeds:
+    - 42
+    - 123
+    - 2024
+  min_seeds: 3                  # minimum seeds for main experiments

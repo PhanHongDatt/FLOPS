@@ -1,0 +1,87 @@
+# Stage Gates — Section 7, CLAUDE.md
+# Update status as each gate is passed. Never skip.
+# status: not_started | in_progress | passed | blocked
+
+gates:
+  G0:
+    name: Evidence/source registry ready
+    status: passed
+    passed_date: "2026-08-07"
+    notes: >
+      8 entries verified from authoritative sources (proceedings pages + arXiv abstract pages):
+      FedAvg, FedProx, SCAFFOLD, FedNova, Flower, Zhao2018-NonIID, YOLOv8, BDD100K.
+      All author lists, venues, arXiv IDs confirmed. No entries from blogs or generated summaries.
+      Next: pin environment versions (G1) — requires ADR-001.
+
+  G1:
+    name: Environment reproducible
+    status: in_progress
+    passed_date: null
+    notes: >
+      ADR-001 proposed (2026-08-08) — awaiting approval on:
+      PyTorch 2.7.1 + CUDA 12.8, Flower 1.33.0,
+      ultralytics Option A (8.2.82) vs Option B (8.4.116),
+      client count (4 vs 6), GPU sharing strategy.
+      Docker files drafted in docker/.
+      environment.lock not yet filled.
+
+  G2:
+    name: Centralized YOLOv8 baseline reproducible
+    status: not_started
+    passed_date: null
+    notes: ""
+
+  G3:
+    name: FedAvg baseline reproducible
+    status: not_started
+    passed_date: null
+    notes: ""
+
+  G4:
+    name: Missing-Class effect established
+    status: not_started
+    passed_date: null
+    notes: "Requires S1 vs S1-Control with parameter + prediction evidence"
+
+  G5:
+    name: YOLO class-intervention feasibility established
+    status: not_started
+    passed_date: null
+    sub_path: null  # A | B | C — set after F1/F2/F3
+    notes: "F1, F2, F3 not yet started"
+
+  G6:
+    name: Client preservation validated
+    status: not_started
+    passed_date: null
+    notes: "Blocked until G4 and G5 passed"
+
+  G7:
+    name: Server class-aware aggregation validated
+    status: not_started
+    passed_date: null
+    notes: "Blocked until G4 and G5 passed"
+
+  G8:
+    name: Full method implemented
+    status: not_started
+    passed_date: null
+    notes: ""
+
+  G9:
+    name: Ablation completed
+    status: not_started
+    passed_date: null
+    notes: "Ablation matrix A0–A4 required"
+
+  G10:
+    name: Main multi-seed experiments completed
+    status: not_started
+    passed_date: null
+    notes: "Minimum 3 seeds"
+
+  G11:
+    name: Research conclusion approved
+    status: not_started
+    passed_date: null
+    notes: ""

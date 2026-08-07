@@ -1,0 +1,22 @@
+# CANONICAL ENVIRONMENT RECORD — Section 5, CLAUDE.md
+# STATUS: DRAFT — fill after ADR-001 is approved and pip freeze is run.
+# Every experiment must record these values in its own config/environment.json.
+
+python_version: ""            # e.g. 3.11.9
+pytorch_version: ""           # e.g. 2.7.1+cu128
+torchvision_version: ""       # e.g. 0.22.0+cu128
+torchaudio_version: ""        # e.g. 2.7.0+cu128
+cuda_version: ""              # e.g. 12.8 (from nvidia-smi)
+cudnn_version: ""             # e.g. 9.x
+ultralytics_version: ""       # e.g. 8.2.82
+flwr_version: ""              # e.g. 1.33.0
+numpy_version: ""
+pandas_version: ""
+base_docker_image: ""         # e.g. pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
+host_driver_version: ""       # from nvidia-smi (e.g. 535.x)
+dataset_version: ""           # BDD100K version / download date
+dataset_source: ""            # URL or path
+git_commit: ""                # commit hash at time of environment creation
+created_date: ""
+created_by: ""
+notes: ""

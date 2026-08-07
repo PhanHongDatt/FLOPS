@@ -1,0 +1,33 @@
+# PROPOSED — pending ADR-001 approval
+# Versions below match ADR-001 proposal. Do NOT build before ADR-001 is accepted.
+#
+# Single image used for both ServerApp and ClientApp (role selected at runtime
+# via Flower SuperExec --plugin-type flag).
+
+FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
+
+LABEL maintainer="FLOPS Research Project"
+LABEL description="YOLOv8 + Flower FL research image"
+
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Python deps — versions pinned after ADR-001 approval
+# ultralytics version: Option A (8.2.82) — update if Option B chosen
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project source
+COPY src/ ./src/
+COPY configs/ ./configs/
+
+# Flower expects the app to be importable
+ENV PYTHONPATH=/app
+
+# Default: no entrypoint — SuperExec controls execution

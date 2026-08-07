@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Data & weights (large files)
+*.pt
+*.pth
+*.onnx
+*.weights
+data/raw/
+data/processed/
+artifacts/checkpoints/
+
+# Experiment outputs (track registry only, not raw outputs)
+artifacts/runs/
+
+# Environment
+.env
+*.lock
+!environment.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
