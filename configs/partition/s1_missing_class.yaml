@@ -1,0 +1,15 @@
+partition_id: s1_mc_seed42
+scenario: S1
+seed: 42
+num_clients: 4
+missing_map:
+  C0: [motorcycle]     # client 0 has zero motorcycle
+  C1: [truck]          # client 1 has zero truck
+  C2: []               # client 2 has all classes
+  C3: []               # client 3 has all classes
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50
+notes: >
+  Missing-Class Non-IID. C0 missing motorcycle, C1 missing truck.
+  Severity: 2 missing-class clients out of 4.
+  Must define rare_threshold BEFORE inspecting model outcomes (CLAUDE.md §9).

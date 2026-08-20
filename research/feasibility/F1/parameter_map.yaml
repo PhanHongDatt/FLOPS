@@ -1,0 +1,80 @@
+# F1 Parameter Mapping — DRAFT (based on source inspection, not yet runtime-verified)
+# YOLOv8n pinned version: ultralytics 8.3.253
+#
+# Source references:
+#   - ultralytics/cfg/models/v8/yolov8.yaml       (backbone + head layout)
+#   - ultralytics/nn/modules/head.py::Detect      (Detect head structure)
+#   - ultralytics/nn/tasks.py::DetectionModel     (model assembly)
+#
+# ⚠️ Runtime confirmation REQUIRED before this is used in F2/F3:
+#   Run src.model.parameter_map.build_parameter_map(model) and diff against
+#   this table. If shapes differ, update this file and open an ADR.
+
+pinned_version:
+  ultralytics: "8.3.253"
+  model_config: "yolov8n"
+  num_classes: 4                # car, bus, truck, motorcycle
+  reg_max: 16
+  image_size: 640
+
+module_layout:
+  backbone:
+    indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    layers:
+      - {idx: 0, module: Conv,  args: "[64, 3, 2]",  scaled_out: 16}
+      - {idx: 1, module: Conv,  args: "[128, 3, 2]", scaled_out: 32}
+      - {idx: 2, module: C2f,   args: "[128, True]", scaled_out: 32, repeats: 1}
+      - {idx: 3, module: Conv,  args: "[256, 3, 2]", scaled_out: 64}
+      - {idx: 4, module: C2f,   args: "[256, True]", scaled_out: 64, repeats: 2}
+      - {idx: 5, module: Conv,  args: "[512, 3, 2]", scaled_out: 128}
+      - {idx: 6, module: C2f,   args: "[512, True]", scaled_out: 128, repeats: 2}
+      - {idx: 7, module: Conv,  args: "[1024, 3, 2]", scaled_out: 256}
+      - {idx: 8, module: C2f,   args: "[1024, True]", scaled_out: 256, repeats: 1}
+      - {idx: 9, module: SPPF,  args: "[1024, 5]",   scaled_out: 256}
+    class_specific: false
+    shared: true
+    mask_candidate: false
+
+  neck:
+    indices: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+    description: >
+      PAN-FPN: Upsample + Concat + C2f (top-down),
+      then Conv(stride=2) + Concat + C2f (bottom-up),
+      producing P3 (256 ch), P4 (512 ch), P5 (1024 ch) feature maps (nano scaled).
+    class_specific: false
+    shared: true
+    mask_candidate: false
+
+  detect_head:
+    index: 22
+    class_definition_source: "ultralytics/nn/modules/head.py::Detect"
+    submodules:
+      cv2:
+        role: "box regression"
+        output_channels: 64          # 4 * reg_max = 4*16
+        class_specific: false        # regression is class-agnostic
+        mask_candidate: false
+        notes: "Applied per feature map (P3, P4, P5)."
+      cv3:
+        role: "classification"
+        output_channels: 4           # nc (target classes for this project)
+        class_specific: true         # CANDIDATE for H2/H3 masking
+        mask_candidate: true
+        notes: >
+          Only the FINAL conv layer's output channel dim = nc.
+          Earlier conv layers inside cv3 are shared feature transforms.
+          For per-class masking, target only the last-layer weight/bias
+          along the output channel dim (dim 0).
+      dfl:
+        role: "Distribution Focal Loss integral"
+        output_channels: 1
+        class_specific: false
+        mask_candidate: false
+        notes: "Fixed integral filter; typically not learned per class."
+
+# Runtime verification status
+verification:
+  runtime_confirmed: false
+  confirmed_by_script: null          # fill: e.g. "research/feasibility/F1/verify_map.py"
+  confirmed_on_date: null
+  discrepancies: []                  # fill after running build_parameter_map

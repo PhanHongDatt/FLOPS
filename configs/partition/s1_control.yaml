@@ -1,0 +1,12 @@
+partition_id: s1_control_seed42
+scenario: S1-Control
+seed: 42
+num_clients: 4
+missing_map: {}   # matched control — same image counts, all classes present
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50
+notes: >
+  Matched causal control for S1. Same recording sources, image count,
+  total bbox count, and non-target class frequencies as s1_missing_class.
+  Primary difference: target class IS present for all clients.
+  Required to isolate Missing-Class effect (CLAUDE.md §10).

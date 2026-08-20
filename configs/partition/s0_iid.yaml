@@ -1,0 +1,8 @@
+partition_id: s0_iid_seed42
+scenario: S0
+seed: 42
+num_clients: 4
+missing_map: {}   # IID — no forced exclusions
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50
+notes: "Approximate class balance across all 4 clients."

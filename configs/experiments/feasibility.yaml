@@ -1,0 +1,8 @@
+run_class: feasibility
+train:
+  epochs: 10
+  batch_size: 8
+federated:
+  num_rounds: 5
+  num_clients: 4
+notes: "Reduced data/rounds. Used for G2–G5 feasibility checks. Not for reporting."

@@ -18,24 +18,27 @@ gates:
     status: in_progress
     passed_date: null
     notes: >
-      ADR-001 proposed (2026-08-08) — awaiting approval on:
-      PyTorch 2.7.1 + CUDA 12.8, Flower 1.33.0,
-      ultralytics Option A (8.2.82) vs Option B (8.4.116),
-      client count (4 vs 6), GPU sharing strategy.
-      Docker files drafted in docker/.
-      environment.lock not yet filled.
+      ADR-001 accepted (2026-08-08). Versions pinned: PyTorch 2.7.1+CUDA12.8,
+      ultralytics==8.3.253, flwr==1.21.0, mlflow==3.4.0 (all from thesis Chapter 3).
+      Docker files complete (docker/). requirements.txt final.
+      REMAINING: smoke test on GPU host → pip freeze → fill environment.lock.
 
   G2:
     name: Centralized YOLOv8 baseline reproducible
-    status: not_started
+    status: code_ready
     passed_date: null
-    notes: ""
+    notes: >
+      Code complete: scripts/prepare_bdd100k.py + scripts/train_centralized.py.
+      Blocked on: BDD100K dataset download + GPU host to run.
 
   G3:
     name: FedAvg baseline reproducible
-    status: not_started
+    status: code_ready
     passed_date: null
-    notes: ""
+    notes: >
+      Code complete: scripts/run_fl_experiment.py + all 4 strategies
+      (FedAvg built-in, FedProx built-in, SCAFFOLD custom Option II,
+      FedNova custom per JYWa reference). Blocked on G2 dataset + GPU.
 
   G4:
     name: Missing-Class effect established
@@ -45,10 +48,17 @@ gates:
 
   G5:
     name: YOLO class-intervention feasibility established
-    status: not_started
+    status: F1_source_inspected
     passed_date: null
-    sub_path: null  # A | B | C — set after F1/F2/F3
-    notes: "F1, F2, F3 not yet started"
+    sub_path: null  # A | B | C — set after F1/F2/F3 runtime verification
+    notes: >
+      F1 (parameter mapping) source-level analysis complete:
+      research/feasibility/F1/parameter_map.yaml.
+      Verified from ultralytics 8.3.253 source (yolov8.yaml + head.py).
+      Only detect_cls (model.22.cv3) is structurally class-specific.
+      Runtime confirmation required: run src.model.parameter_map.build_parameter_map(model)
+      on actual YOLOv8n model and diff against parameter_map.yaml.
+      F2 (perturbation) + F3 (matched training) require GPU + G3 passed first.
 
   G6:
     name: Client preservation validated

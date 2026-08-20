@@ -1,4 +1,4 @@
-# Python
+# ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.pyo
@@ -9,33 +9,67 @@ build/
 .venv/
 venv/
 env/
+.Python
 
-# Jupyter
+# ── Jupyter ───────────────────────────────────────────────────────────────────
 .ipynb_checkpoints/
 *.ipynb
 
-# Data & weights (large files)
+# ── Model weights & large binaries ───────────────────────────────────────────
 *.pt
 *.pth
 *.onnx
 *.weights
-data/raw/
-data/processed/
-artifacts/checkpoints/
+*.engine
+*.tflite
+*.pb
 
-# Experiment outputs (track registry only, not raw outputs)
+# ── Dataset (large, download separately) ────────────────────────────────────
+data/
+!data/.gitkeep
+
+# ── Experiment artifacts (track registry only) ───────────────────────────────
 artifacts/runs/
+artifacts/mlruns/
+artifacts/mlflow-artifacts/
+artifacts/checkpoints/
+!artifacts/.gitkeep
 
-# Environment
+# ── Environment (lock file IS tracked; local overrides are not) ──────────────
 .env
-*.lock
-!environment.lock
+.env.*
+!environment.lock          # canonical pinned versions — always track
 
-# IDE
+# ── MLflow local ──────────────────────────────────────────────────────────────
+mlruns/
+mlflow.db
+
+# ── Ultralytics / YOLO run outputs ────────────────────────────────────────────
+runs/
+wandb/
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+.docker/
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
 
-# OS
-.DS_Store
-Thumbs.db
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Test / Coverage ───────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
