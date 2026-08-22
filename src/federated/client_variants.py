@@ -2,6 +2,7 @@
 
 FedAvg / FedProx use the base YOLOFlowerClient.
 SCAFFOLD and FedNova need extra client-side state and metrics reporting.
+PreservationClient (H2): applies detection-cls preservation mask before upload.
 
 FedProx: proximal term added inside local training loop.
         (Note: with ultralytics wrapper we cannot easily inject the proximal
@@ -12,6 +13,7 @@ from __future__ import annotations
 
 import base64
 import io
+import json
 from pathlib import Path
 from typing import Any
 
@@ -156,3 +158,77 @@ class FedProxClient(YOLOFlowerClient):
         # TODO: inject proximal term into ultralytics trainer.
         # See v8_yolo_prox integration ADR (to be written).
         return super().fit(parameters, config)
+
+
+class PreservationClient(YOLOFlowerClient):
+    """H2 — Client-side knowledge preservation client.
+
+    After local training, applies the preservation mask to detect_cls final-conv
+    parameters for missing classes before returning parameters to the server.
+
+    Also reports 'class_counts_json' in fit metrics so the server-side
+    ClassAwareAggregation (H3) can determine eligible clients per class.
+
+    Required train_config keys (beyond YOLOFlowerClient):
+        missing_classes (list[str]): class names with zero positive boxes
+        rho (float):                 preservation factor (0=full, 1=none, 0.25=partial)
+        class_counts (dict):         {class_name: box_count} for this client's data
+
+    GATE CONSTRAINT (CLAUDE.md §7): Not scientifically valid until G5 passes
+    and F1 runtime parameter map is verified (runtime_confirmed in parameter_map.yaml).
+    """
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._global_params: NDArrays | None = None
+        self._param_names: list[str] | None = None
+
+    def fit(
+        self,
+        parameters: NDArrays,
+        config: dict[str, Scalar],
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
+        from src.preservation.mask import apply_preservation_mask, get_param_names
+
+        # Snapshot global params before local training
+        self._global_params = [np.array(p, copy=True) for p in parameters]
+        if self._param_names is None:
+            self._param_names = get_param_names(self.model)
+
+        set_parameters(self.model, parameters)
+
+        train_metrics = train_one_round(
+            model=self.model,
+            data_yaml=self.data_yaml,
+            epochs=self.train_config["local_epochs"],
+            batch=self.train_config["batch_size"],
+            img_size=self.train_config["image_size"],
+            lr0=self.train_config["lr0"],
+            device=self.train_config.get("device", 0),
+            project=self.run_dir / "clients" / self.client_id,
+            name=f"round_{self._round + 1}",
+        )
+        self._round += 1
+
+        local_params = get_parameters(self.model)
+
+        missing_classes: list[str] = list(self.train_config.get("missing_classes", []))
+        rho: float = float(self.train_config.get("rho", 1.0))
+
+        masked_params = apply_preservation_mask(
+            local_params=local_params,
+            global_params=self._global_params,
+            param_names=self._param_names,
+            missing_classes=missing_classes,
+            rho=rho,
+        )
+
+        # Report class counts for server-side ClassAwareAggregation (H3)
+        class_counts: dict[str, int] = dict(self.train_config.get("class_counts", {}))
+        metrics: dict[str, Scalar] = {
+            **{k: float(v) for k, v in train_metrics.items()},
+            "class_counts_json": json.dumps(class_counts),
+            "rho": rho,
+        }
+        num_examples = int(self.train_config.get("num_train_examples", 1))
+        return masked_params, num_examples, metrics
