@@ -239,6 +239,7 @@ cmd = [
     "--seed", "42",
     "--mlflow-uri", MLFLOW_URI,
     "--mlflow-experiment", "smoke-FedAvg-S0",
+    "--global-data-yaml", str(YOLO_ROOT / "data.yaml"),
 ]
 print("Running:", " ".join(cmd))
 subprocess.check_call(cmd)

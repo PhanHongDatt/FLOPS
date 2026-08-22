@@ -77,6 +77,13 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--mlflow-uri", default="http://mlflow:5000")
     ap.add_argument("--mlflow-experiment", default="G3-federated")
+    ap.add_argument(
+        "--global-data-yaml",
+        type=Path,
+        default=None,
+        help="Global YOLO data.yaml for centralized post-round eval. "
+             "Required to produce per_class_metrics.csv (CLAUDE.md §13, §21).",
+    )
     args = ap.parse_args()
 
     _set_seed(args.seed)
@@ -131,6 +138,13 @@ def main() -> None:
         "fraction_evaluate": config["federated"]["fraction_evaluate"],
     }
 
+    eval_config = {
+        "image_size": config["model"]["image_size"],
+        "conf": config["evaluation"]["conf"],
+        "iou": config["evaluation"]["iou"],
+        "device": config["train"]["device"],
+    }
+
     run_fl_server(
         algorithm=args.algorithm,
         fl_config=fl_config,
@@ -138,6 +152,8 @@ def main() -> None:
         run_dir=run_dir,
         mlflow_experiment=args.mlflow_experiment,
         mlflow_uri=args.mlflow_uri,
+        global_data_yaml=args.global_data_yaml,
+        eval_config=eval_config if args.global_data_yaml else None,
     )
 
     finalize_run(run_dir)

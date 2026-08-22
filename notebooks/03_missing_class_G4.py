@@ -135,6 +135,7 @@ def run_one(scenario_name: str, manifest_path: Path, data_yaml_dir: Path, seed: 
         "--seed", str(seed),
         "--mlflow-uri", MLFLOW_URI,
         "--mlflow-experiment", f"G4-FedAvg-{scenario_name}",
+        "--global-data-yaml", str(DATA_YAML),
     ]
     print(f"\n[{scenario_name} seed={seed}] {' '.join(cmd[-8:])}")
     subprocess.check_call(cmd)
@@ -168,27 +169,31 @@ def read_metrics(run_dir: Path) -> dict:
     """Read final metrics from a run dir. Prefer per_class_metrics.csv."""
     per_class_csv = run_dir / "per_class_metrics.csv"
     metrics_csv = run_dir / "metrics.csv"
-    out = {}
+    out: dict[str, float] = {}
+    # per_class_metrics.csv: rows have keys [class, AP50, AP, precision, recall]
     if per_class_csv.exists():
         with per_class_csv.open() as f:
-            reader = csv.DictReader(f)
-            for row in reader:
+            for row in csv.DictReader(f):
                 cls = row.get("class")
-                ap = row.get("AP50") or row.get("AP") or row.get("mAP50")
-                if cls and ap:
+                if not cls:
+                    continue
+                ap50 = row.get("AP50")
+                if ap50 not in (None, "", "None"):
                     try:
-                        out[f"AP50_{cls}"] = float(ap)
+                        out[f"AP50_{cls}"] = float(ap50)
                     except ValueError:
                         pass
+    # metrics.csv: two columns [metric, value], one row per metric
     if metrics_csv.exists():
         with metrics_csv.open() as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                for k, v in row.items():
-                    try:
-                        out.setdefault(k, float(v))
-                    except (ValueError, TypeError):
-                        pass
+            for row in csv.DictReader(f):
+                name, val = row.get("metric"), row.get("value")
+                if not name or val in (None, "", "None"):
+                    continue
+                try:
+                    out.setdefault(name, float(val))
+                except ValueError:
+                    pass
     return out
 
 rows = []

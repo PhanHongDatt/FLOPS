@@ -25,7 +25,11 @@ from src.model.yolo_wrapper import build_model, evaluate, train_one_round
 from src.utils.config import load_experiment_config
 from src.utils.logger import get_logger, setup_mlflow, log_metrics, log_params, end_run
 from src.utils.artifacts import save_yaml
-from src.evaluation.metrics import save_summary_metrics
+from src.evaluation.metrics import (
+    flatten_per_class_metrics,
+    save_per_class_metrics,
+    save_summary_metrics,
+)
 
 logger = get_logger(__name__)
 
@@ -102,6 +106,10 @@ def main() -> None:
     log_metrics(eval_metrics)
 
     save_summary_metrics(eval_metrics, run_dir / "metrics.csv")
+    save_per_class_metrics(
+        flatten_per_class_metrics(eval_metrics),
+        run_dir / "per_class_metrics.csv",
+    )
     save_yaml({**train_metrics, **eval_metrics}, run_dir / "final_metrics.yaml")
 
     end_run()

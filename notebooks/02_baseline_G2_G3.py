@@ -148,6 +148,7 @@ cmd = [
     "--seed", str(SEED),
     "--mlflow-uri", MLFLOW_URI,
     "--mlflow-experiment", "G3-FedAvg-S0",
+    "--global-data-yaml", str(DATA_YAML),
 ]
 print("Running:", " ".join(cmd))
 subprocess.check_call(cmd)
