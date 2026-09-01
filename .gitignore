@@ -27,6 +27,12 @@ env/
 # ── Dataset (large, download separately) ────────────────────────────────────
 data/
 !data/.gitkeep
+# raw BDD100K download (local only)
+bdd100k/
+# normalized dataset for Kaggle upload (local only)
+bdd100k_kaggle/
+# dataset zips and repo zip for Kaggle upload
+*.zip
 
 # ── Experiment artifacts (track registry only) ───────────────────────────────
 artifacts/runs/

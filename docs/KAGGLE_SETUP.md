@@ -55,73 +55,86 @@ Sau khi xóa test: dataset còn ~4.5 GB.
 **Option A — Kaggle UI (khuyến nghị):**
 
 1. Vào https://www.kaggle.com/datasets → **New Dataset**
-2. Title: `bdd100k-flops` (hoặc tên tùy chọn — nhớ để dùng ở cell notebook)
-3. Visibility: **Private**
-4. Kéo thả toàn bộ folder `bdd100k/` vào drop zone
-5. Chờ upload xong (phụ thuộc mạng — thường 30–60 phút cho ~4.5 GB)
-6. **Create**
+1. Vào **https://www.kaggle.com/datasets** → **New Dataset**
+2. Title: `bdd100k-flops` | Visibility: **Private**
+3. Kéo thả **toàn bộ folder** `D:\FLOPS\bdd100k_kaggle\` vào drop zone
+4. Chờ upload xong (~30–60 phút cho ~4.5 GB tùy mạng)
+5. Click **Create**
+6. Lưu lại slug dạng `<username>/bdd100k-flops` (dùng ở Step 4)
 
-**Option B — Kaggle CLI:**
-
-```powershell
-pip install kaggle
-# Đặt kaggle.json vào ~/.kaggle/
-kaggle datasets init -p ./bdd100k
-# Edit ./bdd100k/dataset-metadata.json — set title, id, license
-kaggle datasets create -p ./bdd100k -r zip
+Sau khi upload, dataset sẽ mount trên Kaggle tại:
 ```
-
-**Sau khi upload xong**, lưu lại slug dataset dạng `<username>/bdd100k-flops` (dùng ở step 5).
+/kaggle/input/bdd100k-flops/
+├── images/100k/train/
+├── images/100k/val/
+└── labels/det_20/det_train.json
+```
 
 ---
 
-## 3. Upload FLOPS repo lên Kaggle (chọn 1 trong 2)
+## 3. Upload FLOPS repo lên Kaggle
 
-### Option 3A — GitHub private repo (khuyến nghị nếu bạn có repo GitHub)
+### Option A — GitHub private repo (khuyến nghị)
 
 1. Push repo lên GitHub private:
    ```powershell
    git remote add origin git@github.com:<user>/FLOPS.git
    git push -u origin main
    ```
-2. Tạo GitHub Personal Access Token với scope `repo` (Settings → Developer settings → PATs)
-3. Trong Kaggle notebook sẽ clone bằng: `git clone https://<TOKEN>@github.com/<user>/FLOPS.git`
-
-### Option 3B — Upload as Kaggle Dataset
-
-1. Zip repo local (loại bỏ `data/`, `artifacts/`, `.git/` để giảm size):
-   ```powershell
-   Compress-Archive -Path src, scripts, configs, tests, notebooks, research, docker, requirements.txt, environment.lock, CLAUDE.md, README.md -DestinationPath flops_repo.zip
+2. Tạo GitHub Personal Access Token với scope `repo`
+   (Settings → Developer settings → Personal access tokens)
+3. Trong Kaggle notebook clone bằng:
+   ```python
+   import subprocess
+   subprocess.check_call([
+       "git", "clone",
+       "https://<TOKEN>@github.com/<user>/FLOPS.git",
+       "/kaggle/working/FLOPS"
+   ])
    ```
-2. Upload zip lên Kaggle Datasets tương tự Step 2 với title `flops-repo`
-3. Trong notebook mount tại `/kaggle/input/flops-repo/` rồi copy vào `/kaggle/working/FLOPS/`
+
+### Option B — Upload as Kaggle Dataset (không cần GitHub)
+
+1. Zip repo local (bỏ `data/`, `artifacts/`, `.git/`, `bdd100k*/`):
+   ```powershell
+   Compress-Archive `
+     -Path D:\FLOPS\src, D:\FLOPS\scripts, D:\FLOPS\configs, D:\FLOPS\tests, `
+           D:\FLOPS\notebooks, D:\FLOPS\research, `
+           D:\FLOPS\requirements.txt, D:\FLOPS\environment.lock, `
+           D:\FLOPS\CLAUDE.md, D:\FLOPS\README.md `
+     -DestinationPath D:\FLOPS\flops_repo.zip
+   ```
+2. Upload `flops_repo.zip` lên Kaggle Datasets (tương tự Step 2):
+   - Title: `flops-repo` | Visibility: **Private**
+3. Dataset mount tại `/kaggle/input/flops-repo/flops_repo.zip`
 
 ---
 
 ## 4. Tạo Kaggle Notebook
 
-1. Vào https://www.kaggle.com/code → **New Notebook**
-2. **Settings** (bên phải):
-   - Accelerator: **GPU T4 x2** (hoặc **P100** nếu có)
-   - Internet: **On** (bắt buộc — để pip install)
-   - Persistence: **No** (không cần)
-   - Environment: **Latest** (mặc định)
-3. **Add Data** (bên phải):
-   - Search dataset của bạn: `bdd100k-flops` → Add
-   - Nếu dùng Option 3B: search `flops-repo` → Add
-4. Notebook sẽ mount tại:
-   - `/kaggle/input/bdd100k-flops/bdd100k/` (BDD100K)
-   - `/kaggle/input/flops-repo/` (nếu Option 3B)
+1. Vào **https://www.kaggle.com/code** → **New Notebook**
+2. **Settings** (panel bên phải):
+   - Accelerator: **GPU T4 x2** (hoặc P100 nếu có)
+   - Internet: **On** ← bắt buộc (để pip install)
+   - Persistence: **No**
+   - Environment: **Latest**
+3. **Add Data** (icon `+` bên phải):
+   - Search `bdd100k-flops` → **Add**
+   - Nếu Option B: Search `flops-repo` → **Add**
+4. Mount paths:
+   - `/kaggle/input/bdd100k-flops/` → BDD100K dataset
+   - `/kaggle/input/flops-repo/` → FLOPS repo (nếu Option B)
 
 ---
 
-## 5. Cell setup ban đầu (paste vào cell đầu tiên)
+## 5. Cell setup trong Notebook
 
-### Nếu Option 3A (GitHub clone):
+Paste lần lượt vào các cell đầu tiên **trước** khi copy notebook 01.
+
+### Cell 0A — Setup repo (nếu Option A GitHub)
 
 ```python
-import subprocess, os
-# Thay <TOKEN> và <user> bằng giá trị thực
+import subprocess
 subprocess.check_call([
     "git", "clone",
     "https://<TOKEN>@github.com/<user>/FLOPS.git",
@@ -130,7 +143,7 @@ subprocess.check_call([
 print("Cloned.")
 ```
 
-### Nếu Option 3B (dataset copy):
+### Cell 0A — Setup repo (nếu Option B dataset)
 
 ```python
 import shutil
@@ -139,39 +152,42 @@ from pathlib import Path
 src = Path("/kaggle/input/flops-repo")
 dst = Path("/kaggle/working/FLOPS")
 if not dst.exists():
-    # Nếu upload là zip → cần unzip; nếu upload folder → chỉ copy
-    if (src / "flops_repo.zip").exists():
-        shutil.unpack_archive(src / "flops_repo.zip", dst)
-    else:
-        shutil.copytree(src, dst)
+    shutil.unpack_archive(src / "flops_repo.zip", dst)
 print("Repo ready at", dst)
 ```
 
-### Verify dataset mount:
+### Cell 0B — Verify BDD100K mount
 
 ```python
 from pathlib import Path
-BDD = Path("/kaggle/input/bdd100k-flops/bdd100k")
-assert (BDD / "images/100k/train").exists(), f"BDD100K structure wrong at {BDD}"
+
+BDD = Path("/kaggle/input/bdd100k-flops")
+assert (BDD / "images/100k/train").exists(), f"Missing train images at {BDD}"
 assert (BDD / "labels/det_20/det_train.json").exists(), "Missing det_train.json"
 print("✅ BDD100K mounted correctly")
+print(f"   train: {sum(1 for _ in (BDD / 'images/100k/train').glob('*.jpg'))} images")
+print(f"   val:   {sum(1 for _ in (BDD / 'images/100k/val').glob('*.jpg'))} images")
 ```
-
-Nếu assertion fail → dataset upload sai structure. Quay lại Step 1–2 fix.
 
 ---
 
 ## 6. Chạy notebook 01
 
-Copy nội dung `notebooks/01_smoke_G1_G3.py` vào các cell của Kaggle notebook (mỗi block `# %%` = 1 cell). Chạy tuần tự **Run All** hoặc từng cell một.
+Copy nội dung `notebooks/01_smoke_G1_G3.py` vào các cell tiếp theo (mỗi block `# %%` = 1 cell).
 
-**Nếu path Kaggle dataset khác với notebook default:**
+**⚠️ Bắt buộc — sửa Cell 3 trước khi chạy:**
 
-Notebook default expect `/kaggle/input/bdd100k/` (không có prefix `-flops`). Sửa Cell 3 của notebook 01:
+Notebook 01 mặc định đọc `/kaggle/input/bdd100k` (không có suffix `-flops`).
+Sửa dòng `BDD100K_RAW` trong Cell 3:
 
 ```python
-BDD100K_RAW = Path("/kaggle/input/bdd100k-flops/bdd100k")  # ← sửa theo tên dataset của bạn
+# Sửa từ:
+BDD100K_RAW = Path("/kaggle/input/bdd100k")
+# Thành:
+BDD100K_RAW = Path("/kaggle/input/bdd100k-flops")
 ```
+
+Sau đó chạy **Run All** hoặc từng cell một.
 
 **Thời gian ước tính (T4 GPU):**
 
@@ -180,7 +196,7 @@ BDD100K_RAW = Path("/kaggle/input/bdd100k-flops/bdd100k")  # ← sửa theo tên
 | 1 | pip install torch + libs | ~5–8 phút |
 | 2 | Environment audit + freeze | ~10 giây |
 | 3 | Path setup | ~1 giây |
-| 4 | prepare_bdd100k.py (100k ảnh, symlink) | ~3–5 phút |
+| 4 | prepare_bdd100k.py (70k ảnh → YOLO format) | ~3–5 phút |
 | 5 | generate_partition.py (scan labels) | ~30 giây |
 | 6 | Smoke FL run (2 rounds, 4 clients, 1 epoch, batch 4) | ~10–20 phút |
 | 7 | Verify §21 artifacts | ~1 giây |
@@ -193,28 +209,20 @@ BDD100K_RAW = Path("/kaggle/input/bdd100k-flops/bdd100k")  # ← sửa theo tên
 
 ## 7. Export artifacts (sau khi notebook 01 xong)
 
-Kaggle session ephemeral — mọi thứ trong `/kaggle/working/` sẽ mất sau khi close notebook.
-Để giữ artifacts + `environment.lock`:
+Kaggle session ephemeral — mọi thứ trong `/kaggle/working/` mất sau khi close.
 
 1. Click **Save Version** góc trên phải notebook
-2. Chọn **Quick Save** (Advanced options → Save output)
-3. Kaggle sẽ snapshot `/kaggle/working/flops_export/` vào Output
+2. Chọn **Quick Save** → Advanced options → tick **Save output**
+3. Kaggle snapshot `/kaggle/working/flops_export/` vào Output tab
 
-**Hoặc** tạo Output Dataset:
+Tải về local và commit:
 
-1. Trong notebook thêm cell cuối:
-   ```python
-   # Nội dung /kaggle/working/flops_export/ sẽ tự thành Kaggle Output
-   # Sau khi Save Version, download về local từ:
-   # https://www.kaggle.com/<user>/notebook/output
-   ```
-2. Tải `flops_export.zip` về local
-3. Extract → commit `environment.lock` vào repo:
-   ```powershell
-   Copy-Item flops_export/environment.lock D:\FLOPS\environment.lock
-   git add environment.lock
-   git commit -m "chore(env): populate environment.lock from Kaggle smoke run"
-   ```
+```powershell
+# Download flops_export.zip từ Output tab, extract rồi:
+Copy-Item flops_export\environment.lock D:\FLOPS\environment.lock
+git add environment.lock
+git commit -m "chore(env): populate environment.lock from Kaggle smoke run"
+```
 
 ---
 
@@ -226,7 +234,7 @@ Sửa `research/gates.yaml`:
 G1:
   name: Environment reproducible
   status: passed                        # ← đổi từ in_progress
-  passed_date: "2026-08-21"             # ← ngày pass
+  passed_date: "2026-09-01"             # ← ngày pass thực tế
   notes: >
     environment.lock populated from Kaggle T4 smoke session (see ADR-002).
     All pinned versions per ADR-001 verified in Kaggle environment.
@@ -244,48 +252,48 @@ git commit -m "chore(gates): G1 passed via Kaggle smoke session (ADR-002)"
 
 ### "CUDA out of memory" trong FL run
 - Giảm `batch_size` trong `configs/experiments/smoke.yaml` từ 4 → 2
-- Hoặc giảm `client_resources={"num_gpus": 0.25}` → `0.5` trong `server.py` (nhưng phải giảm num_clients)
+- Hoặc giảm `client_resources={"num_gpus": 0.25}` → `0.5` trong `server.py`
 
 ### "det_train.json not found"
-- Verify path Kaggle dataset: `!ls /kaggle/input/bdd100k-flops/bdd100k/labels/det_20/`
-- Nếu structure khác, sửa `BDD100K_RAW` trong notebook Cell 3
+- Verify structure: `!ls /kaggle/input/bdd100k-flops/labels/det_20/`
+- Nếu khác, sửa `BDD100K_RAW` trong Cell 3 (xem Step 6)
 
 ### `pip install ultralytics` bị lỗi dependency
-- Kaggle preinstalled numpy có thể conflict. Thử:
+- Kaggle preinstalled numpy có thể conflict:
   ```python
   !pip install --force-reinstall ultralytics==8.3.253
   ```
 
 ### FL run treo ở round 0
-- Thường do `client_resources` conflict với GPU quota. Kiểm tra:
+- Thường do `client_resources` conflict với GPU quota:
   ```python
   import torch
   print(torch.cuda.memory_allocated() / 1e9, "GB used")
   ```
 
 ### Version mismatch warning ở Cell 2
-- Kaggle preinstall torch 2.x thấp hơn 2.7.1. Cell 1 reinstall nhưng có thể partial. Xem `environment.lock` → nếu version ≠ ADR-001, cần **ghi addendum vào ADR-002** trước khi tiến sang G2+.
+- Kaggle preinstall torch 2.x thấp hơn 2.7.1. Cell 1 reinstall nhưng có thể partial.
+- Nếu version ≠ ADR-001 → ghi addendum vào ADR-002 trước khi tiến sang G2+.
 
 ### Notebook 01 pass nhưng `per_class_metrics.csv` missing
-- Verify Cell 6 pass `--global-data-yaml` (đã có sẵn trong notebook mới nhất). Nếu vẫn missing, check log warning "run_fl_server called without global_data_yaml" trong `run.log`.
+- Verify Cell 6 pass `--global-data-yaml`. Nếu vẫn missing, check log:
+  `"run_fl_server called without global_data_yaml"` trong `run.log`.
 
 ### Kaggle "This notebook has crashed" giữa chừng
-- Save version thường xuyên. Restart kernel + run từ cell cuối cùng đã pass.
-- Nếu do OOM: giảm batch/rounds.
+- Save version thường xuyên. Restart kernel + run từ cell cuối đã pass.
+- Nếu OOM: giảm batch/rounds.
 
 ---
 
 ## 10. Sau notebook 01 pass — tiếp theo
 
-Theo thứ tự:
-
 | # | Notebook | Gate | Thời gian ước tính (T4) |
 |---|---|---|---|
-| 1 | 01_smoke_G1_G3.py | G1 (env) | ~30 phút ✅ |
+| 1 | 01_smoke_G1_G3.py | G1 (env) | ~30 phút |
 | 2 | 02_baseline_G2_G3.py | G2 + G3 feasibility | ~2–3 giờ |
 | 3 | 03_missing_class_G4.py | G4 partial (3 seeds × 2 scenarios) | ~4–6 giờ |
 
-Notebook 02 và 03 có thể chạy chung 1 session hoặc split. Notebook 03 cần commit `final_params.npz` về Kaggle Dataset để sau này notebook parameter analysis dùng lại (F3 evidence).
+Notebook 02 và 03 có thể chạy chung 1 session hoặc split. Notebook 03 cần commit `final_params.npz` về Kaggle Dataset để notebook parameter analysis dùng lại (F3 evidence).
 
 ---
 
