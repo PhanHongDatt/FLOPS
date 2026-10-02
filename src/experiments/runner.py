@@ -56,13 +56,45 @@ def _git_commit() -> str:
         return "unknown"
 
 
+def _environment_lock_path() -> Path:
+    return Path(__file__).parents[2] / "environment.lock"
+
+
+def _parse_pip_freeze(text: str) -> dict[str, str]:
+    packages: dict[str, str] = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "==" in line:
+            name, version = line.split("==", 1)
+        elif " @ " in line:
+            name, version = line.split(" @ ", 1)
+        else:
+            continue
+        packages[name.strip().lower()] = version.strip()
+    return packages
+
+
 def _read_environment_lock() -> dict[str, Any]:
-    lock_path = Path(__file__).parents[2] / "environment.lock"
+    """environment.lock as a mapping, in either of its two formats.
+
+    The repo ships a YAML template; notebook 01 Cell 2 replaces it with
+    ``pip freeze`` output, which yaml.safe_load reads as one string — callers
+    that merge the result with ``{**lock, ...}`` then crashed.
+    """
+    lock_path = _environment_lock_path()
     if not lock_path.exists():
         logger.warning("environment.lock not found — environment metadata incomplete")
         return {}
-    with lock_path.open("r", encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
+    text = lock_path.read_text(encoding="utf-8")
+    try:
+        data = yaml.safe_load(text)
+    except yaml.YAMLError:
+        data = None
+    if isinstance(data, dict):
+        return data
+    return {"lock_format": "pip-freeze", "packages": _parse_pip_freeze(text)}
 
 
 def default_run_id(exp_id: str, run_class: str, seed: int, partition_id: str) -> str:
