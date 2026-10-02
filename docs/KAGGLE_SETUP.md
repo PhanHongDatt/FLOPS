@@ -64,11 +64,15 @@ Sau khi xóa test: dataset còn ~4.5 GB.
 
 Sau khi upload, dataset sẽ mount trên Kaggle tại:
 ```
-/kaggle/input/bdd100k-flops/
+/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle/
 ├── images/100k/train/
 ├── images/100k/val/
 └── labels/det_20/det_train.json
 ```
+
+> **Lưu ý**: Private datasets mount theo path dạng
+> `/kaggle/input/datasets/<owner>/<slug>/<folder>/` — khác với public datasets
+> (dạng `/kaggle/input/<slug>/`).
 
 ---
 
@@ -122,7 +126,7 @@ Sau khi upload, dataset sẽ mount trên Kaggle tại:
    - Search `bdd100k-flops` → **Add**
    - Nếu Option B: Search `flops-repo` → **Add**
 4. Mount paths:
-   - `/kaggle/input/bdd100k-flops/` → BDD100K dataset
+   - `/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle/` → BDD100K dataset
    - `/kaggle/input/flops-repo/` → FLOPS repo (nếu Option B)
 
 ---
@@ -161,10 +165,11 @@ print("Repo ready at", dst)
 ```python
 from pathlib import Path
 
-BDD = Path("/kaggle/input/bdd100k-flops")
+BDD = Path("/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle")
 assert (BDD / "images/100k/train").exists(), f"Missing train images at {BDD}"
 assert (BDD / "labels/det_20/det_train.json").exists(), "Missing det_train.json"
 print("✅ BDD100K mounted correctly")
+print(f"   Dataset path: {BDD}")
 print(f"   train: {sum(1 for _ in (BDD / 'images/100k/train').glob('*.jpg'))} images")
 print(f"   val:   {sum(1 for _ in (BDD / 'images/100k/val').glob('*.jpg'))} images")
 ```
@@ -175,19 +180,13 @@ print(f"   val:   {sum(1 for _ in (BDD / 'images/100k/val').glob('*.jpg'))} imag
 
 Copy nội dung `notebooks/01_smoke_G1_G3.py` vào các cell tiếp theo (mỗi block `# %%` = 1 cell).
 
-**⚠️ Bắt buộc — sửa Cell 3 trước khi chạy:**
-
-Notebook 01 mặc định đọc `/kaggle/input/bdd100k` (không có suffix `-flops`).
-Sửa dòng `BDD100K_RAW` trong Cell 3:
+**✅ Path đã được cập nhật sẵn trong notebook** — Cell 3 đã có đúng path:
 
 ```python
-# Sửa từ:
-BDD100K_RAW = Path("/kaggle/input/bdd100k")
-# Thành:
-BDD100K_RAW = Path("/kaggle/input/bdd100k-flops")
+BDD100K_RAW = Path("/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle")
 ```
 
-Sau đó chạy **Run All** hoặc từng cell một.
+Không cần sửa thêm. Chạy **Run All** hoặc từng cell một.
 
 **Thời gian ước tính (T4 GPU):**
 
@@ -255,8 +254,11 @@ git commit -m "chore(gates): G1 passed via Kaggle smoke session (ADR-002)"
 - Hoặc giảm `client_resources={"num_gpus": 0.25}` → `0.5` trong `server.py`
 
 ### "det_train.json not found"
-- Verify structure: `!ls /kaggle/input/bdd100k-flops/labels/det_20/`
-- Nếu khác, sửa `BDD100K_RAW` trong Cell 3 (xem Step 6)
+- Verify structure:
+  ```
+  !ls /kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle/labels/det_20/
+  ```
+- Nếu path khác, sửa `BDD100K_RAW` trong Cell 3 và `notebooks/01_smoke_G1_G3.py`
 
 ### `pip install ultralytics` bị lỗi dependency
 - Kaggle preinstalled numpy có thể conflict:

@@ -1,0 +1,23 @@
+sweep_id: C8_reference_baselines
+comparison: C8
+description: >
+  Reference FL baselines required by CLAUDE.md §11, Tier 2 at 1 seed per decision
+  D4; raise to 3 seeds if the GPU budget allows, otherwise record the resource
+  limitation rather than omitting them silently.
+  FedProx is intentionally NOT listed: its proximal term is not injected into the
+  Ultralytics trainer, so the CLI blocks it to avoid labelling FedAvg as FedProx.
+  Resume for SCAFFOLD/FedNova is approximate (server state is not checkpointed) —
+  do not resume these cells without noting it.
+run_class: feasibility
+baseline_arm: A0
+defaults:
+  seeds: [42]
+  tau_elig: 1
+  global_data_yaml: data/bdd100k_yolo/data.yaml
+  mlflow_uri: file:///kaggle/working/mlruns
+  mlflow_experiment: C8-reference-baselines
+cells:
+  - scenario: S1b
+    partition: partitions/s1b_bus_seed42/manifest.yaml
+    data_yaml_dir: partitions/s1b_bus_seed42
+    arms: [A0, SCAFFOLD, FedNova]

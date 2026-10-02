@@ -1,0 +1,23 @@
+sweep_id: C9_tau_elig_sensitivity
+comparison: C9
+description: >
+  Declared sensitivity analysis, not a tuning knob: tau_elig=50 makes A3 exclude
+  clients that merely have FEW boxes of a class, which is the one configuration
+  where A3 stops being numerically identical to A1 on S1b. Reported alongside the
+  primary tau_elig=1 result whatever the outcome.
+run_class: feasibility
+baseline_arm: A0
+defaults:
+  seeds: [42]
+  global_data_yaml: data/bdd100k_yolo/data.yaml
+  mlflow_uri: file:///kaggle/working/mlruns
+  mlflow_experiment: C9-tau-elig
+cells:
+  - scenario: S1b
+    partition: partitions/s1b_bus_seed42/manifest.yaml
+    data_yaml_dir: partitions/s1b_bus_seed42
+    arms:
+      - A0
+      - A1
+      - {id: A3, tau_elig: 1}
+      - {id: A3, tau_elig: 50}

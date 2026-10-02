@@ -11,17 +11,39 @@ import yaml
 
 ARTIFACTS_ROOT = Path(__file__).parents[2] / "artifacts"
 
-# Required artifact set per Section 21, CLAUDE.md
-REQUIRED_ARTIFACTS = {
+# Required artifact set per Section 21, CLAUDE.md.
+# Split into base (every run) + algorithm-specific (only some algorithms
+# produce these). Previously bundled together, causing false "missing artifact"
+# warnings for every FedAvg / SCAFFOLD / FedNova run since only
+# ClassAwareAggregation writes aggregation_trace.yaml.
+BASE_REQUIRED: set[str] = {
     "config.yaml",
     "environment.json",
     "partition_manifest.yaml",
     "metrics.csv",
     "per_class_metrics.csv",
     "round_metrics.csv",
-    "aggregation_trace.yaml",
     "run.log",
 }
+
+# Centralized (single-node) runs don't have a partition or multi-round loop,
+# so drop those two files from the required set. Everything else in §21 still
+# applies (config, env, metrics, per-class metrics, log).
+CENTRALIZED_REQUIRED: set[str] = {
+    "config.yaml",
+    "environment.json",
+    "metrics.csv",
+    "per_class_metrics.csv",
+    "run.log",
+}
+
+ALGO_SPECIFIC_REQUIRED: dict[str, set[str]] = {
+    "ClassAwareAgg": {"aggregation_trace.yaml"},
+    "ClassCountFedAvg": {"aggregation_trace.yaml"},
+}
+
+# Backwards-compatible union for any external reader that imports the constant.
+REQUIRED_ARTIFACTS: set[str] = BASE_REQUIRED | {"aggregation_trace.yaml"}
 
 
 def make_run_dir(run_id: str) -> Path:
@@ -55,7 +77,26 @@ def write_run_readme(run_dir: Path, meta: dict[str, Any]) -> None:
     (run_dir / "README.md").write_text("\n".join(lines), encoding="utf-8")
 
 
-def verify_artifacts(run_dir: Path) -> list[str]:
-    """Return list of missing required artifacts."""
+def verify_artifacts(
+    run_dir: Path,
+    algorithm: str | None = None,
+    run_type: str = "federated",
+) -> list[str]:
+    """Return list of missing required artifacts.
+
+    Args:
+        run_dir: run directory to inspect.
+        algorithm: FL algorithm name — enables algorithm-specific artefact
+            requirements (e.g. ClassAwareAgg → aggregation_trace.yaml).
+            When None, only base artefacts for the run_type are enforced.
+        run_type: "federated" (default) or "centralized". Centralized runs
+            skip partition_manifest.yaml + round_metrics.csv.
+    """
+    if run_type == "centralized":
+        required = set(CENTRALIZED_REQUIRED)
+    else:
+        required = set(BASE_REQUIRED)
+    if algorithm and algorithm in ALGO_SPECIFIC_REQUIRED:
+        required |= ALGO_SPECIFIC_REQUIRED[algorithm]
     present = {p.name for p in run_dir.rglob("*") if p.is_file()}
-    return sorted(REQUIRED_ARTIFACTS - present)
+    return sorted(required - present)

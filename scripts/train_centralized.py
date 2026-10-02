@@ -113,7 +113,7 @@ def main() -> None:
     save_yaml({**train_metrics, **eval_metrics}, run_dir / "final_metrics.yaml")
 
     end_run()
-    finalize_run(run_dir)
+    finalize_run(run_dir, run_type="centralized")
     logger.info("Centralized run complete. Metrics: %s", eval_metrics)
 
 

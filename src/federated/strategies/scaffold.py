@@ -69,6 +69,11 @@ class Scaffold(FedAvg):
         self.eta_global = eta_global
         self.num_total_clients = num_total_clients
         self._server_c: NDArrays | None = None
+        # Previous global x — required for the Algorithm 1 server step
+        # x_new = x + eta_g * mean_i(delta_y_i). Without it the previous
+        # implementation silently degenerated into weighted FedAvg, i.e. it
+        # labelled FedAvg results as SCAFFOLD (CLAUDE.md §22).
+        self._prev_params: NDArrays | None = None
 
     def _init_control(self, params: NDArrays) -> None:
         self._server_c = [np.zeros_like(p) for p in params]
@@ -79,13 +84,16 @@ class Scaffold(FedAvg):
         parameters: Parameters,
         client_manager: ClientManager,
     ) -> list[tuple[ClientProxy, FitIns]]:
+        self._prev_params = parameters_to_ndarrays(parameters)
         if self._server_c is None:
-            self._init_control(parameters_to_ndarrays(parameters))
+            self._init_control(self._prev_params)
 
-        config = {
-            "server_round": server_round,
-            "server_c": _serialize(self._server_c),
-        }
+        # Merge the server's on_fit_config_fn first so the ABSOLUTE round number
+        # survives a resumed run; server_c is this strategy's own addition.
+        config: dict = {"server_round": server_round}
+        if self.on_fit_config_fn is not None:
+            config.update(self.on_fit_config_fn(server_round))
+        config["server_c"] = _serialize(self._server_c)
         fit_ins = FitIns(parameters, config)
 
         clients = client_manager.sample(
@@ -100,26 +108,27 @@ class Scaffold(FedAvg):
         results: list[tuple[ClientProxy, FitRes]],
         failures: list,
     ) -> tuple[Parameters | None, dict[str, Scalar]]:
-        if not results:
+        if not results or self._prev_params is None:
             return None, {}
 
-        global_params = None  # will be set from client's returned parameters (they carry x + delta_y)
-        aggregated_y: NDArrays | None = None
+        x = self._prev_params
+        delta_y_sum: NDArrays | None = None
         delta_c_sum: NDArrays | None = None
         n_selected = len(results)
 
-        # Weighted average of returned parameters (which are x + delta_y in Option II)
-        weights: list[float] = [float(r.num_examples) for _, r in results]
-        total = sum(weights) or 1.0
-
-        for i, (_, res) in enumerate(results):
+        # Algorithm 1 (Option II) server step — UNWEIGHTED mean of client
+        # deltas, scaled by the global step size:
+        #     x_new = x + eta_g * (1 / |S|) * sum_i (y_i - x)
+        # Note this is deliberately NOT num_examples-weighted: SCAFFOLD's
+        # correction lives in the control variates, not in the server weights.
+        for _, res in results:
             y_i = parameters_to_ndarrays(res.parameters)
-            w = weights[i] / total
-            if aggregated_y is None:
-                aggregated_y = [w * a for a in y_i]
+            delta_y = [y - xp for y, xp in zip(y_i, x)]
+            if delta_y_sum is None:
+                delta_y_sum = [np.array(d, copy=True) for d in delta_y]
             else:
-                for j, a in enumerate(y_i):
-                    aggregated_y[j] = aggregated_y[j] + w * a
+                for j, d in enumerate(delta_y):
+                    delta_y_sum[j] = delta_y_sum[j] + d
 
             delta_c_payload = res.metrics.get("delta_c") if res.metrics else None
             if delta_c_payload:
@@ -136,5 +145,31 @@ class Scaffold(FedAvg):
                 c + scale * dc for c, dc in zip(self._server_c, delta_c_sum)
             ]
 
-        params_out = ndarrays_to_parameters(aggregated_y) if aggregated_y else None
-        return params_out, {"n_selected": n_selected}
+        if delta_y_sum is None:
+            return None, {}
+
+        scale_y = self.eta_global / max(n_selected, 1)
+        new_params = [xp + scale_y * d for xp, d in zip(x, delta_y_sum)]
+        return (
+            ndarrays_to_parameters(new_params),
+            {"n_selected": n_selected, "eta_global": float(self.eta_global)},
+        )
+
+
+def build_scaffold(
+    num_rounds: int,
+    eta_global: float = 1.0,
+    num_total_clients: int = 4,
+    **kwargs: Any,
+) -> Scaffold:
+    """Factory with the uniform builder signature used by server._load_strategy_builder.
+
+    `num_rounds` is consumed here and NOT forwarded: flwr's FedAvg.__init__ has
+    no `num_rounds` parameter and no **kwargs, so forwarding it raised
+    TypeError before the strategy could be constructed.
+    """
+    return Scaffold(
+        eta_global=eta_global,
+        num_total_clients=num_total_clients,
+        **kwargs,
+    )

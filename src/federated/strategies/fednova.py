@@ -58,7 +58,10 @@ class FedNova(FedAvg):
         client_manager: ClientManager,
     ) -> list[tuple[ClientProxy, FitIns]]:
         self._prev_params = parameters_to_ndarrays(parameters)
-        config = {"server_round": server_round}
+        config: dict = {"server_round": server_round}
+        if self.on_fit_config_fn is not None:
+            # Keeps the ABSOLUTE round number on a resumed run.
+            config.update(self.on_fit_config_fn(server_round))
         fit_ins = FitIns(parameters, config)
 
         clients = client_manager.sample(
@@ -111,3 +114,17 @@ class FedNova(FedAvg):
             ndarrays_to_parameters(new_params),
             {"tau_eff": float(tau_eff), "n_selected": len(results)},
         )
+
+
+def build_fednova(
+    num_rounds: int,
+    eta_global: float = 1.0,
+    **kwargs: Any,
+) -> FedNova:
+    """Factory with the uniform builder signature used by server._load_strategy_builder.
+
+    `num_rounds` is consumed here and NOT forwarded: flwr's FedAvg.__init__ has
+    no `num_rounds` parameter and no **kwargs, so forwarding it raised
+    TypeError before the strategy could be constructed.
+    """
+    return FedNova(eta_global=eta_global, **kwargs)

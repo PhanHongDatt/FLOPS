@@ -1,0 +1,23 @@
+run_class: main
+
+# Main runs use the canonical thesis protocol verbatim: everything is inherited
+# from configs/base_config.yaml (YOLOv8n / yolov8n.pt, imgsz 640, batch 16, SGD
+# lr0 0.01, 10 rounds, 1 local epoch, 4 clients, fraction_fit 1.0, conf 0.25,
+# iou 0.70, seeds 42/123/2024). Nothing is overridden here on purpose — a main
+# run that silently differs from the declared protocol is not reportable
+# (CLAUDE.md §5, §14).
+#
+# NOTE on cost: fraction_evaluate stays at the thesis value 1.0, which makes every
+# client re-validate the SHARED GLOBAL val set once per round on top of the
+# server's centralized evaluate_fn (the actual reporting path). Passing
+# `--fraction-evaluate 0.0` removes that redundancy and is the declared
+# cost-saving override from ADR-007 §D7.9 — if you use it, say so in the run's
+# README.md rather than leaving the deviation implicit.
+#
+# Before launching: CLAUDE.md §14 requires the estimated compute cost to be
+# reported first. Measure t_epoch / t_eval at G2 and fill research/plan/plan.md
+# §7.4; `[RESOURCE-BUDGET-UNRESOLVED]` must be cleared.
+notes: >
+  Approved full experiment. Minimum 3 seeds, same partition across compared arms,
+  final-round reporting. Every run must be registered in
+  research/experiment_registry/registry.yaml.

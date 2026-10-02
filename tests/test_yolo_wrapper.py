@@ -1,0 +1,123 @@
+"""Tests for YOLO wrapper — Section 18, CLAUDE.md.
+
+Guards against the class-index mis-alignment bug where per-class AP was
+assigned by positional order over TARGET_CLASSES instead of via Ultralytics'
+results.box.ap_class_index. That bug silently mapped e.g. AP50_car → truck's
+AP whenever a target class was absent from val — exactly the H1 scenario.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+import numpy as np
+import pytest
+
+from src.model.yolo_wrapper import evaluate
+from src.data.bdd100k import TARGET_CLASSES
+
+
+def _mock_yolo_with_ap(ap_class_index, ap50, ap, p, r, map50=0.5, map_=0.4):
+    """Build a mock YOLO instance whose .val() returns a results object
+    with the given per-class arrays. All arrays must be same length.
+    """
+    box = SimpleNamespace(
+        map50=map50,
+        map=map_,
+        ap_class_index=np.array(ap_class_index),
+        ap50=np.array(ap50, dtype=float),
+        ap=np.array(ap, dtype=float),
+        p=np.array(p, dtype=float),
+        r=np.array(r, dtype=float),
+    )
+    results = SimpleNamespace(box=box)
+    model = MagicMock()
+    model.val.return_value = results
+    return model
+
+
+def test_ap_mapped_by_class_index_not_position():
+    """When val contains only classes {car, truck} (indices 0 and 2 out of
+    [car, bus, truck, motorcycle]), Ultralytics returns
+    ap_class_index=[0, 2] and per-class arrays of length 2. The wrapper must
+    assign ap50[0] → car and ap50[1] → truck (NOT to bus).
+    """
+    model = _mock_yolo_with_ap(
+        ap_class_index=[0, 2],
+        ap50=[0.85, 0.60],
+        ap=[0.70, 0.45],
+        p=[0.80, 0.55],
+        r=[0.75, 0.50],
+    )
+    metrics = evaluate(
+        model=model, data_yaml=Path("/tmp/x.yaml"),
+        img_size=640, conf=0.25, iou=0.7, device="cpu",
+    )
+    assert metrics["AP50_car"] == pytest.approx(0.85)
+    assert metrics["AP50_truck"] == pytest.approx(0.60)
+    # Missing classes must not be silently invented
+    assert "AP50_bus" not in metrics
+    assert "AP50_motorcycle" not in metrics
+    # Precision + recall must also be per-class and correctly mapped
+    assert metrics["precision_car"] == pytest.approx(0.80)
+    assert metrics["recall_truck"] == pytest.approx(0.50)
+
+
+def test_all_classes_present_maps_correctly():
+    """When all 4 target classes are present, mapping order still comes from
+    ap_class_index — Ultralytics may not sort by class index.
+    """
+    # Deliberately return in scrambled order to prove we don't rely on it
+    model = _mock_yolo_with_ap(
+        ap_class_index=[3, 0, 2, 1],  # motorcycle, car, truck, bus
+        ap50=[0.30, 0.90, 0.55, 0.40],
+        ap=[0.20, 0.75, 0.42, 0.30],
+        p=[0.35, 0.85, 0.60, 0.45],
+        r=[0.25, 0.80, 0.50, 0.35],
+    )
+    metrics = evaluate(
+        model=model, data_yaml=Path("/tmp/x.yaml"),
+        img_size=640, conf=0.25, iou=0.7, device="cpu",
+    )
+    assert metrics["AP50_motorcycle"] == pytest.approx(0.30)
+    assert metrics["AP50_car"] == pytest.approx(0.90)
+    assert metrics["AP50_truck"] == pytest.approx(0.55)
+    assert metrics["AP50_bus"] == pytest.approx(0.40)
+
+
+def test_empty_results_returns_empty_dict():
+    model = MagicMock()
+    model.val.return_value = None
+    metrics = evaluate(
+        model=model, data_yaml=Path("/tmp/x.yaml"),
+        img_size=640, conf=0.25, iou=0.7, device="cpu",
+    )
+    assert metrics == {}
+
+
+def test_out_of_range_class_index_is_ignored():
+    """If Ultralytics ever returns an index >= len(TARGET_CLASSES),
+    the wrapper must skip it instead of raising IndexError.
+    """
+    model = _mock_yolo_with_ap(
+        ap_class_index=[0, 99],
+        ap50=[0.80, 0.10],
+        ap=[0.70, 0.05],
+        p=[0.75, 0.15],
+        r=[0.72, 0.12],
+    )
+    metrics = evaluate(
+        model=model, data_yaml=Path("/tmp/x.yaml"),
+        img_size=640, conf=0.25, iou=0.7, device="cpu",
+    )
+    assert metrics["AP50_car"] == pytest.approx(0.80)
+    assert all(k.startswith(("mAP", "AP50_car", "AP_car", "precision_car", "recall_car"))
+               for k in metrics.keys())
+
+
+def test_target_classes_still_the_contract():
+    """Regression guard: if TARGET_CLASSES order changes, mapping semantics
+    change. Fail loudly so downstream analyses aren't silently invalidated.
+    """
+    assert TARGET_CLASSES == ("car", "bus", "truck", "motorcycle")

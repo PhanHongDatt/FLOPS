@@ -1,0 +1,38 @@
+# S1-Control (MATCHED) — causal control for S1b (CLAUDE.md §10, plan.md §5.3)
+#
+# Replaces the old configs/partition/s1_control.yaml, which was a plain IID split
+# carrying a note that CLAIMED matching its construction did not provide. A
+# data-size or class-composition difference would then have been reportable as a
+# missing-class effect, which is exactly what §10 forbids.
+#
+# Construction: start from each S1b client's own image set, then swap the minimum
+# number of images holding no bus for images that do, picking each replacement to
+# have a similar total box count (and the same `timeofday` when attribute_json is
+# available). Image count is therefore identical BY CONSTRUCTION, and the
+# non-target profile stays close.
+#
+# PREREQUISITE: generate the S1b partition first — this config matches against it.
+partition_id: s1_control_matched_seed42
+scenario: S1-Control-Matched
+seed: 42
+num_clients: 4
+
+reference_manifest: s1b_bus_seed42/manifest.yaml   # resolved under --output-dir
+target_class: bus
+tolerance: 0.05            # ±5% on total boxes and on each non-target class
+
+# Optional but recommended: matching on a BDD100K frame attribute removes an
+# obvious confound (a daytime-heavy control is not a control for a night-heavy
+# group). Point this at the det_20 annotation file for the split being partitioned.
+# When absent, match_report.yaml records this column as NOT matched rather than
+# implying it was.
+match_attribute: timeofday
+attribute_json: ""         # e.g. /kaggle/input/.../labels/det_20/det_train.json
+
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50
+notes: >
+  Outputs match_report.yaml next to manifest.yaml. `matched: false` does NOT stop
+  the run, but the report MUST be published with any S1-vs-control result, and a
+  causal Missing-Class claim requires matched: true plus the F3 parameter evidence
+  (CLAUDE.md §8). Used by comparison C1 in research/plan/comparison_design.md.

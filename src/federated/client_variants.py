@@ -63,19 +63,9 @@ class ScaffoldClient(YOLOFlowerClient):
         self._last_x = [np.array(p, copy=True) for p in parameters]
 
         # Run local training identical to FedAvg
+        self._advance_round(config)
         set_parameters(self.model, parameters)
-        train_metrics = train_one_round(
-            model=self.model,
-            data_yaml=self.data_yaml,
-            epochs=self.train_config["local_epochs"],
-            batch=self.train_config["batch_size"],
-            img_size=self.train_config["image_size"],
-            lr0=self.train_config["lr0"],
-            device=self.train_config.get("device", 0),
-            project=self.run_dir / "clients" / self.client_id,
-            name=f"round_{self._round + 1}",
-        )
-        self._round += 1
+        train_metrics = train_one_round(model=self.model, **self._train_kwargs())
         y_i = get_parameters(self.model)
 
         # Option II delta_c_i shortcut:
@@ -90,12 +80,9 @@ class ScaffoldClient(YOLOFlowerClient):
         # Update stored c_i
         self._c_i = [c + dc for c, dc in zip(self._c_i, delta_c)]
 
-        metrics: dict[str, Scalar] = {
-            **{k: float(v) for k, v in train_metrics.items()},
-            "delta_c": _serialize(delta_c),
-        }
-        num_examples = int(self.train_config.get("num_train_examples", 1))
-        return y_i, num_examples, metrics
+        metrics = self._fit_metrics(train_metrics)
+        metrics["delta_c"] = _serialize(delta_c)
+        return y_i, self.num_train_examples, metrics
 
 
 class FedNovaClient(YOLOFlowerClient):
@@ -110,29 +97,17 @@ class FedNovaClient(YOLOFlowerClient):
 
         local_epochs = int(self.train_config["local_epochs"])
         batch_size = int(self.train_config["batch_size"])
-        num_train = int(self.train_config.get("num_train_examples", 1))
+        num_train = int(self.num_train_examples)
 
-        train_metrics = train_one_round(
-            model=self.model,
-            data_yaml=self.data_yaml,
-            epochs=local_epochs,
-            batch=batch_size,
-            img_size=self.train_config["image_size"],
-            lr0=self.train_config["lr0"],
-            device=self.train_config.get("device", 0),
-            project=self.run_dir / "clients" / self.client_id,
-            name=f"round_{self._round + 1}",
-        )
-        self._round += 1
+        self._advance_round(config)
+        train_metrics = train_one_round(model=self.model, **self._train_kwargs())
 
         # tau_i = number of local SGD steps = local_epochs * ceil(N_i / B)
         steps_per_epoch = max(1, (num_train + batch_size - 1) // batch_size)
         tau_i = local_epochs * steps_per_epoch
 
-        metrics: dict[str, Scalar] = {
-            **{k: float(v) for k, v in train_metrics.items()},
-            "tau_i": int(tau_i),
-        }
+        metrics = self._fit_metrics(train_metrics)
+        metrics["tau_i"] = int(tau_i)
         return get_parameters(self.model), num_train, metrics
 
 
@@ -169,10 +144,15 @@ class PreservationClient(YOLOFlowerClient):
     Also reports 'class_counts_json' in fit metrics so the server-side
     ClassAwareAggregation (H3) can determine eligible clients per class.
 
-    Required train_config keys (beyond YOLOFlowerClient):
-        missing_classes (list[str]): class names with zero positive boxes
-        rho (float):                 preservation factor (0=full, 1=none, 0.25=partial)
-        class_counts (dict):         {class_name: box_count} for this client's data
+    This is ablation **A2a** (parameter-level). It reads ``missing_classes``,
+    ``rho`` and ``class_counts`` from PER-CLIENT constructor arguments, not from
+    the shared ``train_config`` dict — that dict is one shared object and could
+    never hold per-client values.
+
+    ⚠️  Known identity (research/plan/plan.md §6.3): the rows A2a protects are
+    exactly the rows ClassAwareAggregation already excludes for this client, so
+    ``A4a (A2a + A3) === A3``. A4a is therefore a numerical identity test, not a
+    separate experimental arm.
 
     GATE CONSTRAINT (CLAUDE.md §7): Not scientifically valid until G5 passes
     and F1 runtime parameter map is verified (runtime_confirmed in parameter_map.yaml).
@@ -197,38 +177,56 @@ class PreservationClient(YOLOFlowerClient):
 
         set_parameters(self.model, parameters)
 
-        train_metrics = train_one_round(
-            model=self.model,
-            data_yaml=self.data_yaml,
-            epochs=self.train_config["local_epochs"],
-            batch=self.train_config["batch_size"],
-            img_size=self.train_config["image_size"],
-            lr0=self.train_config["lr0"],
-            device=self.train_config.get("device", 0),
-            project=self.run_dir / "clients" / self.client_id,
-            name=f"round_{self._round + 1}",
-        )
-        self._round += 1
+        self._advance_round(config)
+        train_metrics = train_one_round(model=self.model, **self._train_kwargs())
 
         local_params = get_parameters(self.model)
-
-        missing_classes: list[str] = list(self.train_config.get("missing_classes", []))
-        rho: float = float(self.train_config.get("rho", 1.0))
 
         masked_params = apply_preservation_mask(
             local_params=local_params,
             global_params=self._global_params,
             param_names=self._param_names,
-            missing_classes=missing_classes,
-            rho=rho,
+            missing_classes=self.missing_classes,
+            rho=self.rho,
         )
 
-        # Report class counts for server-side ClassAwareAggregation (H3)
-        class_counts: dict[str, int] = dict(self.train_config.get("class_counts", {}))
-        metrics: dict[str, Scalar] = {
-            **{k: float(v) for k, v in train_metrics.items()},
-            "class_counts_json": json.dumps(class_counts),
-            "rho": rho,
-        }
-        num_examples = int(self.train_config.get("num_train_examples", 1))
-        return masked_params, num_examples, metrics
+        metrics = self._fit_metrics(train_metrics)
+        metrics["rho"] = float(self.rho)
+        metrics["mechanism"] = "preservation_param"
+        metrics["missing_classes"] = json.dumps(self.missing_classes)
+        return masked_params, self.num_train_examples, metrics
+
+
+class LossPreservationClient(YOLOFlowerClient):
+    """H2 ablation **A2b** — loss-level rho on the vacant class channel.
+
+    Intended mechanism: scale the per-class BCE term of a locally missing class
+    by rho, so with rho=0 that channel produces no gradient at all — including
+    into the shared earlier convs of the cv3 branch. Unlike A2a this changes the
+    trajectory of SHARED parameters, which is why it is the client-side
+    mechanism that is actually separable from server-side aggregation
+    (research/plan/plan.md §6.3).
+
+    NOT IMPLEMENTED YET, deliberately. It requires ``src/preservation/rho_loss.py``,
+    which depends on the internals of ``ultralytics.utils.loss.v8DetectionLoss``
+    (``self.bce`` reduction/shape, ``init_criterion`` override) plus the
+    weight-decay/EMA interaction described in plan.md §6.1. CLAUDE.md §4 forbids
+    implementing research logic whose justification is still
+    ``[NEEDS-VERIFICATION]``: F1 runtime verification must pass first.
+
+    Raising here — rather than silently falling back to FedAvg — follows the
+    same pattern as FedProxClient so that no run can be mislabelled (§22).
+    """
+
+    def fit(
+        self,
+        parameters: NDArrays,
+        config: dict[str, Scalar],
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
+        raise NotImplementedError(
+            "A2b (loss-level rho) is not implemented yet. Blocked on: "
+            "(1) F1 runtime verification of the YOLOv8 parameter map / "
+            "v8DetectionLoss internals for the pinned Ultralytics version; "
+            "(2) src/preservation/rho_loss.py; "
+            "(3) ADR-006 (rho mechanism). See research/plan/plan.md §6.1-§6.3."
+        )

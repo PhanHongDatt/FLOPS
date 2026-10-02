@@ -1,0 +1,20 @@
+sweep_id: C4_no_contributor
+comparison: C4
+description: >
+  S1d — bus absent from ALL four clients. This is the one scenario where A3
+  differs from A1 by construction: A3 keeps theta^t for the bus rows every round
+  while A0/A1 let them drift. Decisive and cheap test of the §12 no-contributor
+  guarantee, which is the part of H3 that class-count weighting cannot explain.
+run_class: feasibility
+baseline_arm: A0
+defaults:
+  seeds: [42, 123, 2024]
+  tau_elig: 1
+  global_data_yaml: data/bdd100k_yolo/data.yaml
+  mlflow_uri: file:///kaggle/working/mlruns
+  mlflow_experiment: C4-no-contributor
+cells:
+  - scenario: S1d
+    partition: partitions/s1d_bus_absent_seed42/manifest.yaml
+    data_yaml_dir: partitions/s1d_bus_absent_seed42
+    arms: [A0, A1, A3]

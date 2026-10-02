@@ -1,0 +1,24 @@
+sweep_id: C0_plumbing_smoke
+comparison: C0
+description: >
+  Correctness-only. Verifies every runnable arm executes end to end, that the
+  artifact contract holds, and that A4a is numerically identical to A3.
+  NOT reportable: 2 rounds at batch 4 says nothing about the hypotheses.
+run_class: smoke
+baseline_arm: A0
+defaults:
+  seeds: [42]
+  tau_elig: 1
+  global_data_yaml: data/bdd100k_yolo/data.yaml
+  mlflow_uri: file:///kaggle/working/mlruns
+  mlflow_experiment: C0-plumbing-smoke
+cells:
+  - scenario: S1b
+    partition: partitions/s1b_bus_seed42/manifest.yaml
+    data_yaml_dir: partitions/s1b_bus_seed42
+    arms:
+      - A0
+      - A1
+      - A3
+      - {id: A2a, rho: 0.0}
+      - {id: A4a, rho: 0.0}

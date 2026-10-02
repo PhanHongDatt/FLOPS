@@ -4,5 +4,13 @@ train:
   batch_size: 4
 federated:
   num_rounds: 2
-  num_clients: 2
+  # Client-side evaluation is skipped: every per-client data yaml points `val:`
+  # at the SHARED GLOBAL val set, so fraction_evaluate=1.0 repeats the same full
+  # validation once per client per round on top of the server's centralized
+  # evaluate_fn, which is the actual reporting path (CLAUDE.md §14).
+  fraction_evaluate: 0.0
+  # num_clients intentionally inherited from base_config (4). Overriding to 2
+  # here previously conflicted with the 4-client partition manifest, causing
+  # Flower to silently select a subset. Keep the client count aligned with the
+  # partition so smoke exercises the real dispatch path.
 notes: "Correctness-only run. Not for reporting results."

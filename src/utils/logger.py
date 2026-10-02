@@ -5,8 +5,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import mlflow
-
 
 def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     logger = logging.getLogger(name)
@@ -15,7 +13,7 @@ def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     logger.setLevel(level)
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(logging.Formatter(
-        "%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+        "%(asctime)s [%(levelname)s] %(name)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     ))
     logger.addHandler(handler)
@@ -27,6 +25,7 @@ def setup_mlflow(
     tracking_uri: str = "http://mlflow:5000",
     run_name: str | None = None,
 ) -> str:
+    import mlflow  # lazy -- only needed when actually running experiments
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(experiment_name)
     run = mlflow.start_run(run_name=run_name)
@@ -34,16 +33,20 @@ def setup_mlflow(
 
 
 def log_params(params: dict[str, Any]) -> None:
+    import mlflow
     mlflow.log_params(params)
 
 
 def log_metrics(metrics: dict[str, float], step: int | None = None) -> None:
+    import mlflow
     mlflow.log_metrics(metrics, step=step)
 
 
 def log_artifact(path: str | Path) -> None:
+    import mlflow
     mlflow.log_artifact(str(path))
 
 
 def end_run() -> None:
+    import mlflow
     mlflow.end_run()

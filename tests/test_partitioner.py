@@ -12,7 +12,7 @@ from src.data.partitioner import (
     save_partition_manifest,
     load_partition_manifest,
 )
-from src.data.bdd100k import TARGET_CLASSES
+from src.data.bdd100k import TARGET_CLASSES, BDD_NAME_MAP, filter_target_classes
 
 
 def _make_label_dir(tmp: Path, images: list[str], class_map: dict[str, list[int]]) -> Path:
@@ -93,3 +93,74 @@ def test_manifest_save_load_roundtrip():
     assert loaded.partition_id == manifest.partition_id
     assert loaded.seed == manifest.seed
     assert loaded.client_assignments == manifest.client_assignments
+
+
+def test_motor_mapped_to_motorcycle():
+    """BDD100K annotation uses 'motor'; must be normalised to 'motorcycle'."""
+    assert BDD_NAME_MAP["motor"] == "motorcycle"
+
+    frames = [
+        {
+            "name": "img_0000.jpg",
+            "labels": [
+                {"category": "motor", "box2d": {"x1": 0, "y1": 0, "x2": 10, "y2": 10}},
+                {"category": "car",   "box2d": {"x1": 20, "y1": 0, "x2": 50, "y2": 30}},
+                {"category": "person","box2d": {"x1": 60, "y1": 0, "x2": 80, "y2": 40}},
+            ],
+        }
+    ]
+    filtered = filter_target_classes(frames)
+    assert len(filtered) == 1
+    cats = {lb["category"] for lb in filtered[0]["labels"]}
+    assert "motorcycle" in cats, "motor should be mapped to motorcycle"
+    assert "motor" not in cats, "raw 'motor' should not appear after normalisation"
+    assert "person" not in cats, "person is not a target class"
+    assert "car" in cats
+
+
+def test_missing_class_drops_ineligible_images():
+    """CLAUDE.md §22: an image containing ONLY classes excluded by every
+    client must NOT be silently assigned — the previous fallback would break
+    the S1 missing-class contract. It should be dropped instead.
+    """
+    images = [f"img_{i:04d}.jpg" for i in range(10)]
+    # Every image has only class 0 (car). If both clients exclude 'car',
+    # no image is eligible.
+    class_map = {img: [0] for img in images}
+    with tempfile.TemporaryDirectory() as tmp:
+        label_dir = _make_label_dir(Path(tmp), images, class_map)
+        manifest = partition_missing_class(
+            images,
+            label_dir,
+            num_clients=2,
+            missing_map={"C0": ["car"], "C1": ["car"]},
+            seed=42,
+            partition_id="s1_drop_test",
+        )
+    # All 10 images should be dropped, both clients truly car-free
+    assigned_total = sum(len(v) for v in manifest.client_assignments.values())
+    assert assigned_total == 0, f"Expected 0 assignments, got {assigned_total}"
+    assert manifest.class_counts["C0"]["car"] == 0
+    assert manifest.class_counts["C1"]["car"] == 0
+
+
+def test_missing_class_partial_overlap_keeps_eligible_only():
+    """When some clients still allow the class, images should go there."""
+    images = [f"img_{i:04d}.jpg" for i in range(20)]
+    class_map = {img: [0] for img in images}  # all car
+    with tempfile.TemporaryDirectory() as tmp:
+        label_dir = _make_label_dir(Path(tmp), images, class_map)
+        manifest = partition_missing_class(
+            images,
+            label_dir,
+            num_clients=3,
+            missing_map={"C0": ["car"], "C1": ["car"], "C2": []},
+            seed=42,
+            partition_id="s1_partial_test",
+        )
+    # All 20 must land on C2 (only eligible client); C0 and C1 stay empty
+    assert len(manifest.client_assignments["C0"]) == 0
+    assert len(manifest.client_assignments["C1"]) == 0
+    assert len(manifest.client_assignments["C2"]) == 20
+    assert manifest.class_counts["C0"]["car"] == 0
+    assert manifest.class_counts["C1"]["car"] == 0

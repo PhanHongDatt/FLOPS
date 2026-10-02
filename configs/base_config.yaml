@@ -26,6 +26,17 @@ train:
   iou: 0.70
   device: 0                     # GPU index; "cpu" for CPU-only
 
+  # ── Local-training knobs [ENGINEERING] ──────────────────────────────────
+  # Not thesis hyperparameters: these control Ultralytics trainer behaviour that
+  # the thesis does not specify. Rationale in src/model/yolo_wrapper.py and
+  # research/plan/plan.md §6.5 / §13.
+  workers: 2                    # K2: 8/client x 4 Ray actors swamps ~4 vCPU
+  warmup_epochs: 0.0            # H3: Ultralytics default 3.0 > local_epochs=1
+  close_mosaic: 0               # freeze augmentation schedule across rounds
+  client_run_val: false         # H1/H2: no per-epoch val on the GLOBAL val set
+  deterministic: true
+  nbs: null                     # nominal batch for grad accumulation (low VRAM)
+
 # ── Federated learning ────────────────────────────────────────────────────────
 federated:
   num_clients: 4
@@ -38,6 +49,20 @@ federated:
     - FedProx
     - SCAFFOLD
     - FedNova
+
+  # ── Simulation resources [ENGINEERING] ──────────────────────────────────
+  # client_num_gpus: 1.0 serialises clients onto one GPU. 0.25 placed 4 YOLOv8n
+  # trainings on one device at once — certain OOM on a 4 GB GPU, borderline on a
+  # 16 GB T4/P100 (plan.md §13 K3). Lower it only after measuring real VRAM.
+  client_num_cpus: 1
+  client_num_gpus: 1.0
+
+  # ── Checkpointing / disk [ENGINEERING] ──────────────────────────────────
+  # Per-round global checkpoints make a Kaggle run resumable across the 12 h
+  # session cap (K4); pruning client weights keeps /kaggle/working under its
+  # 20 GB budget (K5).
+  keep_last_checkpoints: 2
+  prune_client_weights: true
 
 # ── Evaluation ────────────────────────────────────────────────────────────────
 evaluation:

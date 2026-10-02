@@ -1,0 +1,25 @@
+sweep_id: C6_full_ablation
+comparison: C6
+description: >
+  The Tier-1 ablation on S1b: A0, A1, A2b(rho*), A3, A4b(rho*) x 3 seeds.
+  A4a is deliberately absent — it is a numerical identity of A3 (plan.md §6.3),
+  so running it as a separate 3-seed arm would be three wasted runs.
+  rho* must be substituted from the C5a promotion rule before running.
+run_class: main
+baseline_arm: A0
+defaults:
+  seeds: [42, 123, 2024]
+  tau_elig: 1
+  global_data_yaml: data/bdd100k_yolo/data.yaml
+  mlflow_uri: file:///kaggle/working/mlruns
+  mlflow_experiment: C6-full-ablation
+cells:
+  - scenario: S1b
+    partition: partitions/s1b_bus_seed42/manifest.yaml
+    data_yaml_dir: partitions/s1b_bus_seed42
+    arms:
+      - A0
+      - A1
+      - A3
+      - {id: A2b, rho: 0.25}     # REPLACE with rho* from C5a
+      - {id: A4b, rho: 0.25}     # REPLACE with rho* from C5a

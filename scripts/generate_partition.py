@@ -30,9 +30,14 @@ import yaml
 
 from src.data.bdd100k import TARGET_CLASSES
 from src.data.partitioner import (
+    MatchReport,
     PartitionManifest,
+    build_attribute_index,
+    load_partition_manifest,
     partition_iid,
+    partition_matched_control,
     partition_missing_class,
+    save_match_report,
     save_partition_manifest,
 )
 from src.utils.logger import get_logger
@@ -82,10 +87,85 @@ def _dispatch_partition(
             seed=seed,
             partition_id=partition_id,
             scenario=scenario,
+            per_client=config.get("per_client"),
         )
 
     raise ValueError(
-        f"Unknown scenario '{scenario}'. Expected one of: S0, S1, S1-Control."
+        f"Unknown scenario '{scenario}'. Expected one of: "
+        "S0, S1, S1-Control, S1-Control-Matched."
+    )
+
+
+def _dispatch_matched_control(
+    config: dict[str, Any],
+    images: list[str],
+    label_dir: Path,
+    config_dir: Path,
+    output_dir: Path,
+) -> tuple[PartitionManifest, MatchReport]:
+    """Build the matched-pair control for an existing S1 partition (§5.3, §10).
+
+    Needs `reference_manifest` (path to the S1 manifest it must match) and
+    `target_class`. `attribute_json` + `match_attribute` are optional: with them the
+    control is also matched on a BDD100K frame attribute such as timeofday;
+    without them the match report records that column as not matched rather than
+    implying it was.
+    """
+    ref_rel = config.get("reference_manifest")
+    if not ref_rel:
+        raise ValueError(
+            "scenario S1-Control-Matched requires 'reference_manifest' — the S1 "
+            "partition manifest this control must be matched against."
+        )
+    ref_path = Path(ref_rel)
+    for candidate in (ref_path, config_dir / ref_rel, output_dir / ref_rel):
+        if candidate.exists():
+            ref_path = candidate
+            break
+    else:
+        raise FileNotFoundError(
+            f"reference_manifest not found: {ref_rel}. Generate the S1 partition first."
+        )
+
+    reference = load_partition_manifest(ref_path)
+    logger.info(
+        "Matching control against %s (scenario=%s, clients=%d)",
+        ref_path, reference.scenario, reference.num_clients,
+    )
+
+    attribute_index = None
+    attribute_key = config.get("match_attribute")
+    ann_json = config.get("attribute_json")
+    if ann_json and attribute_key:
+        ann_path = Path(ann_json)
+        if ann_path.exists():
+            attribute_index = build_attribute_index(ann_path, key=str(attribute_key))
+            logger.info(
+                "Loaded attribute index %r for %d images", attribute_key, len(attribute_index)
+            )
+        else:
+            logger.warning(
+                "attribute_json %s not found — control will NOT be matched on %r "
+                "and the match report will say so.", ann_path, attribute_key,
+            )
+            attribute_key = None
+    elif attribute_key:
+        logger.warning(
+            "match_attribute=%r given without attribute_json — skipping attribute "
+            "matching and recording it as unmatched.", attribute_key,
+        )
+        attribute_key = None
+
+    return partition_matched_control(
+        image_names=images,
+        label_dir=label_dir,
+        reference=reference,
+        target_class=str(config["target_class"]),
+        seed=int(config["seed"]),
+        partition_id=str(config["partition_id"]),
+        tolerance=float(config.get("tolerance", 0.05)),
+        attribute_index=attribute_index,
+        attribute_key=attribute_key,
     )
 
 
@@ -145,7 +225,22 @@ def generate_partition_artifacts(
     images = _list_train_images(yolo_root)
     logger.info("Loaded %d train images from %s", len(images), yolo_root)
 
-    manifest = _dispatch_partition(config, images, label_dir)
+    if config["scenario"] == "S1-Control-Matched":
+        manifest, report = _dispatch_matched_control(
+            config, images, label_dir, partition_config_path.parent, output_dir
+        )
+        save_match_report(report, out_dir / "match_report.yaml")
+        logger.info("Wrote match report: %s (matched=%s)",
+                    out_dir / "match_report.yaml", report.matched)
+        if not report.matched:
+            logger.warning(
+                "Control for %s is NOT fully matched. Any S1-vs-control result must "
+                "be published together with match_report.yaml (CLAUDE.md §10).",
+                config["partition_id"],
+            )
+    else:
+        manifest = _dispatch_partition(config, images, label_dir)
+
     manifest_path = out_dir / "manifest.yaml"
     save_partition_manifest(manifest, manifest_path)
     logger.info("Wrote manifest: %s", manifest_path)

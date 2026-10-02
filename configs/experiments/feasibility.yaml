@@ -5,4 +5,7 @@ train:
 federated:
   num_rounds: 5
   num_clients: 4
+  # See smoke.yaml — reporting comes from the server's centralized evaluate_fn,
+  # so per-client re-validation on the same global val set is pure overhead.
+  fraction_evaluate: 0.0
 notes: "Reduced data/rounds. Used for G2–G5 feasibility checks. Not for reporting."

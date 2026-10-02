@@ -1,0 +1,26 @@
+sweep_id: C5_rho_sweep
+comparison: C5a
+description: >
+  Pre-registered rho sweep for the client mechanism, 1 seed at feasibility scale.
+  The promotion rule in plan.md §7.3 then picks a single rho* for the 3-seed main
+  runs, and ALL THREE values get reported regardless of outcome (§20).
+  rho=1 doubles as an internal control: A2b at rho=1 must equal A0.
+  BLOCKED until A2b exists (F1 runtime + rho_loss.py + ADR-006); the sweep will
+  fail loudly on LossPreservationClient until then, which is intended.
+run_class: feasibility
+baseline_arm: A0
+defaults:
+  seeds: [42]
+  tau_elig: 1
+  global_data_yaml: data/bdd100k_yolo/data.yaml
+  mlflow_uri: file:///kaggle/working/mlruns
+  mlflow_experiment: C5-rho-sweep
+cells:
+  - scenario: S1b
+    partition: partitions/s1b_bus_seed42/manifest.yaml
+    data_yaml_dir: partitions/s1b_bus_seed42
+    arms:
+      - A0
+      - {id: A2b, rho: 0.0}
+      - {id: A2b, rho: 0.25}
+      - {id: A2b, rho: 1.0}

@@ -21,7 +21,8 @@
 # ## Cell 1 — Assume environment ready (from notebook 01)
 
 # %%
-import subprocess, sys
+import subprocess
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path("/kaggle/working/FLOPS")
@@ -35,18 +36,37 @@ if not (REPO_ROOT / "environment.lock").exists() or (REPO_ROOT / "environment.lo
         "environment.lock missing or empty. Run notebook 01 to satisfy G1 first."
     )
 
-# Re-install to be safe (Kaggle sessions are ephemeral)
-subprocess.check_call(
-    [sys.executable, "-m", "pip", "install", "-q",
-     "torch==2.7.1", "torchvision==0.22.0",
-     "--index-url", "https://download.pytorch.org/whl/cu128"]
-)
-subprocess.check_call(
-    [sys.executable, "-m", "pip", "install", "-q",
-     "ultralytics==8.3.253", "flwr==1.21.0", "mlflow==3.4.0",
-     "numpy>=1.26,<2.0", "pandas>=2.2,<3.0", "PyYAML>=6.0",
-     "scipy>=1.13,<2.0", "opencv-python-headless>=4.9,<5.0"]
-)
+# Kaggle sessions are ephemeral — mirror notebook 01's install stack EXACTLY
+# per ADR-002 addendum 1 (mlflow<3.0 to keep protobuf<5, required by
+# flwr==1.21.0). Previous version pinned mlflow==3.4.0 and numpy<2 which
+# broke flwr and Ultralytics respectively.
+subprocess.check_call([
+    sys.executable, "-m", "pip", "uninstall", "-q", "-y",
+    "tensorflow", "tensorflow-cpu", "keras", "tf-keras",
+])
+TORCH_INDEX = "https://download.pytorch.org/whl/cu128"
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "-q",
+    "torch==2.7.1", "torchvision==0.22.0",
+    "--index-url", TORCH_INDEX,
+])
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "-q",
+    "ultralytics==8.3.253",
+    "flwr==1.21.0",
+    "mlflow>=2.0,<3.0",       # ADR-002-A1: keep protobuf<5
+    "protobuf>=3.20,<5.0",
+    "pandas>=2.2,<3.0",
+    "PyYAML>=6.0",
+    "scipy>=1.13,<2.0",
+    "opencv-python-headless>=4.9,<5.0",
+])
+# Register FLOPS as an editable package so `python scripts/*.py` invoked
+# via subprocess can resolve `from src...` imports.
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "-q",
+    "--no-deps", "-e", str(REPO_ROOT),
+])
 
 import torch
 if not torch.cuda.is_available():
@@ -60,7 +80,8 @@ print(f"CUDA: {torch.cuda.get_device_name(0)}")
 # `flops-artifacts`. Otherwise re-run conversion + partitioning.
 
 # %%
-BDD100K_RAW = Path("/kaggle/input/bdd100k")
+# Kaggle private-dataset mount path — kept in sync with notebook 01 + docs/KAGGLE_SETUP.md
+BDD100K_RAW = Path("/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle")
 WORK = Path("/kaggle/working")
 YOLO_ROOT = WORK / "data" / "bdd100k_yolo"
 PARTITIONS_DIR = WORK / "data" / "partitions"
@@ -100,8 +121,15 @@ print(f"MANIFEST:  {MANIFEST}")
 # %%
 SEED = 42
 # NOTE: epochs/batch/rounds come from configs/experiments/feasibility.yaml
-# (verified: 10 epochs, 5 rounds, 4 clients). Do NOT pass as CLI arg —
+# (single source of truth per CLAUDE.md §5). Do NOT pass as CLI arg —
 # train_centralized.py does not accept --epochs.
+import yaml
+_feas_cfg_path = REPO_ROOT / "configs" / "experiments" / "feasibility.yaml"
+with _feas_cfg_path.open() as _f:
+    _feas_cfg = yaml.safe_load(_f) or {}
+# Read for later registry entry — previously referenced but never defined.
+G2_EPOCHS = int(_feas_cfg.get("train", {}).get("epochs", 10))
+G3_ROUNDS_FROM_CFG = int(_feas_cfg.get("federated", {}).get("num_rounds", 5))
 
 cmd = [
     sys.executable, str(REPO_ROOT / "scripts" / "train_centralized.py"),
@@ -129,10 +157,10 @@ print(f"G2 run dir: {g2_run}")
 # ## Cell 4 — G3: FedAvg on S0 IID (feasibility)
 
 # %%
-G3_ROUNDS = 5  # from feasibility.yaml (main = 10)
+G3_ROUNDS = G3_ROUNDS_FROM_CFG  # single source: feasibility.yaml (currently 5)
 
-# feasibility.yaml verified: 10 epochs, 5 rounds, 4 clients (matches base_config
-# for num_clients). run_fl_experiment.py picks it up automatically via --run-class.
+# feasibility.yaml: 10 epochs, 5 rounds, 4 clients (num_clients inherited from
+# base_config). run_fl_experiment.py picks it up automatically via --run-class.
 
 feas_cfg = REPO_ROOT / "configs" / "experiments" / "feasibility.yaml"
 if not feas_cfg.exists():
@@ -154,11 +182,17 @@ print("Running:", " ".join(cmd))
 subprocess.check_call(cmd)
 print("\n✅ G3 FedAvg baseline complete.")
 
-g3_runs = sorted(
-    (ARTIFACTS_DIR / "runs").glob("G3-FedAvg_feasibility_seed42_*"),
-    key=lambda p: p.stat().st_mtime,
-)
-g3_run = g3_runs[-1]
+# Run ids are deterministic since ADR-007 (no timestamp), so the directory is
+# computed rather than guessed from mtime, and the arm name is the run prefix
+# ("FedAvg" here, not "G3-FedAvg").
+import yaml as _yaml
+
+from src.experiments.runner import default_run_id
+
+_pid = (_yaml.safe_load((partition_dir / "manifest.yaml").read_text(encoding="utf-8")) or {})["partition_id"]
+g3_run = ARTIFACTS_DIR / "runs" / default_run_id("FedAvg", "feasibility", SEED, _pid)
+if not g3_run.exists():
+    raise RuntimeError(f"Expected G3 run dir not found: {g3_run}")
 print(f"G3 run dir: {g3_run}")
 
 # %% [markdown]

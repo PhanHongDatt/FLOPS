@@ -1,0 +1,24 @@
+# S1d — no-contributor scenario (research/plan/plan.md §5.2, §6.4 option P-a)
+#
+# bus is absent from ALL four clients, so no participating client is ever eligible
+# for the bus class. This is the ONE configuration where the §12 no-contributor
+# rule fires every round, and therefore the only place where class-aware
+# aggregation (A3) is not numerically identical to the class-count baseline (A1).
+#
+# Expect ~8,993 train images (13.0%) to be dropped because every client excludes
+# bus — generate_partition logs the dropped count. That is intended here.
+partition_id: s1d_bus_absent_seed42
+scenario: S1
+seed: 42
+num_clients: 4
+missing_map:
+  C0: [bus]
+  C1: [bus]
+  C2: [bus]
+  C3: [bus]
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50
+notes: >
+  Decisive test of the no-contributor guarantee: A3 must keep theta^t for the bus
+  rows every round (aggregation_trace action=keep_global), while A0/A1 let them
+  drift. AP50_bus on the global val set (1,597 boxes) is the outcome measure.

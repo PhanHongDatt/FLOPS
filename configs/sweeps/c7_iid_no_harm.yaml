@@ -1,0 +1,21 @@
+sweep_id: C7_iid_no_harm
+comparison: C7
+description: >
+  S0 (IID): does the method harm the normal case? Only A0 and the full method are
+  needed. Pass condition is pre-registered in comparison_design.md: the method may
+  lose at most 2x the FedAvg across-seed std on mAP50.
+run_class: main
+baseline_arm: A0
+defaults:
+  seeds: [42, 123, 2024]
+  tau_elig: 1
+  global_data_yaml: data/bdd100k_yolo/data.yaml
+  mlflow_uri: file:///kaggle/working/mlruns
+  mlflow_experiment: C7-iid-no-harm
+cells:
+  - scenario: S0
+    partition: partitions/s0_iid_seed42/manifest.yaml
+    data_yaml_dir: partitions/s0_iid_seed42
+    arms:
+      - A0
+      - {id: A4b, rho: 0.25}     # REPLACE with rho* from C5a

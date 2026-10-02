@@ -22,29 +22,78 @@
 
 # %% [markdown]
 # ## Cell 1 — Install pinned versions (ADR-001)
+#
+# Key constraints (Kaggle-specific, per ADR-002):
+#   - mlflow<3.0  : flwr==1.21 needs protobuf<5; mlflow>=3 needs protobuf>=5 → conflict
+#   - protobuf<5  : enforced via mlflow<3 pin
+#   - numpy>=2.0  : Kaggle base image ships numpy 2.x; do NOT downgrade
+#   - TensorFlow  : Kaggle image includes TF which imports protobuf>=5 → must uninstall
 
 # %%
-import subprocess, sys
+import subprocess
+import sys
 
-PINNED = [
-    "torch==2.7.1", "torchvision==0.22.0",  # ADR-001
-    "ultralytics==8.3.253",
-    "flwr==1.21.0",
-    "mlflow==3.4.0",
-    "numpy>=1.26,<2.0", "pandas>=2.2,<3.0", "PyYAML>=6.0",
-    "scipy>=1.13,<2.0", "opencv-python-headless>=4.9,<5.0",
-]
+# Step 0: Remove TensorFlow (conflicts with protobuf<5 required by flwr+mlflow<3)
+subprocess.check_call([
+    sys.executable, "-m", "pip", "uninstall", "-q", "-y",
+    "tensorflow", "tensorflow-cpu", "keras", "tf-keras",
+])
+
 TORCH_INDEX = "https://download.pytorch.org/whl/cu128"
 
-# Install torch first with correct CUDA wheel, then rest
-subprocess.check_call(
-    [sys.executable, "-m", "pip", "install", "-q",
-     "torch==2.7.1", "torchvision==0.22.0", "--index-url", TORCH_INDEX]
-)
-subprocess.check_call(
-    [sys.executable, "-m", "pip", "install", "-q"] + PINNED[2:]
-)
+# Step 1: PyTorch + TorchVision (keep Kaggle CUDA 12.8 wheel)
+# torchvision pinned to 0.22.0 to match ADR-001 / requirements.txt.
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "-q",
+    "torch==2.7.1", "torchvision==0.22.0",
+    "--index-url", TORCH_INDEX,
+])
+
+# Step 2: FL stack — mlflow<3 enforces protobuf<5 (compatible with flwr 1.21)
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "-q",
+    "ultralytics==8.3.253",
+    "flwr==1.21.0",
+    "mlflow>=2.0,<3.0",       # <3.0 keeps protobuf<5
+    "protobuf>=3.20,<5.0",    # explicit ceiling to prevent auto-upgrade
+    "pandas>=2.2,<3.0",
+    "PyYAML>=6.0",
+    "scipy>=1.13,<2.0",
+    "opencv-python-headless>=4.9,<5.0",
+    # numpy: intentionally omitted — Kaggle ships numpy>=2, keep it
+])
+
 print("Install done.")
+
+# %% [markdown]
+# ## Cell 1b — Install FLOPS repo as package (no-deps)
+#
+# `pip install -e --no-deps`: registers `src` as importable package without
+# re-pulling any dependency (preserves mlflow<3, protobuf<5, numpy>=2 set above).
+
+# %%
+REPO_ROOT_SETUP = "/kaggle/working/FLOPS"
+
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "-q",
+    "--no-deps", "-e", REPO_ROOT_SETUP,
+])
+
+# Verify: imports work + environment not broken
+import importlib
+import numpy as _np
+from src.data.bdd100k import TARGET_CLASSES, BDD_NAME_MAP
+import mlflow as _mlflow
+import google.protobuf as _pb
+
+print("numpy:       ", _np.__version__,    " (expect >=2.0)")
+print("mlflow:      ", _mlflow.__version__, " (expect <3.0)")
+print("protobuf:    ", _pb.__version__,    " (expect <5.0)")
+print("TARGET_CLASSES:", TARGET_CLASSES)
+print("motor ->", BDD_NAME_MAP.get("motor"), " (expect 'motorcycle')")
+assert BDD_NAME_MAP["motor"] == "motorcycle", "BDD_NAME_MAP mapping wrong!"
+assert _mlflow.__version__ < "3.0", f"mlflow too new: {_mlflow.__version__}"
+print("\n✅ Repo installed, environment intact.")
 
 # %% [markdown]
 # ## Cell 2 — Environment audit + freeze (G1)
@@ -110,9 +159,16 @@ if not REPO_ROOT.exists():
     )
 
 lock_path = REPO_ROOT / "environment.lock"
-freeze = subprocess.check_output([sys.executable, "-m", "pip", "freeze"], text=True)
-lock_path.write_text(freeze, encoding="utf-8")
-print(f"\n✅ Wrote {lock_path} ({len(freeze.splitlines())} entries)")
+freeze_raw = subprocess.check_output([sys.executable, "-m", "pip", "freeze"], text=True)
+# Strip editable/local-install pointers (e.g. "-e file:///kaggle/working/FLOPS")
+# so environment.lock remains portable across machines per CLAUDE.md §5.
+freeze_lines = [
+    ln for ln in freeze_raw.splitlines()
+    if ln and not ln.startswith("-e ") and not ln.startswith("# Editable")
+]
+freeze_clean = "\n".join(freeze_lines) + "\n"
+lock_path.write_text(freeze_clean, encoding="utf-8")
+print(f"\n✅ Wrote {lock_path} ({len(freeze_lines)} entries, editable installs stripped)")
 print("   Commit this file to advance G1 status in research/gates.yaml.")
 
 # %% [markdown]
@@ -122,8 +178,9 @@ print("   Commit this file to advance G1 status in research/gates.yaml.")
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-# Kaggle dataset mount (official BDD100K structure per ADR-002)
-BDD100K_RAW = Path("/kaggle/input/bdd100k")
+# Kaggle dataset mount path (ADR-002)
+# Format: /kaggle/input/datasets/<owner>/<dataset-slug>/<folder>
+BDD100K_RAW = Path("/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle")
 if not BDD100K_RAW.exists():
     raise RuntimeError(
         f"BDD100K dataset not mounted at {BDD100K_RAW}. "
@@ -148,8 +205,14 @@ print(f"MLFLOW_URI:      {MLFLOW_URI}")
 # %% [markdown]
 # ## Cell 4 — Convert BDD100K → YOLO format
 #
-# Uses `scripts/prepare_bdd100k.py`. If your Kaggle dataset structure differs
-# from official, override `--train-ann` / `--val-ann` paths accordingly.
+# Uses `scripts/prepare_bdd100k.py`.
+#
+# IMPORTANT: This cell MUST run (or re-run) after any change to src/data/bdd100k.py.
+# The fix for "motor"->"motorcycle" (BDD_NAME_MAP) only takes effect on disk
+# after conversion. If you have old YOLO labels from before the fix, delete
+# YOLO_ROOT and re-run this cell to get correct motorcycle labels.
+#
+#   !rm -rf /kaggle/working/data/bdd100k_yolo  # only if re-converting
 
 # %%
 # Verify structure first

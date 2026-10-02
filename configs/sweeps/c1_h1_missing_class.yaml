@@ -1,0 +1,27 @@
+sweep_id: C1_h1_missing_class
+comparison: C1
+description: >
+  H1 (G4): do clients with zero bus boxes degrade global AP_bus? FedAvg only, on
+  S1b and its matched control, same seeds both sides. The arm is held constant so
+  the only varying factor is the partition. Prediction evidence only — G4 also
+  needs the F3 parameter evidence before any causal claim.
+run_class: feasibility
+baseline_arm: A0
+defaults:
+  seeds: [42, 123, 2024]
+  tau_elig: 1
+  global_data_yaml: data/bdd100k_yolo/data.yaml
+  mlflow_uri: file:///kaggle/working/mlruns
+  mlflow_experiment: C1-h1-missing-class
+cells:
+  - scenario: S1b
+    partition: partitions/s1b_bus_seed42/manifest.yaml
+    data_yaml_dir: partitions/s1b_bus_seed42
+    arms: [A0]
+  # Matched control, NOT a plain IID split. Generate it AFTER S1b, since it is
+  # constructed by matching against that partition (configs/partition/
+  # s1_control_matched_seed42.yaml). Publish its match_report.yaml with any result.
+  - scenario: S1-Control
+    partition: partitions/s1_control_matched_seed42/manifest.yaml
+    data_yaml_dir: partitions/s1_control_matched_seed42
+    arms: [A0]
