@@ -1,0 +1,177 @@
+"""build_model must return a 4-class detector — regression test for the nc=80/nc=4 crash.
+
+Before the fix, ``build_model("yolov8n.pt")`` returned the 80-class COCO model.
+Clients become nc=4 after their first ``model.train(data=<4-class yaml>)``, but
+the server's evaluate model stayed nc=80, so ``set_parameters`` raised
+"size mismatch for model.22.cv3.0.0.conv.weight" at the first post-round eval
+(reproduced on CPU, 2026-10-02). The whole cv3 branch differs, not only the
+class rows: Detect uses c3 = max(ch[0], min(nc, 100)) hidden channels.
+
+These tests need the real Ultralytics package and are skipped without it.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+pytest.importorskip("ultralytics")
+
+from src.data.bdd100k import TARGET_CLASSES
+from src.model.yolo_wrapper import (
+    build_model,
+    get_parameters,
+    set_parameters,
+    train_one_round,
+)
+
+# yolov8n.yaml builds without any download; its weights are random, which is
+# exactly why build_model must seed construction for the determinism test.
+SOURCE = "yolov8n.yaml"
+NC = len(TARGET_CLASSES)
+
+
+def _state(model) -> dict[str, np.ndarray]:
+    return {k: v.cpu().numpy() for k, v in model.model.state_dict().items()}
+
+
+def test_model_has_target_class_count():
+    model = build_model(SOURCE)
+    assert model.model.model[-1].nc == NC
+    state = _state(model)
+    for scale in range(3):
+        assert state[f"model.22.cv3.{scale}.2.weight"].shape[0] == NC
+        assert state[f"model.22.cv3.{scale}.2.bias"].shape == (NC,)
+
+
+def test_names_are_target_classes():
+    model = build_model(SOURCE)
+    assert [model.model.names[i] for i in range(NC)] == list(TARGET_CLASSES)
+
+
+def test_construction_is_deterministic():
+    """Every Ray actor builds its own model; the re-initialised head must agree."""
+    a, b = _state(build_model(SOURCE)), _state(build_model(SOURCE))
+    assert a.keys() == b.keys()
+    for k in a:
+        np.testing.assert_array_equal(a[k], b[k], err_msg=k)
+
+
+def test_init_seed_changes_head_only_when_source_is_fixed():
+    a, b = _state(build_model(SOURCE, init_seed=0)), _state(build_model(SOURCE, init_seed=1))
+    assert any(not np.array_equal(a[k], b[k]) for k in a)
+
+
+def test_shape_matched_weights_are_transferred(monkeypatch):
+    """Backbone/neck/cv2 come from the source checkpoint (Ultralytics intersect_dicts)."""
+    import torch
+    from ultralytics import YOLO
+    with torch.random.fork_rng():
+        torch.manual_seed(0)
+        source = YOLO(SOURCE)
+    src_state = {k: v.cpu().numpy() for k, v in source.model.state_dict().items()}
+    built = _state(build_model(SOURCE, init_seed=0))
+    for key in ("model.0.conv.weight", "model.15.cv1.conv.weight", "model.22.cv2.0.2.weight"):
+        np.testing.assert_array_equal(built[key], src_state[key], err_msg=key)
+
+
+def test_server_model_accepts_client_parameters():
+    """The exact crash: server-built model must load a client's parameters."""
+    server = build_model(SOURCE)
+    client = build_model(SOURCE)
+    set_parameters(server, get_parameters(client))
+
+
+def _tiny_dataset(root: Path) -> Path:
+    import yaml
+    from PIL import Image
+
+    rng = np.random.default_rng(0)
+    for split in ("train", "val"):
+        (root / "images" / split).mkdir(parents=True)
+        (root / "labels" / split).mkdir(parents=True)
+        for i in range(4):
+            img = rng.integers(0, 255, (64, 64, 3), dtype=np.uint8)
+            Image.fromarray(img).save(root / "images" / split / f"{i}.jpg")
+            (root / "labels" / split / f"{i}.txt").write_text(f"{i % NC} 0.5 0.5 0.4 0.4\n")
+    data_yaml = root / "data.yaml"
+    data_yaml.write_text(yaml.safe_dump({
+        "path": str(root.resolve()), "train": "images/train", "val": "images/val",
+        "nc": NC, "names": list(TARGET_CLASSES),
+    }))
+    return data_yaml
+
+
+@pytest.mark.slow
+def test_trained_client_parameters_load_into_fresh_server_model(tmp_path):
+    data_yaml = _tiny_dataset(tmp_path / "ds")
+    client = build_model(SOURCE)
+    keys_before = list(client.model.state_dict().keys())
+    train_one_round(
+        client, data_yaml, epochs=1, batch=2, img_size=64, lr0=0.01,
+        device="cpu", project=tmp_path / "runs", name="c0", workers=0,
+    )
+    assert list(client.model.state_dict().keys()) == keys_before
+    set_parameters(build_model(SOURCE), get_parameters(client))
+
+
+@pytest.mark.slow
+def test_trained_parameters_are_fp32_ema_not_fp16_checkpoint(tmp_path):
+    """Ultralytics reloads best.pt after train(); that checkpoint stores the EMA
+    in fp16 (trainer.py save_model: ``deepcopy(ema).half()``). Every client
+    update was therefore rounded to fp16 each round, and in F3 the class-row
+    Δθ of a short local run was pure rounding noise (identical for both sides
+    of the matched pair and for every seed — observed 2026-10-02).
+    """
+    data_yaml = _tiny_dataset(tmp_path / "ds")
+    model = build_model(SOURCE)
+    before = {k: v.clone() for k, v in model.model.state_dict().items()}
+    # nbs == batch → accumulate = 1, so the optimizer actually steps on 2 batches
+    train_one_round(
+        model, data_yaml, epochs=1, batch=2, img_size=64, lr0=0.01, device="cpu",
+        project=tmp_path / "runs", name="c0", workers=0, nbs=2,
+    )
+    after = model.model.state_dict()
+    ema = model.trainer.ema.ema.state_dict()
+    for k, v in after.items():
+        assert v.dtype == ema[k].dtype and (v == ema[k]).all(), k
+    w = after["model.0.conv.weight"]
+    assert not (w == before["model.0.conv.weight"]).all(), "optimizer never stepped"
+    assert not (w == w.half().float()).all(), "weights are fp16-rounded"
+
+
+@pytest.mark.slow
+def test_evaluate_does_not_fuse_the_callers_model(tmp_path):
+    """Ultralytics val() fuses Conv+BN in place (355 → 127 state_dict entries).
+    The server reuses one evaluate model across rounds, so the next
+    set_parameters crashed with a parameter-count mismatch."""
+    from src.model.yolo_wrapper import evaluate
+
+    data_yaml = _tiny_dataset(tmp_path / "ds")
+    model = build_model(SOURCE)
+    params = get_parameters(model)
+    evaluate(model, data_yaml, img_size=64, conf=0.25, iou=0.7, device="cpu")
+    assert len(model.model.state_dict()) == len(params)
+    set_parameters(model, params)
+
+
+@pytest.mark.slow
+def test_weights_survive_in_place_half_of_ema_during_final_val(tmp_path):
+    """On CUDA with AMP the validator runs ``trainer.ema.ema.half()`` in place on
+    the final epoch (engine/validator.py), then ``.float()`` — fp16-rounding the
+    EMA before train() returns. CPU never does this, so simulate it right after
+    the final validation and require that the returned weights are unrounded."""
+    data_yaml = _tiny_dataset(tmp_path / "ds")
+    model = build_model(SOURCE)
+
+    def amp_like_round_trip(trainer) -> None:
+        trainer.ema.ema.half().float()
+
+    model.add_callback("on_fit_epoch_end", amp_like_round_trip)
+    train_one_round(
+        model, data_yaml, epochs=1, batch=2, img_size=64, lr0=0.01, device="cpu",
+        project=tmp_path / "runs", name="c0", workers=0, nbs=2,
+    )
+    w = model.model.state_dict()["model.0.conv.weight"]
+    assert not (w == w.half().float()).all(), "weights are fp16-rounded"

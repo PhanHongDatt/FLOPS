@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flops"
+version = "0.1.0"
+requires-python = ">=3.10"
+# Dependencies intentionally empty — installed manually in Kaggle Cell 1
+# to preserve exact version pins (mlflow<3.0, protobuf<5.0, numpy>=2.0).
+# Do NOT add deps here: pip install -e . is run with --no-deps on Kaggle.
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: trains a real (tiny) YOLO model on CPU; needs ultralytics",
+]
