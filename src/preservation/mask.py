@@ -99,9 +99,9 @@ def apply_preservation_mask(
 
 
 def get_param_names(model) -> list[str]:
-    """Return ordered state_dict key list from a YOLO model instance."""
-    state = model.model.state_dict() if hasattr(model, "model") else model.state_dict()
-    return list(state.keys())
+    """Return ordered state_dict key list from a YOLO model or DetectionModel."""
+    from src.model.parameter_map import model_state_dict
+    return list(model_state_dict(model).keys())
 
 
 def maskable_params(param_names: list[str], shapes: list[tuple[int, ...]]) -> list[str]:

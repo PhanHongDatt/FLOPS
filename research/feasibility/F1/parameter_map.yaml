@@ -1,4 +1,4 @@
-# F1 Parameter Mapping — DRAFT (based on source inspection, not yet runtime-verified)
+# F1 Parameter Mapping — source inspection + RUNTIME-VERIFIED 2026-10-02 (see verification:)
 # YOLOv8n pinned version: ultralytics 8.3.253
 #
 # Source references:
@@ -74,7 +74,39 @@ module_layout:
 
 # Runtime verification status
 verification:
-  runtime_confirmed: false
-  confirmed_by_script: null          # fill: e.g. "research/feasibility/F1/verify_map.py"
-  confirmed_on_date: null
-  discrepancies: []                  # fill after running build_parameter_map
+  runtime_confirmed: true            # for ultralytics 8.3.253 (see caveat)
+  confirmed_by_script: research/feasibility/F1/verify_map.py
+  confirmed_on_date: "2026-10-02"
+  runtime_output: research/feasibility/F1/runtime_map.yaml
+  environment: "ultralytics 8.3.253, torch 2.11.0+cpu, Python 3.14 (local CPU)"
+  caveat: >
+    Names/shapes are produced by Ultralytics module code, not by torch, but the
+    pinned stack is torch 2.7.1 (ADR-001). Re-run verify_map.py in the first
+    Kaggle session and attach its runtime_map.yaml before G5 is claimed.
+  confirmed:
+    - "355 state_dict entries (184 learned tensors + 171 BN buffers), 3,022,085 elements at nc=4"
+    - "exactly 6 class-head keys: model.22.cv3.{0,1,2}.2.weight (4, 64, 1, 1) and .bias (4,)"
+    - "class-specific elements: 780 of 370,962 in the cv3 branch (0.21%)"
+    - "Detect: nc=4, reg_max=16, stride [8, 16, 32]; no unknown/detect_other keys"
+  discrepancies:
+    - item: "cv3 hidden width"
+      draft: "not stated"
+      runtime: >
+        64 channels at nc=4 (c3 = max(ch[0], min(nc, 100)) in head.py), 80 at nc=80.
+        So the WHOLE cv3 branch has different shapes between COCO yolov8n.pt and the
+        4-class model, not only the final conv.
+      consequence: >
+        (1) COCO weights transfer for 319/355 keys; all 36 cv3 keys are freshly
+        initialised at nc=4 (DetectionModel.load -> intersect_dicts, shape match).
+        A raw "COCO-pretrained" model has NO class knowledge in cv3 — F3 must start
+        from a checkpoint that already detects the target class (plan.md §6.2 updated).
+        (2) build_model() returned the nc=80 model, so the server's evaluate model
+        could not load nc=4 client parameters (crash after round 1). Fixed 2026-10-02.
+    - item: "build_parameter_map on a DetectionModel"
+      draft: "assumed keys start with 'model.'"
+      runtime: "DetectionModel.model is the layer Sequential -> prefix dropped -> all keys 'unknown'"
+      consequence: "fixed via parameter_map.model_state_dict(); mask.get_param_names too"
+    - item: "is_class_specific"
+      draft: "every cv3 parameter"
+      runtime: "only cv3.<s>.2 (final conv); cv3.<s>.0/.1 are shared Conv+BN"
+      consequence: "fixed; drift.py reports the 6-key class_head group separately"

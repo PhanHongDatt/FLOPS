@@ -44,21 +44,25 @@ gates:
     name: Missing-Class effect established
     status: not_started
     passed_date: null
-    notes: "Requires S1 vs S1-Control with parameter + prediction evidence"
+    notes: >
+      Requires S1 vs S1-Control with parameter + prediction evidence.
+      2026-10-02: F3 tooling code_ready (src/experiments/f3.py, scripts/run_f3.py,
+      notebook 03 Cell 6); pre-registered rule DRAFT in research/feasibility/F3/README.md
+      awaits author approval (tau_AP). Needs G2 checkpoint + GPU.
 
   G5:
     name: YOLO class-intervention feasibility established
-    status: F1_source_inspected
+    status: F1_runtime_confirmed_local
     passed_date: null
     sub_path: null  # A | B | C — set after F1/F2/F3 runtime verification
     notes: >
-      F1 (parameter mapping) source-level analysis complete:
-      research/feasibility/F1/parameter_map.yaml.
-      Verified from ultralytics 8.3.253 source (yolov8.yaml + head.py).
-      Only detect_cls (model.22.cv3) is structurally class-specific.
-      Runtime confirmation required: run src.model.parameter_map.build_parameter_map(model)
-      on actual YOLOv8n model and diff against parameter_map.yaml.
-      F2 (perturbation) + F3 (matched training) require GPU + G3 passed first.
+      F1 runtime-verified 2026-10-02 (ultralytics 8.3.253, torch 2.11 CPU):
+      research/feasibility/F1/verify_map.py -> runtime_map.yaml. Exactly 6 class-head
+      keys model.22.cv3.{0,1,2}.2.{weight,bias}, 780 class-specific elements; the rest of
+      cv3 (cv3.<s>.0/.1) is shared. Re-run verify_map.py on the pinned Kaggle stack
+      (torch 2.7.1) before claiming G5. F2 not started (needs G2 checkpoint).
+      F3 code_ready. Gate A/B/C -> ADR-003 after F2 + F3.
+      Model-construction fixes found during F1/F3 smoke: ADR-008 (proposed).
 
   G6:
     name: Client preservation validated

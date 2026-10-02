@@ -1,0 +1,523 @@
+environment:
+  ultralytics: 8.3.253
+  torch: 2.11.0+cpu
+  python: 3.14.0
+  weights: yolov8n.pt
+detect:
+  type: Detect
+  nc: 4
+  reg_max: 16
+  stride:
+  - 8.0
+  - 16.0
+  - 32.0
+summary:
+  backbone:
+    params: 162
+    numel: 1277707
+  neck:
+    params: 108
+    numel: 990738
+  detect_reg:
+    params: 42
+    numel: 382662
+  detect_cls:
+    params: 42
+    numel: 370962
+  detect_dfl:
+    params: 1
+    numel: 16
+class_head_keys:
+  model.22.cv3.0.2.weight:
+  - 4
+  - 64
+  - 1
+  - 1
+  model.22.cv3.0.2.bias:
+  - 4
+  model.22.cv3.1.2.weight:
+  - 4
+  - 64
+  - 1
+  - 1
+  model.22.cv3.1.2.bias:
+  - 4
+  model.22.cv3.2.2.weight:
+  - 4
+  - 64
+  - 1
+  - 1
+  model.22.cv3.2.2.bias:
+  - 4
+class_specific_numel: 780
+detect_head_table:
+- name: model.22.cv2.0.0.conv.weight
+  shape:
+  - 64
+  - 64
+  - 3
+  - 3
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.0.bn.weight
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.0.bn.bias
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.0.bn.running_mean
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.0.bn.running_var
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.0.bn.num_batches_tracked
+  shape: []
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.1.conv.weight
+  shape:
+  - 64
+  - 64
+  - 3
+  - 3
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.1.bn.weight
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.1.bn.bias
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.1.bn.running_mean
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.1.bn.running_var
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.1.bn.num_batches_tracked
+  shape: []
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.2.weight
+  shape:
+  - 64
+  - 64
+  - 1
+  - 1
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.0.2.bias
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.0.conv.weight
+  shape:
+  - 64
+  - 128
+  - 3
+  - 3
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.0.bn.weight
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.0.bn.bias
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.0.bn.running_mean
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.0.bn.running_var
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.0.bn.num_batches_tracked
+  shape: []
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.1.conv.weight
+  shape:
+  - 64
+  - 64
+  - 3
+  - 3
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.1.bn.weight
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.1.bn.bias
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.1.bn.running_mean
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.1.bn.running_var
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.1.bn.num_batches_tracked
+  shape: []
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.2.weight
+  shape:
+  - 64
+  - 64
+  - 1
+  - 1
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.1.2.bias
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.0.conv.weight
+  shape:
+  - 64
+  - 256
+  - 3
+  - 3
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.0.bn.weight
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.0.bn.bias
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.0.bn.running_mean
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.0.bn.running_var
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.0.bn.num_batches_tracked
+  shape: []
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.1.conv.weight
+  shape:
+  - 64
+  - 64
+  - 3
+  - 3
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.1.bn.weight
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.1.bn.bias
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.1.bn.running_mean
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.1.bn.running_var
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.1.bn.num_batches_tracked
+  shape: []
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.2.weight
+  shape:
+  - 64
+  - 64
+  - 1
+  - 1
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv2.2.2.bias
+  shape:
+  - 64
+  group: detect_reg
+  class_specific: false
+- name: model.22.cv3.0.0.conv.weight
+  shape:
+  - 64
+  - 64
+  - 3
+  - 3
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.0.bn.weight
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.0.bn.bias
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.0.bn.running_mean
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.0.bn.running_var
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.0.bn.num_batches_tracked
+  shape: []
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.1.conv.weight
+  shape:
+  - 64
+  - 64
+  - 3
+  - 3
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.1.bn.weight
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.1.bn.bias
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.1.bn.running_mean
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.1.bn.running_var
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.1.bn.num_batches_tracked
+  shape: []
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.0.2.weight
+  shape:
+  - 4
+  - 64
+  - 1
+  - 1
+  group: detect_cls
+  class_specific: true
+- name: model.22.cv3.0.2.bias
+  shape:
+  - 4
+  group: detect_cls
+  class_specific: true
+- name: model.22.cv3.1.0.conv.weight
+  shape:
+  - 64
+  - 128
+  - 3
+  - 3
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.0.bn.weight
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.0.bn.bias
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.0.bn.running_mean
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.0.bn.running_var
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.0.bn.num_batches_tracked
+  shape: []
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.1.conv.weight
+  shape:
+  - 64
+  - 64
+  - 3
+  - 3
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.1.bn.weight
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.1.bn.bias
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.1.bn.running_mean
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.1.bn.running_var
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.1.bn.num_batches_tracked
+  shape: []
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.1.2.weight
+  shape:
+  - 4
+  - 64
+  - 1
+  - 1
+  group: detect_cls
+  class_specific: true
+- name: model.22.cv3.1.2.bias
+  shape:
+  - 4
+  group: detect_cls
+  class_specific: true
+- name: model.22.cv3.2.0.conv.weight
+  shape:
+  - 64
+  - 256
+  - 3
+  - 3
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.0.bn.weight
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.0.bn.bias
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.0.bn.running_mean
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.0.bn.running_var
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.0.bn.num_batches_tracked
+  shape: []
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.1.conv.weight
+  shape:
+  - 64
+  - 64
+  - 3
+  - 3
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.1.bn.weight
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.1.bn.bias
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.1.bn.running_mean
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.1.bn.running_var
+  shape:
+  - 64
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.1.bn.num_batches_tracked
+  shape: []
+  group: detect_cls
+  class_specific: false
+- name: model.22.cv3.2.2.weight
+  shape:
+  - 4
+  - 64
+  - 1
+  - 1
+  group: detect_cls
+  class_specific: true
+- name: model.22.cv3.2.2.bias
+  shape:
+  - 4
+  group: detect_cls
+  class_specific: true
+- name: model.22.dfl.conv.weight
+  shape:
+  - 1
+  - 16
+  - 1
+  - 1
+  group: detect_dfl
+  class_specific: false
