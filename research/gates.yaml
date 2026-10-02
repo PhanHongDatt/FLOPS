@@ -60,8 +60,9 @@ gates:
       research/feasibility/F1/verify_map.py -> runtime_map.yaml. Exactly 6 class-head
       keys model.22.cv3.{0,1,2}.2.{weight,bias}, 780 class-specific elements; the rest of
       cv3 (cv3.<s>.0/.1) is shared. Re-run verify_map.py on the pinned Kaggle stack
-      (torch 2.7.1) before claiming G5. F2 not started (needs G2 checkpoint).
-      F3 code_ready. Gate A/B/C -> ADR-003 after F2 + F3.
+      (torch 2.7.1) before claiming G5. F2 code_ready 2026-10-02 (scripts/run_f2.py,
+      effect matrix + bias-shift positive control + norm-matched shared control; rule DRAFT
+      in research/feasibility/F2/README.md). F3 code_ready. Both need the G2 checkpoint. Gate A/B/C -> ADR-003 after F2 + F3.
       Model-construction fixes found during F1/F3 smoke: ADR-008 (proposed).
 
   G6:

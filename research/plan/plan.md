@@ -52,7 +52,7 @@ ADR-004 giữ chỗ cho môi trường chạy main experiment (đã nêu trong A
 | P-base | Baseline centralized; đo `t_epoch`, `t_eval` | **G2** | `code_ready`, chờ dataset + GPU |
 | P-fedavg | Baseline FedAvg (+FedProx) | **G3** | `code_ready` |
 | P0-a | **F1 runtime verify** parameter map | **G5 / F1** | `runtime_confirmed: true` (local CPU, 2026-10-02) — chạy lại `verify_map.py` trên Kaggle stack đã pin |
-| P0-b | **F2 controlled perturbation** — v1 **bỏ sót**, CLAUDE.md §8 bắt buộc | **G5 / F2** | `not_started` |
+| P0-b | **F2 controlled perturbation** — v1 **bỏ sót**, CLAUDE.md §8 bắt buộc | **G5 / F2** | `code_ready` (2026-10-02); luật pre-register DRAFT chờ duyệt `τ_AP` |
 | P0-c | **F3 matched missing-class local training** (≈ "chẩn đoán quên lớp" của v1) | **G5 / F3**, đồng thời là bằng chứng cho **G4** | `code_ready` (2026-10-02); luật pre-register DRAFT chờ duyệt `τ_AP` |
 | P0-d | Quyết định Gate **A / B / C** → **ADR-003** | **G5** | `not_started` |
 | P1 | S1 vs S1-Control: bằng chứng tham số **và** dự đoán | **G4** | `not_started` |
@@ -347,7 +347,7 @@ Thêm `R4` (không chặn nhưng nên làm): `mask.py` và `class_aware_agg.py` 
 | **M2** buffer int | ⬜ chưa sửa | giữ trong vector để không lệch index; đã ghi chú trong `get_parameters` |
 | **M4** `plots/` rỗng | ⬜ chưa sửa | §21 yêu cầu plots — làm cùng bước vẽ hình báo cáo |
 | **M5** `environment.lock` rỗng | ⬜ chưa sửa | đây chính là G1, cần phiên Kaggle |
-| **Confidence stats** | ⬜ chưa làm | §13 yêu cầu; cần một pass predict riêng, làm cùng F2/F3 |
+| **Confidence stats** | ✅ `yolo_wrapper.confidence_stats` (2026-10-02) | dùng trong F2 và F3 (tập val con cố định có seed) |
 | **K6** Internet/AMP cache | ⬜ chưa xác minh | kiểm ở phiên Kaggle đầu |
 | **K9** mâu thuẫn KAGGLE_SETUP | ⬜ chưa giải | cần ADR-004 sau khi K4 đã chạy thật |
 

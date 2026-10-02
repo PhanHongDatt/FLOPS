@@ -265,6 +265,30 @@ summary.to_csv(G4_RESULTS_DIR / "delta_ap_summary.csv", index=False)
 print(f"\n✅ Saved to {G4_RESULTS_DIR}")
 
 # %% [markdown]
+# ## Cell 5b — F2 controlled perturbation (`scripts/run_f2.py`)
+#
+# **CLAUDE.md §8 F2**: perturb one class-head weight row at a time (all 4 rows →
+# effect matrix), a bias-shift positive control, and a norm-matched shared-conv
+# control, all from the G2 checkpoint on one seeded 2000-image val subset.
+# Pass/fail: pre-registered rule in `research/feasibility/F2/README.md`.
+
+# %%
+G2_WEIGHTS = WORK / "g2" / "best.pt"   # ← set to the real G2 checkpoint (also used by Cell 6)
+F2_OUT = WORK / "flops_export" / "F2"
+
+if not G2_WEIGHTS.exists():
+    print(f"[SKIP] {G2_WEIGHTS} not found — run notebook 02 (G2) first.")
+else:
+    subprocess.check_call([
+        sys.executable, str(REPO_ROOT / "scripts" / "run_f2.py"),
+        "--f2-config", str(REPO_ROOT / "configs" / "feasibility" / "f2_perturb_bus.yaml"),
+        "--weights", str(G2_WEIGHTS),
+        "--eval-data-yaml", str(DATA_YAML),
+        "--output-dir", str(F2_OUT),
+    ], cwd=REPO_ROOT)
+    print("F2 artifacts:", sorted(str(p) for p in F2_OUT.rglob("summary.yaml")))
+
+# %% [markdown]
 # ## Cell 6 — Parameter + prediction evidence: F3 matched pair (`scripts/run_f3.py`)
 #
 # **CLAUDE.md §8 F3**: from ONE global checkpoint, train locally on
@@ -285,7 +309,6 @@ print(f"\n✅ Saved to {G4_RESULTS_DIR}")
 # ΔAP is an observation, not a causal Missing-Class result (CLAUDE.md §10).
 
 # %%
-G2_WEIGHTS = WORK / "g2" / "best.pt"   # ← set to the real G2 checkpoint
 F3_OUT = WORK / "flops_export" / "F3"
 
 for cfg in ("s1b_bus_seed42", "s1_control_matched_seed42"):   # matched needs s1b first

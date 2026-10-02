@@ -1,0 +1,26 @@
+# F2 — controlled perturbation, target = bus (CLAUDE.md §8 F2, plan.md §6.2)
+#
+# CHECKPOINT (command line): a trained nc=4 model that detects every class —
+# the G2 centralized best.pt. Every perturbation starts from the same weights.
+#
+# Grid: row_noise on each of the 4 class rows x noise_rel x seeds (effect matrix),
+# row_bias_shift on each row (positive control), and shared_noise on cv3.<s>.1
+# with the same L2 as the bus-row noise (norm-matched control).
+# With the values below: 4*2*3 + 4*1 + 2*3 = 34 perturbations + 1 baseline,
+# each = one val pass on the subset + one predict pass for confidence stats.
+# [RESOURCE-BUDGET-UNRESOLVED] until G2 measures t_eval; at 2000 images expect
+# roughly 35 x 2 passes — record the measured time in the F2 README before `main`.
+exp_id: F2-perturb-bus
+run_class: feasibility
+exp_config: configs/experiments/feasibility.yaml   # image_size / conf / iou / device
+target_class: bus
+
+val_subset:
+  n_images: 2000     # same seeded subset for baseline and every perturbation
+  seed: 0
+
+perturbations:
+  noise_rel: [0.5, 1.0]   # noise std = rel x RMS of the perturbed row  [ENGINEERING]
+  bias_shift: [2.0]       # logit units subtracted from the row's bias   [ENGINEERING]
+  seeds: [0, 1, 2]
+  shared_control: true
