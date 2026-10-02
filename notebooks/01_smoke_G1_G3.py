@@ -284,14 +284,14 @@ print(f"\n✅ YOLO dataset at {YOLO_ROOT}")
 # %%
 cmd = [
     sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
-    "--partition-config", str(REPO_ROOT / "configs" / "partition" / "s0_iid.yaml"),
+    "--partition-config", str(REPO_ROOT / "configs" / "partition" / "s0_iid_smoke_seed42.yaml"),
     "--yolo-root", str(YOLO_ROOT),
     "--output-dir", str(PARTITIONS_DIR),
 ]
 print("Running:", " ".join(cmd))
 subprocess.check_call(cmd)
 
-partition_dir = PARTITIONS_DIR / "s0_iid_seed42"
+partition_dir = PARTITIONS_DIR / "s0_iid_smoke_seed42"   # 250 images/client
 manifest_path = partition_dir / "manifest.yaml"
 data_yaml_dir = partition_dir  # data_C{i}.yaml files live alongside manifest
 
@@ -336,7 +336,9 @@ cmd = [
     "--global-data-yaml", str(YOLO_ROOT / "data.yaml"),
 ]
 print("Running:", " ".join(cmd))
-subprocess.check_call(cmd)
+# A smoke run on 4 x 250 images takes minutes; fail loudly instead of holding
+# the GPU for hours if something hangs (s1 v4 stalled >90 min after round 1).
+subprocess.check_call(cmd, timeout=3600)
 print("\n✅ Smoke FL run complete.")
 
 # %% [markdown]
@@ -350,14 +352,12 @@ print("\n✅ Smoke FL run complete.")
 from src.utils.artifacts import verify_artifacts
 
 # Find latest run dir
-run_dirs = sorted(
-    (ARTIFACTS_DIR / "runs").glob("G3-FedAvg_smoke_seed42_*"),
-    key=lambda p: p.stat().st_mtime,
-)
-if not run_dirs:
-    raise RuntimeError(f"No run dir found under {ARTIFACTS_DIR / 'runs'}")
+# Deterministic run id since ADR-007: the arm name ("FedAvg") is the prefix.
+from src.experiments.runner import default_run_id
 
-latest_run = run_dirs[-1]
+latest_run = ARTIFACTS_DIR / "runs" / default_run_id("FedAvg", "smoke", 42, manifest_data["partition_id"])
+if not latest_run.exists():
+    raise RuntimeError(f"Run dir {latest_run} not found under {ARTIFACTS_DIR / 'runs'}")
 print(f"Latest run: {latest_run}")
 print("\nRun contents:")
 for f in sorted(latest_run.rglob("*")):

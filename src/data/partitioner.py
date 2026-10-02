@@ -107,8 +107,14 @@ def partition_iid(
     num_clients: int,
     seed: int,
     partition_id: str,
+    per_client: int | None = None,
 ) -> PartitionManifest:
-    """Split images approximately evenly across clients (S0)."""
+    """Split images approximately evenly across clients (S0).
+
+    ``per_client`` keeps only the first N images of each client's split (smoke
+    runs); the split itself is unchanged, so a capped partition is a prefix of
+    the uncapped one.
+    """
     rng = random.Random(seed)
     shuffled = list(image_names)
     rng.shuffle(shuffled)
@@ -119,7 +125,7 @@ def partition_iid(
         client_id = f"C{i}"
         start = i * chunk
         end = start + chunk if i < num_clients - 1 else len(shuffled)
-        splits[client_id] = shuffled[start:end]
+        splits[client_id] = shuffled[start:end][:per_client] if per_client else shuffled[start:end]
 
     counts = {cid: _count_classes(imgs, label_dir) for cid, imgs in splits.items()}
     missing = {cid: [c for c in TARGET_CLASSES if counts[cid][c] == 0] for cid in splits}

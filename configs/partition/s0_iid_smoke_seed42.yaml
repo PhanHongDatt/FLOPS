@@ -1,0 +1,12 @@
+# S0 IID for SMOKE runs only (notebook 01): same split as s0_iid.yaml, each client
+# capped to its first 250 images so a round takes minutes (correctness check,
+# CLAUDE.md §14). The uncapped 70k split took ~19 min per round on T4 x2.
+partition_id: s0_iid_smoke_seed42
+scenario: S0
+seed: 42
+num_clients: 4
+per_client: 250
+missing_map: {}
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50
+notes: "Smoke only — not for reporting."

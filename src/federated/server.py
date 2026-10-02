@@ -150,6 +150,9 @@ def _build_centralized_evaluate_fn(
         model = _holder["model"]
         set_parameters(model, parameters)
 
+        # Logged before AND after: Kaggle s1 v4 went silent for >90 min right
+        # after aggregate_fit of round 1, and nothing showed which step hung.
+        logger.info("Round %d (absolute): centralized eval on %s started", abs_round, global_data_yaml)
         metrics = evaluate(
             model=model,
             data_yaml=global_data_yaml,
@@ -157,6 +160,9 @@ def _build_centralized_evaluate_fn(
             conf=eval_config["conf"],
             iou=eval_config["iou"],
             device=eval_config.get("device", 0),
+            # in-process loading: forking dataloader workers inside the Ray
+            # driver (many threads) can deadlock
+            workers=int(eval_config.get("workers", 0)),
         )
         logger.info("Round %d (absolute) centralized eval: %s", abs_round, metrics)
 

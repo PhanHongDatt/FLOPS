@@ -28,6 +28,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import faulthandler
+import os
 import random
 from pathlib import Path
 
@@ -300,6 +302,10 @@ def main() -> None:
     )
     args = ap.parse_args()
 
+    # Hang diagnostics: dump every thread's stack to stderr periodically, so a
+    # stuck run (Kaggle s1 v4: silent >90 min after round 1) shows where it is.
+    faulthandler.dump_traceback_later(int(os.environ.get("FLOPS_HANG_DUMP_SECS", "1800")), repeat=True)
+
     algorithm, mechanism, rho = _resolve_arms(args)
 
     if algorithm in _DISABLED_ALGORITHMS:
@@ -387,6 +393,7 @@ def main() -> None:
         "iou": config["evaluation"]["iou"],
         "device": config["train"]["device"],
         "weights": config["model"]["weights"],
+        "workers": config["evaluation"].get("workers", 0),
     }
 
     param_names: list[str] | None = None

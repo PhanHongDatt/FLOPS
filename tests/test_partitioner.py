@@ -164,3 +164,16 @@ def test_missing_class_partial_overlap_keeps_eligible_only():
     assert len(manifest.client_assignments["C2"]) == 20
     assert manifest.class_counts["C0"]["car"] == 0
     assert manifest.class_counts["C1"]["car"] == 0
+
+
+def test_iid_partition_per_client_cap():
+    """Smoke runs cap each client so a round takes minutes, not ~19 min (Kaggle s1 v4)."""
+    images = [f"img_{i:04d}.jpg" for i in range(40)]
+    with tempfile.TemporaryDirectory() as tmp:
+        label_dir = _make_label_dir(Path(tmp), images, {img: [0] for img in images})
+        manifest = partition_iid(images, label_dir, num_clients=4, seed=42,
+                                 partition_id="s0_cap", per_client=3)
+        uncapped = partition_iid(images, label_dir, num_clients=4, seed=42, partition_id="s0")
+    assert all(len(v) == 3 for v in manifest.client_assignments.values())
+    for cid, imgs in manifest.client_assignments.items():
+        assert imgs == uncapped.client_assignments[cid][:3]   # prefix of the same split

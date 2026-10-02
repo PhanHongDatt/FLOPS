@@ -355,7 +355,11 @@ def evaluate(
     conf: float,
     iou: float,
     device: int | str,
+    workers: int | None = None,
 ) -> dict[str, float]:
+    """Global-val metrics. ``workers=0`` loads images in-process — use it inside
+    the Ray driver, where forking dataloader workers can deadlock."""
+    val_kwargs: dict[str, Any] = {} if workers is None else {"workers": workers}
     # val() fuses Conv+BN of model.model IN PLACE (355 → 127 state_dict entries
     # for yolov8n), after which set_parameters on the same object fails. The
     # server reuses one evaluate model across rounds, so validate a copy.
@@ -369,6 +373,7 @@ def evaluate(
             iou=iou,
             device=device,
             verbose=False,
+            **val_kwargs,
         )
     finally:
         model.model = original

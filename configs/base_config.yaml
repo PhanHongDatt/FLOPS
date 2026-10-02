@@ -68,6 +68,7 @@ federated:
 evaluation:
   conf: 0.25
   iou: 0.70
+  workers: 0      # [ENGINEERING] server-side eval runs in the Ray driver: no forked loaders
   metrics:
     - mAP50
     - mAP50-95

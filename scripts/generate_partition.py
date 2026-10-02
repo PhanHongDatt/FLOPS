@@ -75,6 +75,7 @@ def _dispatch_partition(
             num_clients=num_clients,
             seed=seed,
             partition_id=partition_id,
+            per_client=config.get("per_client"),
         )
 
     if scenario in ("S1", "S1-Control"):

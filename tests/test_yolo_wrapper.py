@@ -199,3 +199,16 @@ def test_val_subset_is_seeded_and_from_val(tmp_path):
     # n larger than the split → whole split, still deterministic order
     whole = yaml.safe_load(val_subset_data_yaml(src, tmp_path / "c", n_images=100, seed=7).read_text())
     assert len(Path(whole["val"]).read_text().split()) == 30
+
+
+def test_evaluate_forwards_dataloader_workers():
+    """Server-side eval runs inside the Ray driver; forking dataloader workers
+    there is a deadlock risk (Kaggle s1 v4 hung after round 1), so the caller
+    can force workers=0."""
+    model = _mock_yolo_with_ap([0], [0.5], [0.4], [0.5], [0.5])
+    evaluate(model=model, data_yaml=Path("/tmp/x.yaml"), img_size=64, conf=0.25,
+             iou=0.7, device="cpu", workers=0)
+    assert model.val.call_args.kwargs["workers"] == 0
+    evaluate(model=model, data_yaml=Path("/tmp/x.yaml"), img_size=64, conf=0.25,
+             iou=0.7, device="cpu")
+    assert "workers" not in model.val.call_args.kwargs     # Ultralytics default
