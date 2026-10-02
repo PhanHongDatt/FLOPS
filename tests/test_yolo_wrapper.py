@@ -178,3 +178,24 @@ def test_val_stub_rejects_empty_train(tmp_path):
     src = _write_dataset_yaml(tmp_path, str(tmp_path / "empty.txt"))
     with pytest.raises(ValueError, match="no training images"):
         val_stub_data_yaml(src, tmp_path / "run", n_images=8)
+
+
+def test_val_subset_is_seeded_and_from_val(tmp_path):
+    import yaml
+    from src.model.yolo_wrapper import val_subset_data_yaml
+
+    img_dir = tmp_path / "images" / "val"
+    img_dir.mkdir(parents=True)
+    for i in range(30):
+        (img_dir / f"{i:02d}.jpg").write_bytes(b"")
+    src = _write_dataset_yaml(tmp_path, "images/train")  # val: images/val
+
+    a = yaml.safe_load(val_subset_data_yaml(src, tmp_path / "a", n_images=10, seed=7).read_text())
+    b = yaml.safe_load(val_subset_data_yaml(src, tmp_path / "b", n_images=10, seed=7).read_text())
+    sub_a = Path(a["val"]).read_text().split()
+    assert sub_a == Path(b["val"]).read_text().split()
+    assert len(sub_a) == 10 and len(set(sub_a)) == 10
+    assert all(Path(p).parent == img_dir for p in sub_a)
+    # n larger than the split → whole split, still deterministic order
+    whole = yaml.safe_load(val_subset_data_yaml(src, tmp_path / "c", n_images=100, seed=7).read_text())
+    assert len(Path(whole["val"]).read_text().split()) == 30

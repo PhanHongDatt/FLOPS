@@ -186,15 +186,28 @@ def train_one_round(
 _IMG_SUFFIXES = {".bmp", ".dng", ".jpeg", ".jpg", ".mpo", ".png", ".tif", ".tiff", ".webp", ".pfm"}
 
 
-def _train_images(data: dict[str, Any], data_yaml: Path) -> list[str]:
-    """Image paths of the ``train`` entry: an image-list .txt or an image directory."""
+def _split_images(data: dict[str, Any], data_yaml: Path, split: str) -> list[str]:
+    """Image paths of a split entry (``train``/``val``): an image-list .txt or a directory."""
     root = Path(data.get("path") or data_yaml.parent)
-    train = Path(data["train"])
-    train = train if train.is_absolute() else root / train
-    if train.is_dir():
-        return [str(p) for p in sorted(train.iterdir()) if p.suffix.lower() in _IMG_SUFFIXES]
-    lines = [ln.strip() for ln in train.read_text(encoding="utf-8").splitlines() if ln.strip()]
-    return [ln if Path(ln).is_absolute() else str(train.parent / ln) for ln in lines]
+    entry = Path(data[split])
+    entry = entry if entry.is_absolute() else root / entry
+    if entry.is_dir():
+        return [str(p) for p in sorted(entry.iterdir()) if p.suffix.lower() in _IMG_SUFFIXES]
+    lines = [ln.strip() for ln in entry.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    return [ln if Path(ln).is_absolute() else str(entry.parent / ln) for ln in lines]
+
+
+def _write_split_yaml(data: dict[str, Any], data_yaml: Path, out_dir: Path,
+                      images: list[str], tag: str) -> Path:
+    import yaml
+
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    listing = out_dir / f"{tag}.txt"
+    listing.write_text("\n".join(images) + "\n", encoding="utf-8")
+    out = out_dir / f"{Path(data_yaml).stem}_{tag}.yaml"
+    out.write_text(yaml.safe_dump({**data, "val": str(listing.resolve())}), encoding="utf-8")
+    return out
 
 
 def val_stub_data_yaml(data_yaml: Path, out_dir: Path, n_images: int = 8) -> Path:
@@ -211,16 +224,27 @@ def val_stub_data_yaml(data_yaml: Path, out_dir: Path, n_images: int = 8) -> Pat
 
     data_yaml = Path(data_yaml)
     data = yaml.safe_load(data_yaml.read_text(encoding="utf-8"))
-    images = _train_images(data, data_yaml)[:n_images]
+    images = _split_images(data, data_yaml, "train")[:n_images]
     if not images:
         raise ValueError(f"{data_yaml}: no training images found for the val stub")
-    out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    stub = out_dir / "val_stub.txt"
-    stub.write_text("\n".join(images) + "\n", encoding="utf-8")
-    out = out_dir / f"{data_yaml.stem}_valstub.yaml"
-    out.write_text(yaml.safe_dump({**data, "val": str(stub.resolve())}), encoding="utf-8")
-    return out
+    return _write_split_yaml(data, data_yaml, out_dir, images, "val_stub")
+
+
+def val_subset_data_yaml(data_yaml: Path, out_dir: Path, n_images: int, seed: int) -> Path:
+    """Copy of ``data_yaml`` whose ``val`` is a seeded subset of ``n_images`` val images.
+
+    Used where many evaluations of one model must share the same, cheaper val
+    set (F2 perturbations). Selection is seeded and kept in sorted order.
+    """
+    import yaml
+
+    data_yaml = Path(data_yaml)
+    data = yaml.safe_load(data_yaml.read_text(encoding="utf-8"))
+    images = sorted(_split_images(data, data_yaml, "val"))
+    if n_images < len(images):
+        keep = np.random.default_rng(seed).choice(len(images), size=n_images, replace=False)
+        images = [images[i] for i in sorted(keep)]
+    return _write_split_yaml(data, data_yaml, out_dir, images, f"val_subset_{n_images}_s{seed}")
 
 
 def _load_fp32_ema(model: "YOLO", snapshot: dict[str, Any]) -> None:
@@ -283,6 +307,44 @@ def _per_class_fp_fn(results: Any) -> dict[str, float]:
         out[f"TP_{cls_name}"] = tp
         out[f"FP_{cls_name}"] = float(m[cls_idx, :].sum()) - tp
         out[f"FN_{cls_name}"] = float(m[:, cls_idx].sum()) - tp
+    return out
+
+
+def confidence_stats(
+    model: "YOLO",
+    images: list[str],
+    img_size: int,
+    conf: float,
+    iou: float,
+    device: int | str,
+    batch: int = 16,
+) -> dict[str, float]:
+    """Per-class prediction count and mean confidence over ``images`` (CLAUDE.md §13).
+
+    ``YOLO.predict`` caches a predictor holding the model it first saw, and its
+    AutoBackend fuses that model in place; predicting on a fresh copy with the
+    cache cleared keeps the stats tied to the current weights.
+    """
+    nc = len(TARGET_CLASSES)
+    confs: list[list[float]] = [[] for _ in range(nc)]
+    original = model.model
+    model.model = copy.deepcopy(original)
+    model.predictor = None
+    try:
+        for r in model.predict(source=list(images), imgsz=img_size, conf=conf, iou=iou,
+                               device=device, stream=True, verbose=False, batch=batch):
+            if r.boxes is None:
+                continue
+            for c, cf in zip(r.boxes.cls.cpu().numpy().astype(int), r.boxes.conf.cpu().numpy()):
+                if 0 <= c < nc:
+                    confs[c].append(float(cf))
+    finally:
+        model.model = original
+        model.predictor = None
+    out: dict[str, float] = {}
+    for c, name in enumerate(TARGET_CLASSES):
+        out[f"n_pred_{name}"] = float(len(confs[c]))
+        out[f"mean_conf_{name}"] = float(np.mean(confs[c])) if confs[c] else float("nan")
     return out
 
 

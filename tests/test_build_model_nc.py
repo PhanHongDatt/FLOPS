@@ -188,3 +188,28 @@ def test_local_training_validates_on_stub_not_global_val(tmp_path):
     val = Path(model.trainer.data["val"])
     assert val.name == "val_stub.txt"
     assert len(val.read_text().split()) == 2
+
+
+@pytest.mark.slow
+def test_confidence_stats_follow_weight_changes(tmp_path):
+    """YOLO.predict caches its predictor with the model it first saw; without a
+    reset, stats after a weight change would still describe the old weights."""
+    from src.model.yolo_wrapper import confidence_stats
+
+    data_yaml = _tiny_dataset(tmp_path / "ds")
+    images = sorted(str(p) for p in (tmp_path / "ds" / "images" / "val").iterdir())
+    model = build_model(SOURCE)
+    # make every class fire: raise all class-head biases
+    params = get_parameters(model)
+    names = list(model.model.state_dict().keys())
+    hot = [p + 20.0 if n.endswith(".2.bias") and ".cv3." in n else p for n, p in zip(names, params)]
+    set_parameters(model, hot)
+    stats_hot = confidence_stats(model, images, img_size=64, conf=0.25, iou=0.7, device="cpu")
+    assert set(stats_hot) == {f"{s}_{c}" for c in TARGET_CLASSES for s in ("n_pred", "mean_conf")}
+    assert sum(stats_hot[f"n_pred_{c}"] for c in TARGET_CLASSES) > 0
+
+    cold = [p - 40.0 if n.endswith(".2.bias") and ".cv3." in n else p for n, p in zip(names, hot)]
+    set_parameters(model, cold)
+    stats_cold = confidence_stats(model, images, img_size=64, conf=0.25, iou=0.7, device="cpu")
+    assert sum(stats_cold[f"n_pred_{c}"] for c in TARGET_CLASSES) == 0
+    assert len(model.model.state_dict()) == len(names)  # not fused in place
