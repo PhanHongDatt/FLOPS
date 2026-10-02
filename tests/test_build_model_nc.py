@@ -213,3 +213,23 @@ def test_confidence_stats_follow_weight_changes(tmp_path):
     stats_cold = confidence_stats(model, images, img_size=64, conf=0.25, iou=0.7, device="cpu")
     assert sum(stats_cold[f"n_pred_{c}"] for c in TARGET_CLASSES) == 0
     assert len(model.model.state_dict()) == len(names)  # not fused in place
+
+
+@pytest.mark.slow
+def test_fedprox_term_changes_the_update_in_real_training(tmp_path):
+    """Same seed/data: mu > 0 must pull weights toward the start point (smaller drift)."""
+    data_yaml = _tiny_dataset(tmp_path / "ds")
+    start = {k: v.clone() for k, v in build_model(SOURCE).model.state_dict().items()}
+
+    def drift(mu: float, name: str) -> float:
+        model = build_model(SOURCE)
+        train_one_round(model, data_yaml, epochs=1, batch=2, img_size=64, lr0=0.01,
+                        device="cpu", project=tmp_path / "runs", name=name, workers=0,
+                        nbs=2, proximal_mu=mu)
+        sd = model.model.state_dict()
+        return sum(float((sd[k].float() - start[k].float()).pow(2).sum())
+                   for k in sd if k.endswith("conv.weight")) ** 0.5
+
+    d0, d_big = drift(0.0, "mu0"), drift(50.0, "mu50")
+    assert d0 > 0
+    assert d_big < d0          # the proximal term really acts on the trainer's params
