@@ -79,10 +79,11 @@ verification:
   confirmed_on_date: "2026-10-02"
   runtime_output: research/feasibility/F1/runtime_map.yaml
   environment: "ultralytics 8.3.253, torch 2.11.0+cpu, Python 3.14 (local CPU)"
-  caveat: >
-    Names/shapes are produced by Ultralytics module code, not by torch, but the
-    pinned stack is torch 2.7.1 (ADR-001). Re-run verify_map.py in the first
-    Kaggle session and attach its runtime_map.yaml before G5 is claimed.
+  pinned_stack_confirmation: >
+    2026-10-03, Kaggle kernel phdatt/flops-s1-smoke-g1 v6 (torch 2.7.1+cu128,
+    ultralytics 8.3.253, Python 3.12.13, T4): verify_map.py produced the same 6
+    class-head keys and 780 class-specific elements; runtime_map.yaml replaced
+    with that output.
   confirmed:
     - "355 state_dict entries (184 learned tensors + 171 BN buffers), 3,022,085 elements at nc=4"
     - "exactly 6 class-head keys: model.22.cv3.{0,1,2}.2.weight (4, 64, 1, 1) and .bias (4,)"
