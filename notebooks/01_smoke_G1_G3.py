@@ -203,6 +203,21 @@ print(f"PARTITIONS_DIR:  {PARTITIONS_DIR}")
 print(f"MLFLOW_URI:      {MLFLOW_URI}")
 
 # %% [markdown]
+# ## Cell 3b — F1 + ADR-008 checks on the pinned GPU stack (no dataset needed)
+#
+# 1. `verify_map.py`: F1 runtime parameter map on the pinned torch/ultralytics;
+#    fails unless exactly 6 class-head keys exist. Output `runtime_map.yaml` is
+#    exported in Cell 8 and replaces the local-CPU record (gates.yaml G5).
+# 2. `check_fp32_upload.py`: one tiny training run on the GPU; fails if the
+#    weights a client would upload are fp16-rounded (AMP path, ADR-008).
+
+# %%
+import subprocess
+F1_DIR = REPO_ROOT / "research" / "feasibility" / "F1"
+subprocess.check_call([sys.executable, str(F1_DIR / "verify_map.py")], cwd=WORK)
+subprocess.check_call([sys.executable, str(F1_DIR / "check_fp32_upload.py"), "--device", "0"], cwd=WORK)
+
+# %% [markdown]
 # ## Cell 4 — Convert BDD100K → YOLO format
 #
 # Uses `scripts/prepare_bdd100k.py`.
@@ -358,6 +373,7 @@ EXPORT_DIR.mkdir(parents=True, exist_ok=True)
 # Copy artifacts run + env lock
 shutil.copytree(latest_run, EXPORT_DIR / "run", dirs_exist_ok=True)
 shutil.copy2(REPO_ROOT / "environment.lock", EXPORT_DIR / "environment.lock")
+shutil.copy2(F1_DIR / "runtime_map.yaml", EXPORT_DIR / "F1_runtime_map.yaml")  # Cell 3b
 
 # Also save the partition manifest for reproducibility
 shutil.copytree(partition_dir, EXPORT_DIR / "partition", dirs_exist_ok=True)
