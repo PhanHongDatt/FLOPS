@@ -27,8 +27,8 @@ mlflow>=2.0,<3.0            # ADR-002-A1: keeps protobuf<5 for flwr 1.21.0
 # Inside Docker: do NOT reinstall — use base image torch.
 # Local dev (non-Docker): uncomment below and confirm CUDA variant manually.
 # torch==2.7.1
-# torchvision==0.22.0
-# torchaudio==2.7.0
+# torchvision==0.22.1   # ADR-002-A2: 0.22.0 requires torch==2.7.0
+# torchaudio==2.7.1
 
 # ── Data / Numerics ───────────────────────────────────────────────────────────
 numpy>=2.0,<3.0             # ADR-002-A1: numpy<2 broke Ultralytics on Kaggle

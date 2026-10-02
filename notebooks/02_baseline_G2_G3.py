@@ -47,7 +47,7 @@ subprocess.check_call([
 TORCH_INDEX = "https://download.pytorch.org/whl/cu128"
 subprocess.check_call([
     sys.executable, "-m", "pip", "install", "-q",
-    "torch==2.7.1", "torchvision==0.22.0",
+    "torch==2.7.1", "torchvision==0.22.1",  # 0.22.0 requires torch==2.7.0 (ADR-002-A2)
     "--index-url", TORCH_INDEX,
 ])
 subprocess.check_call([

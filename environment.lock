@@ -4,7 +4,7 @@
 
 python_version: ""            # e.g. 3.11.9
 pytorch_version: ""           # e.g. 2.7.1+cu128
-torchvision_version: ""       # e.g. 0.22.0+cu128
+torchvision_version: ""       # e.g. 0.22.1+cu128
 torchaudio_version: ""        # e.g. 2.7.0+cu128
 cuda_version: ""              # e.g. 12.8 (from nvidia-smi)
 cudnn_version: ""             # e.g. 9.x

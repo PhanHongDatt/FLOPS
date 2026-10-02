@@ -42,10 +42,10 @@ subprocess.check_call([
 TORCH_INDEX = "https://download.pytorch.org/whl/cu128"
 
 # Step 1: PyTorch + TorchVision (keep Kaggle CUDA 12.8 wheel)
-# torchvision pinned to 0.22.0 to match ADR-001 / requirements.txt.
+# torchvision 0.22.1 is the release built for torch 2.7.1 (ADR-002-A2).
 subprocess.check_call([
     sys.executable, "-m", "pip", "install", "-q",
-    "torch==2.7.1", "torchvision==0.22.0",
+    "torch==2.7.1", "torchvision==0.22.1",  # 0.22.0 requires torch==2.7.0 (ADR-002-A2)
     "--index-url", TORCH_INDEX,
 ])
 

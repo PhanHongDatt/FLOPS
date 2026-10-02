@@ -32,7 +32,7 @@ No version may be chosen silently.
 | Ultralytics | **8.3.253** | thesis (8.3.x) | Latest patch of 8.3.x series; released 2026-01-13; verified on PyPI `[YOLO-DOC]` |
 | Flower (flwr) | **1.21.0** | thesis (1.21.x) | Only patch in 1.21.x; released 2025-09-10; verified on PyPI `[FL-DOC]` |
 | MLflow | **3.4.0** | thesis (3.4.x) | Released 2025-09-17; verified on mlflow.org `[ENGINEERING]` |
-| torchvision | **0.22.0** | proposed | Paired with PyTorch 2.7.x per pytorch.org version table `[ENGINEERING]` |
+| torchvision | **0.22.1** (was 0.22.0) | amended | 0.22.0 requires torch==2.7.0; 0.22.1 is the pair for 2.7.1 — see ADR-002-A2 `[ENGINEERING]` |
 
 ---
 

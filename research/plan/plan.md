@@ -71,7 +71,7 @@ Theo `ADR-001` (accepted 2026-08-08), khớp stack trong `notebooks/01_smoke_G1_
 | Thành phần | Giá trị chốt |
 |---|---|
 | Python | 3.11 |
-| PyTorch / torchvision | 2.7.1 / 0.22.0 (cu128) |
+| PyTorch / torchvision | 2.7.1 / 0.22.1 (cu128; ADR-002-A2) |
 | Ultralytics | **8.3.253** |
 | Flower | **1.21.0** |
 | MLflow | `>=2.0,<3.0` (ADR-002-A1: giữ protobuf<5 cho flwr 1.21.0) |

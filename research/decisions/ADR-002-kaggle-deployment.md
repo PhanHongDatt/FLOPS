@@ -34,7 +34,7 @@ This is a **deployment-only deviation**. All research contracts remain unchanged
 
 3. **Versions pinned per ADR-001** — every notebook session begins with:
    ```
-   pip install torch==2.7.1 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
+   pip install torch==2.7.1 torchvision==0.22.1 --index-url https://download.pytorch.org/whl/cu128
    pip install -r requirements.txt
    pip freeze > /kaggle/working/environment.lock
    ```
