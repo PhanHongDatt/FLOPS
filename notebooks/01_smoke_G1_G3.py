@@ -184,7 +184,13 @@ if str(REPO_ROOT) not in sys.path:
 
 # Kaggle dataset mount path (ADR-002)
 # Format: /kaggle/input/datasets/<owner>/<dataset-slug>/<folder>
-BDD100K_RAW = Path("/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle")
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+from src.utils.kaggle_paths import find_bdd100k_root
+
+# web editor mounts datasets/<owner>/<slug>/, `kaggle kernels push` may mount <slug>/
+BDD100K_RAW = find_bdd100k_root()
+print("BDD100K_RAW:", BDD100K_RAW)
 if not BDD100K_RAW.exists():
     raise RuntimeError(
         f"BDD100K dataset not mounted at {BDD100K_RAW}. "

@@ -76,7 +76,13 @@ print(f"GPU: {torch.cuda.get_device_name(0)}")
 
 # %%
 # Kaggle private-dataset mount path — kept in sync with notebook 01/02 + docs/KAGGLE_SETUP.md
-BDD100K_RAW = Path("/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle")
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+from src.utils.kaggle_paths import find_bdd100k_root
+
+# web editor mounts datasets/<owner>/<slug>/, `kaggle kernels push` may mount <slug>/
+BDD100K_RAW = find_bdd100k_root()
+print("BDD100K_RAW:", BDD100K_RAW)
 WORK = Path("/kaggle/working")
 YOLO_ROOT = WORK / "data" / "bdd100k_yolo"
 PARTITIONS_DIR = WORK / "data" / "partitions"
