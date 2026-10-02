@@ -42,7 +42,7 @@ def test_failure_raises_with_tail(tmp_path, capsys):
 def test_timeout_kills_and_raises(tmp_path):
     code = "import time; print('started', flush=True); time.sleep(30)"
     with pytest.raises(subprocess.TimeoutExpired):
-        run_logged([sys.executable, "-c", code], tmp_path / "slow.log", timeout=2)
+        run_logged([sys.executable, "-c", code], tmp_path / "slow.log", timeout=2, poll_interval=0.5)
     assert "started" in (tmp_path / "slow.log").read_text(encoding="utf-8")
 
 
@@ -51,3 +51,32 @@ def test_extra_env_is_passed(tmp_path):
     tail = run_logged([sys.executable, "-c", code], tmp_path / "env.log", env={"YOLO_VERBOSE": "False"},
                       tail_lines=1)
     assert tail.strip() == "False"
+
+
+def test_stall_watchdog_kills_a_silent_process(tmp_path):
+    """A hang that writes nothing must not burn Kaggle quota until the 12 h cap."""
+    watch = tmp_path / "run"
+    watch.mkdir()
+    code = "import time; time.sleep(60)"
+    with pytest.raises(subprocess.TimeoutExpired) as exc:
+        run_logged([sys.executable, "-c", code], tmp_path / "stall.log",
+                   stall_timeout=3, watch_dir=watch, poll_interval=0.5)
+    assert "no progress" in exc.value.output
+
+
+def test_stall_watchdog_spares_a_process_that_makes_progress(tmp_path):
+    watch = tmp_path / "run"
+    watch.mkdir()
+    code = (
+        "import time, pathlib\n"
+        f"d = pathlib.Path(r'{watch}')\n"
+        "for i in range(6):\n"
+        "    (d / f'ckpt{i}').write_text('x'); time.sleep(1)\n"
+    )
+    run_logged([sys.executable, "-c", code], tmp_path / "ok.log",
+               stall_timeout=3, watch_dir=watch, poll_interval=0.5)
+
+
+def test_stall_timeout_requires_watch_dir(tmp_path):
+    with pytest.raises(ValueError, match="watch_dir"):
+        run_logged([sys.executable, "-c", "pass"], tmp_path / "x.log", stall_timeout=5)

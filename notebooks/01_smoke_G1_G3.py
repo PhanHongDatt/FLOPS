@@ -339,7 +339,8 @@ print("Running:", " ".join(cmd))
 # A smoke run on 4 x 250 images takes minutes; fail loudly instead of holding
 # the GPU for hours if something hangs (s1 v4 stalled >90 min after round 1).
 from src.utils.proc import run_logged  # output → file: the notebook stdout pipe can block (s1 v5)
-run_logged(cmd, WORK / "flops_export" / "logs" / "smoke_fl.log", timeout=3600, env={"YOLO_VERBOSE": "False"})
+run_logged(cmd, WORK / "flops_export" / "logs" / "smoke_fl.log", timeout=3600, env={"YOLO_VERBOSE": "False"},
+           stall_timeout=1800, watch_dir=ARTIFACTS_DIR / "runs")
 print("\n✅ Smoke FL run complete.")
 
 # %% [markdown]

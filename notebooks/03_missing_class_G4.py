@@ -168,7 +168,7 @@ def run_one(scenario_name: str, manifest_path: Path, data_yaml_dir: Path, seed: 
     print(f"\n[{scenario_name} seed={seed}] {' '.join(cmd[-8:])}")
     from src.utils.proc import run_logged  # output → file: the notebook stdout pipe can block (s1 v5)
     run_logged(cmd, WORK / "flops_export" / "logs" / f"c1_{scenario_name}_seed{seed}.log",
-               env={"YOLO_VERBOSE": "False"})
+               env={"YOLO_VERBOSE": "False"}, timeout=4 * 3600, stall_timeout=3600, watch_dir=ARTIFACTS_DIR / "runs")
     # Deterministic run id since ADR-007: compute the directory instead of
     # picking the newest match by mtime. Arm name "FedAvg" is the run prefix.
     import yaml as _yaml
@@ -322,7 +322,8 @@ else:
         "--weights", str(G2_WEIGHTS),
         "--eval-data-yaml", str(DATA_YAML),
         "--output-dir", str(F2_OUT),
-    ], WORK / "flops_export" / "logs" / "f2.log", cwd=REPO_ROOT, env={"YOLO_VERBOSE": "False"})
+    ], WORK / "flops_export" / "logs" / "f2.log", cwd=REPO_ROOT, env={"YOLO_VERBOSE": "False"},
+       timeout=4 * 3600)   # F2 writes its artifacts only at the end: total limit, no stall check
     print("F2 artifacts:", sorted(str(p) for p in F2_OUT.rglob("summary.yaml")))
 
 # %% [markdown]
@@ -365,7 +366,8 @@ else:
         "--global-weights", str(G2_WEIGHTS),
         "--eval-data-yaml", str(DATA_YAML),
         "--output-dir", str(F3_OUT),
-    ], WORK / "flops_export" / "logs" / "f3.log", cwd=REPO_ROOT, env={"YOLO_VERBOSE": "False"})
+    ], WORK / "flops_export" / "logs" / "f3.log", cwd=REPO_ROOT, env={"YOLO_VERBOSE": "False"},
+       timeout=4 * 3600, stall_timeout=3600, watch_dir=F3_OUT)
     print("F3 artifacts:", sorted(str(p) for p in F3_OUT.rglob("summary.yaml")))
 
 # %% [markdown]

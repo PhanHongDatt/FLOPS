@@ -166,7 +166,8 @@ def run_arm(ablation: str, rho: float | None = None, resume: bool = False,
     print("=" * 78)
     from src.utils.proc import run_logged  # output → file: the notebook stdout pipe can block (s1 v5)
     run_logged(cmd, Path("/kaggle/working/flops_export/logs") / f"ablation_{cmd[cmd.index('--ablation') + 1] if '--ablation' in cmd else 'run'}.log",
-               env={"YOLO_VERBOSE": "False"})
+               env={"YOLO_VERBOSE": "False"}, timeout=3 * 3600,
+               stall_timeout=3600, watch_dir=Path(REPO_ROOT) / "artifacts" / "runs")
 
 
 RUNS = Path(REPO_ROOT) / "artifacts" / "runs"

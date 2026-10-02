@@ -148,7 +148,10 @@ cmd = [
 ]
 print("Running:", " ".join(cmd))
 from src.utils.proc import run_logged  # output → file: the notebook stdout pipe can block (s1 v5)
-run_logged(cmd, WORK / "flops_export" / "logs" / "g2_centralized.log", env={"YOLO_VERBOSE": "False"})
+# Watchdog: abort if nothing under artifacts/runs changes for 1 h (Ultralytics writes
+# last.pt every epoch), and after 6 h in any case — a hang must not burn the quota.
+run_logged(cmd, WORK / "flops_export" / "logs" / "g2_centralized.log", env={"YOLO_VERBOSE": "False"},
+           timeout=6 * 3600, stall_timeout=3600, watch_dir=ARTIFACTS_DIR / "runs")
 print("\n✅ G2 centralized training complete.")
 
 # Find latest G2 run (exp_id="G2-centralized" per train_centralized.py:59)
@@ -187,7 +190,8 @@ cmd = [
     "--global-data-yaml", str(DATA_YAML),
 ]
 print("Running:", " ".join(cmd))
-run_logged(cmd, WORK / "flops_export" / "logs" / "g3_fedavg.log", env={"YOLO_VERBOSE": "False"})
+run_logged(cmd, WORK / "flops_export" / "logs" / "g3_fedavg.log", env={"YOLO_VERBOSE": "False"},
+           timeout=3 * 3600, stall_timeout=3600, watch_dir=ARTIFACTS_DIR / "runs")
 print("\n✅ G3 FedAvg baseline complete.")
 
 # Run ids are deterministic since ADR-007 (no timestamp), so the directory is
@@ -217,7 +221,8 @@ if RUN_FEDPROX:
     cmd_prox = [c if c != "FedAvg" else "FedProx" for c in cmd]
     cmd_prox[cmd_prox.index("--mlflow-experiment") + 1] = "G3-FedProx-S0"
     print("Running:", " ".join(cmd_prox))
-    run_logged(cmd_prox, WORK / "flops_export" / "logs" / "g3_fedprox.log", env={"YOLO_VERBOSE": "False"})
+    run_logged(cmd_prox, WORK / "flops_export" / "logs" / "g3_fedprox.log", env={"YOLO_VERBOSE": "False"},
+               timeout=3 * 3600, stall_timeout=3600, watch_dir=ARTIFACTS_DIR / "runs")
     g3p_run = ARTIFACTS_DIR / "runs" / default_run_id("FedProx", "feasibility", SEED, _pid)
     if not g3p_run.exists():
         raise RuntimeError(f"Expected FedProx run dir not found: {g3p_run}")
