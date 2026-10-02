@@ -31,10 +31,12 @@ from src.experiments.f3 import F3Hooks, resolve_side, run_matched_pair, validate
 from src.experiments.runner import _git_commit, _read_environment_lock
 from src.model.yolo_wrapper import (
     build_model,
+    confidence_stats,
     evaluate,
     get_parameters,
     set_parameters,
     train_one_round,
+    val_subset_data_yaml,
 )
 from src.utils.artifacts import save_json, save_yaml
 from src.utils.config import (
@@ -60,7 +62,8 @@ def _model_factory(global_weights: Path, base_weights: str):
     return lambda: build_model(str(global_weights))
 
 
-def _hooks(global_weights: Path, base_weights: str, eval_data_yaml: Path, tc: dict[str, Any]) -> F3Hooks:
+def _hooks(global_weights: Path, base_weights: str, eval_data_yaml: Path, tc: dict[str, Any],
+           conf_images: list[str]) -> F3Hooks:
     def train(model, data_yaml: Path, seed: int, project: Path, name: str) -> None:
         train_one_round(
             model=model, data_yaml=data_yaml, epochs=tc["local_epochs"], batch=tc["batch_size"],
@@ -72,8 +75,12 @@ def _hooks(global_weights: Path, base_weights: str, eval_data_yaml: Path, tc: di
         )
 
     def run_eval(model) -> dict[str, float]:
-        return evaluate(model=model, data_yaml=eval_data_yaml, img_size=tc["image_size"],
-                        conf=tc["conf"], iou=tc["iou"], device=tc["device"])
+        metrics = evaluate(model=model, data_yaml=eval_data_yaml, img_size=tc["image_size"],
+                           conf=tc["conf"], iou=tc["iou"], device=tc["device"])
+        # CLAUDE.md §8 F3 "confidence change": per-class count/mean confidence on a
+        # fixed seeded subset (AP above uses the full val set)
+        return {**metrics, **confidence_stats(model, conf_images, tc["image_size"],
+                                              tc["conf"], tc["iou"], tc["device"])}
 
     def state(model) -> dict[str, np.ndarray]:
         # copies: get_parameters returns views of live CPU tensors
@@ -139,7 +146,11 @@ def main() -> None:
     if match_report is not None:
         save_yaml(match_report, out_dir / "match_report.yaml")
 
-    hooks = _hooks(args.global_weights, exp_config["model"]["weights"], args.eval_data_yaml, tc)
+    sub = f3_cfg.get("confidence_subset", {"n_images": 2000, "seed": 0})
+    conf_yaml = val_subset_data_yaml(args.eval_data_yaml, out_dir, sub["n_images"], sub["seed"])
+    conf_images = Path(yaml.safe_load(conf_yaml.read_text(encoding="utf-8"))["val"]).read_text().split()
+    hooks = _hooks(args.global_weights, exp_config["model"]["weights"], args.eval_data_yaml, tc,
+                   conf_images)
     summary = run_matched_pair(missing, control, target, TARGET_CLASSES, f3_cfg["seeds"], hooks, out_dir)
     logger.info("F3 done → %s | target_known_before=%s | bias_delta_gap=%s",
                 out_dir, summary["target_known_before"], summary["parameter"]["bias_delta_gap"])

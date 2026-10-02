@@ -24,4 +24,6 @@ control:
   manifest: s1_control_matched_seed42/manifest.yaml
   client: C0
 
+confidence_subset: {n_images: 2000, seed: 0}   # per-class confidence stats (AP uses full val)
+
 seeds: [42, 123, 2024]   # CLAUDE.md §14; the pre-registered rule uses the across-seed std
