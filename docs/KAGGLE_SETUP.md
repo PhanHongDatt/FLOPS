@@ -90,6 +90,42 @@ Các notebook trong repo ở dạng script `# %%` (mỗi khối `# %%` là một
 
 ---
 
+## 2b. Chạy từ VS Code bằng Kaggle CLI (không cần mở trình duyệt)
+
+Đã cài đặt sẵn trên máy (2026-10-02): `kaggle` CLI 2.2.4, `jupytext`; token ở
+`C:\Users\hogda\.kaggle\access_token` (tài khoản `phdatt`). File token nằm **ngoài repo** và
+bị chặn bởi `.gitignore`. **Không bao giờ commit token**, vì repo đang public. Nếu token lộ: Kaggle →
+Settings → API → tạo token mới rồi ghi đè file trên.
+
+Các phiên được khai báo trong `kaggle/sessions.yaml`:
+
+| Phiên | Kernel trên Kaggle | Notebook | Ghi chú |
+|---|---|---|---|
+| `s1` | `phdatt/flops-s1-smoke-g1` | 01 | G1 + F1 + kiểm fp32 + smoke |
+| `s2` | `phdatt/flops-s2-baseline-g2-g3` | 02 | sinh checkpoint G2 |
+| `s3` | `phdatt/flops-s3-f2-f3` | 03, `RUN_C1=False` | tự gắn output của `s2` (`kernel_sources`) để lấy checkpoint G2 |
+| `s4a` / `s4b` | `phdatt/flops-s4a-c1-seed42` / `...-s4b-c1-seed123-2024` | 03 | C1 chia seed |
+
+Mỗi phiên dùng 3 lệnh, gõ ở terminal VS Code tại `D:\FLOPS`:
+
+```powershell
+python scripts/kaggle_run.py s1 push     # đẩy lên, Kaggle chạy nền trên GPU T4 x2
+python scripts/kaggle_run.py s1 status   # queued / running / complete / error
+python scripts/kaggle_run.py s1 output   # tải output + log về kaggle/output/s1/
+```
+
+- `push` chỉ chạy khi working tree **sạch** và commit đã **push lên GitHub**, vì notebook trên Kaggle
+  clone repo và `checkout` đúng commit đó. Commit hash nằm ở ô đầu notebook và trong `environment.json` của mọi run.
+- `python scripts/kaggle_run.py s1 build` chỉ tạo `kaggle/build/s1/` (notebook + `kernel-metadata.json`)
+  để xem trước, không đẩy lên.
+- Notebook tự dò đường mount dataset (`src/utils/kaggle_paths.py`), vì kernel đẩy qua API có thể thấy
+  `/kaggle/input/bdd100k-flops/` thay vì `/kaggle/input/datasets/phdatt/bdd100k-flops/`.
+- Ô cuối tự xóa `data/bdd100k_yolo` để output nhẹ; giữ lại `flops_export/` và `FLOPS/artifacts/`.
+- Theo dõi log trực tiếp: mở `https://www.kaggle.com/code/phdatt/<slug>` (link được in ra sau `push`).
+- Chạy `s3` **sau khi `s2` đã complete**, vì `kernel_sources` lấy output của version mới nhất của `s2`.
+
+---
+
 ## 3. Phiên 1: notebook 01 (G1, F1, ADR-008, smoke)
 
 | Cell | Việc | Kết quả mong đợi |

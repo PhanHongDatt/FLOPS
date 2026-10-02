@@ -1,0 +1,39 @@
+# Kaggle sessions run headless with `python scripts/kaggle_run.py <session> push`.
+# Each session = one notebook from notebooks/, pinned to the pushed git commit,
+# run on Kaggle with GPU + internet. See docs/KAGGLE_SETUP.md §2b.
+#
+# kernel_sources: earlier sessions whose OUTPUT is mounted under /kaggle/input/<slug>/
+# (e.g. s3 finds the G2 checkpoint from s2). replace: exact-text overrides applied
+# to the notebook before pushing; each must match exactly once.
+owner: phdatt
+repo_url: https://github.com/PhanHongDatt/FLOPS.git
+dataset_sources: [phdatt/bdd100k-flops]
+machine_shape: NvidiaTeslaT4          # GPU T4 x2
+
+sessions:
+  s1:   # G1 environment, F1 on the pinned stack, fp32 check (ADR-008), smoke FL
+    slug: flops-s1-smoke-g1
+    notebook: notebooks/01_smoke_G1_G3.py
+
+  s2:   # G2 centralized (produces the G2 checkpoint) + G3 FedAvg S0
+    slug: flops-s2-baseline-g2-g3
+    notebook: notebooks/02_baseline_G2_G3.py
+
+  s3:   # F2 + F3 from the s2 G2 checkpoint; C1 skipped
+    slug: flops-s3-f2-f3
+    notebook: notebooks/03_missing_class_G4.py
+    kernel_sources: [s2]
+    replace:
+      "RUN_C1 = True": "RUN_C1 = False"
+
+  s4a:  # C1 seed 42 (S1b vs matched control). F2/F3 cells skip: no G2 source attached
+    slug: flops-s4a-c1-seed42
+    notebook: notebooks/03_missing_class_G4.py
+    replace:
+      "SEEDS = [42, 123, 2024]  # from base_config.yaml": "SEEDS = [42]"
+
+  s4b:  # C1 seeds 123, 2024
+    slug: flops-s4b-c1-seed123-2024
+    notebook: notebooks/03_missing_class_G4.py
+    replace:
+      "SEEDS = [42, 123, 2024]  # from base_config.yaml": "SEEDS = [123, 2024]"

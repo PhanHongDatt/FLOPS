@@ -79,3 +79,10 @@ logs/
 .coverage
 htmlcov/
 coverage.xml
+
+# ── Kaggle CLI (secrets + generated push folders) ────────────────────────────
+kaggle.json
+access_token
+.kaggle/
+kaggle/build/
+kaggle/output/
