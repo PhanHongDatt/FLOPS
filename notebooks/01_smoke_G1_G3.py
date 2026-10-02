@@ -373,6 +373,22 @@ if missing:
 else:
     print("\n✅ All §21 artifacts present.")
 
+# Learning sanity check: s1 v6 passed every cell while no weight was updated
+# (only BN running stats moved). Learned 3x3 conv weights must differ between
+# the round-1 and round-2 global models.
+import numpy as np
+from src.experiments.checkpoint import load_global_checkpoint
+
+_ckpt = latest_run / "checkpoint"
+_r1 = load_global_checkpoint(_ckpt / "global_round_001.npz")
+_r2 = load_global_checkpoint(_ckpt / "global_round_002.npz")
+_conv = [i for i, x in enumerate(_r1) if x.ndim == 4 and x.shape[-1] == 3]
+_delta = max(float(np.max(np.abs(_r2[i] - _r1[i]))) for i in _conv)
+print(f"max |Δ| of {len(_conv)} 3x3 conv weights, round 1 → 2: {_delta:.3e}")
+if _delta < 1e-6:
+    raise RuntimeError("Global conv weights did not change between rounds: the model is not learning.")
+print("✅ Model weights change across rounds (learning path exercised).")
+
 # %% [markdown]
 # ## Cell 8 — Export to Kaggle Output Dataset (persistence)
 #

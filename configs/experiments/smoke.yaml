@@ -2,6 +2,10 @@ run_class: smoke
 train:
   epochs: 1
   batch_size: 4
+  # nbs == batch → one optimizer step per batch. With the default nbs 64 a
+  # 250-image client did ~3 accumulated steps per round and s1 v6 learned
+  # nothing (conv weights unchanged across rounds); smoke must exercise learning.
+  nbs: 4
 federated:
   num_rounds: 2
   # Client-side evaluation is skipped: every per-client data yaml points `val:`

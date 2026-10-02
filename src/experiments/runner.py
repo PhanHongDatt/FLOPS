@@ -47,8 +47,9 @@ def _detach_run_log_handler(run_dir: Path) -> None:
 
 def _git_commit() -> str:
     try:
+        # -C repo root: scripts run from /kaggle/working on Kaggle, outside the repo
         result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
+            ["git", "-C", str(Path(__file__).parents[2]), "rev-parse", "HEAD"],
             capture_output=True, text=True, check=True,
         )
         return result.stdout.strip()

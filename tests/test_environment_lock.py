@@ -35,3 +35,11 @@ def test_yaml_template_lock_is_parsed(tmp_path, monkeypatch):
 def test_missing_lock_returns_empty(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "_environment_lock_path", lambda: tmp_path / "nope.lock")
     assert runner._read_environment_lock() == {}
+
+
+def test_git_commit_is_resolved_outside_the_repo(tmp_path, monkeypatch):
+    """Kaggle runs scripts from /kaggle/working (not the repo): environment.json
+    recorded git_commit 'unknown' in s1 v6, breaking CLAUDE.md §5 traceability."""
+    import re
+    monkeypatch.chdir(tmp_path)
+    assert re.fullmatch(r"[0-9a-f]{40}", runner._git_commit())
