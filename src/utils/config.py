@@ -44,3 +44,29 @@ def resolve_env(config: dict[str, Any]) -> dict[str, Any]:
         else:
             result[k] = v
     return result
+
+
+def build_local_train_config(config: dict[str, Any]) -> dict[str, Any]:
+    """Per-client local-training settings from a merged experiment config.
+
+    Single source for FL clients (run_fl_experiment.py) and F3 (run_f3.py): F3's
+    Δθ only says something about FL if its local training is the same update.
+    """
+    train = config["train"]
+    return {
+        "local_epochs": config["federated"]["local_epochs"],
+        "batch_size": train["batch_size"],
+        "image_size": config["model"]["image_size"],
+        "lr0": train["lr0"],
+        "conf": config["evaluation"]["conf"],
+        "iou": config["evaluation"]["iou"],
+        "device": train["device"],
+        # Local-training knobs — see yolo_wrapper.train_one_round for why these
+        # defaults differ from Ultralytics' own (plan.md §13 K2, §6.5 H1/H3).
+        "workers": train.get("workers", 2),
+        "warmup_epochs": train.get("warmup_epochs", 0.0),
+        "close_mosaic": train.get("close_mosaic", 0),
+        "client_run_val": train.get("client_run_val", False),
+        "deterministic": train.get("deterministic", True),
+        "nbs": train.get("nbs"),
+    }

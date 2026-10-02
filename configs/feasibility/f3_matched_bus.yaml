@@ -1,0 +1,27 @@
+# F3 — matched missing-class local training, target = bus (CLAUDE.md §8, plan.md §6.2)
+#
+# Pair: S1b C0 (zero bus boxes) vs S1-Control-Matched C0 (same image count and
+# non-target box vector, bus present). Generate both partitions first:
+#   scripts/generate_partition.py --config configs/partition/s1b_bus_seed42.yaml
+#   scripts/generate_partition.py --config configs/partition/s1_control_matched_seed42.yaml
+#
+# GLOBAL CHECKPOINT (passed on the command line, not stored here):
+#   must be an nc=4 model that ALREADY detects bus — the G2 centralized best.pt,
+#   or an FL global after warm-up rounds. Raw yolov8n.pt is NOT valid: at nc=4
+#   the whole cv3 branch (36 keys) is re-initialised because shapes differ from
+#   COCO's 80 classes [YOLO-DOC: ultralytics 8.3.253 DetectionModel.load →
+#   intersect_dicts], so there is no bus knowledge to forget. The run records
+#   `target_known_before` and warns when the start model has zero bus AP.
+exp_id: F3-matched-bus
+run_class: feasibility
+exp_config: configs/experiments/feasibility.yaml   # local training = FL client settings
+target_class: bus
+
+missing:
+  manifest: s1b_bus_seed42/manifest.yaml
+  client: C0
+control:
+  manifest: s1_control_matched_seed42/manifest.yaml
+  client: C0
+
+seeds: [42, 123, 2024]   # CLAUDE.md §14; the pre-registered rule uses the across-seed std

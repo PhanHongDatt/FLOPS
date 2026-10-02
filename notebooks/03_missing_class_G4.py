@@ -27,7 +27,8 @@
 # ## Cell 1 — Environment restore
 
 # %%
-import subprocess, sys
+import subprocess
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path("/kaggle/working/FLOPS")
@@ -36,18 +37,35 @@ if not REPO_ROOT.exists():
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-# Reinstall pinned versions (Kaggle sessions are ephemeral per ADR-002)
-subprocess.check_call(
-    [sys.executable, "-m", "pip", "install", "-q",
-     "torch==2.7.1", "torchvision==0.22.0",
-     "--index-url", "https://download.pytorch.org/whl/cu128"]
-)
-subprocess.check_call(
-    [sys.executable, "-m", "pip", "install", "-q",
-     "ultralytics==8.3.253", "flwr==1.21.0", "mlflow==3.4.0",
-     "numpy>=1.26,<2.0", "pandas>=2.2,<3.0", "PyYAML>=6.0",
-     "scipy>=1.13,<2.0", "opencv-python-headless>=4.9,<5.0"]
-)
+# Kaggle sessions are ephemeral — mirror notebook 01's install stack EXACTLY
+# per ADR-002 addendum 1 (mlflow<3.0 keeps protobuf<5 which flwr==1.21.0
+# requires). Previous version pinned mlflow==3.4.0 + numpy<2 and broke
+# flwr + Ultralytics respectively.
+subprocess.check_call([
+    sys.executable, "-m", "pip", "uninstall", "-q", "-y",
+    "tensorflow", "tensorflow-cpu", "keras", "tf-keras",
+])
+TORCH_INDEX = "https://download.pytorch.org/whl/cu128"
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "-q",
+    "torch==2.7.1", "torchvision==0.22.0",
+    "--index-url", TORCH_INDEX,
+])
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "-q",
+    "ultralytics==8.3.253",
+    "flwr==1.21.0",
+    "mlflow>=2.0,<3.0",       # ADR-002-A1
+    "protobuf>=3.20,<5.0",
+    "pandas>=2.2,<3.0",
+    "PyYAML>=6.0",
+    "scipy>=1.13,<2.0",
+    "opencv-python-headless>=4.9,<5.0",
+])
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "-q",
+    "--no-deps", "-e", str(REPO_ROOT),
+])
 
 import torch
 assert torch.cuda.is_available(), "CUDA required."
@@ -57,7 +75,8 @@ print(f"GPU: {torch.cuda.get_device_name(0)}")
 # ## Cell 2 — Paths + restore YOLO dataset
 
 # %%
-BDD100K_RAW = Path("/kaggle/input/bdd100k")
+# Kaggle private-dataset mount path — kept in sync with notebook 01/02 + docs/KAGGLE_SETUP.md
+BDD100K_RAW = Path("/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle")
 WORK = Path("/kaggle/working")
 YOLO_ROOT = WORK / "data" / "bdd100k_yolo"
 PARTITIONS_DIR = WORK / "data" / "partitions"
@@ -139,12 +158,15 @@ def run_one(scenario_name: str, manifest_path: Path, data_yaml_dir: Path, seed: 
     ]
     print(f"\n[{scenario_name} seed={seed}] {' '.join(cmd[-8:])}")
     subprocess.check_call(cmd)
-    # Latest run dir
-    runs = sorted(
-        (ARTIFACTS_DIR / "runs").glob(f"G3-FedAvg_feasibility_seed{seed}_*"),
-        key=lambda p: p.stat().st_mtime,
-    )
-    return runs[-1] if runs else None
+    # Deterministic run id since ADR-007: compute the directory instead of
+    # picking the newest match by mtime. Arm name "FedAvg" is the run prefix.
+    import yaml as _yaml
+
+    from src.experiments.runner import default_run_id
+
+    pid = (_yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {})["partition_id"]
+    run_dir = ARTIFACTS_DIR / "runs" / default_run_id("FedAvg", "feasibility", seed, pid)
+    return run_dir if run_dir.exists() else None
 
 results: dict[str, dict[int, Path]] = {"S1": {}, "S1-Control": {}}
 for seed in SEEDS:
@@ -243,42 +265,49 @@ summary.to_csv(G4_RESULTS_DIR / "delta_ap_summary.csv", index=False)
 print(f"\n✅ Saved to {G4_RESULTS_DIR}")
 
 # %% [markdown]
-# ## Cell 6 — Parameter evidence STUB (`[NEEDS-VERIFICATION]`)
+# ## Cell 6 — Parameter + prediction evidence: F3 matched pair (`scripts/run_f3.py`)
 #
-# **CLAUDE.md §8 F3** requires tracking Δθ = θ_local - θ_global by module
-# (backbone / neck / classification branch / regression branch / validated
-# class-associated group) with L2 norm + cosine similarity + confidence + FP/FN.
+# **CLAUDE.md §8 F3**: from ONE global checkpoint, train locally on
+# S1b C0 (zero bus) vs its S1-Control-Matched twin (same images except the
+# swaps that add bus) for 3 seeds; record Δθ by module, the 6-key class head
+# and each class row (signed Δbias), plus per-class ΔAP / FP / FN.
 #
-# **The current codebase does NOT instrument this.** `run_fl_experiment.py`
-# does not save initial θ_global or per-client Δθ. Adding this requires:
+# **Global checkpoint must already detect bus** — set `G2_WEIGHTS` to the G2
+# centralized `best.pt` (or an FL `global_round_XXX.npz`). Raw `yolov8n.pt` is
+# not valid: at nc=4 the whole cv3 branch is re-initialised (F1 runtime,
+# 2026-10-02), so there is nothing to forget. The run records
+# `target_known_before` and warns if the start model has zero bus AP.
 #
-# 1. Server-side hook in `src/federated/server.py` to save initial parameters
-#    at round 0 as `initial_params.npz`
-# 2. Client-side hook in `YOLOFlowerClient.fit()` to save `params_local_C{i}.npz`
-#    after local training but before returning
-# 3. Post-run analysis script computing per-module L2 / cosine using
-#    `src.model.parameter_map.build_parameter_map()` to group params
+# Pass/fail is NOT decided here: apply the pre-registered rule in
+# `research/feasibility/F3/README.md` to `summary.yaml` across seeds.
 #
-# Without this, G4 CANNOT be claimed passed (§8: parameter + prediction evidence).
-# See: ADR-003 (planned) for F3 instrumentation contract.
+# Note: Cells 3–5 above still use the old unmatched `s1_control_seed42`; their
+# ΔAP is an observation, not a causal Missing-Class result (CLAUDE.md §10).
 
 # %%
-print("=" * 70)
-print("[NEEDS-VERIFICATION] G4 parameter evidence — INCOMPLETE")
-print("=" * 70)
-print("""
-Parameter/update analysis (Δθ by module) required by CLAUDE.md §8 is NOT
-implemented in the current codebase. This notebook produces prediction
-evidence (per-class ΔAP) only.
+G2_WEIGHTS = WORK / "g2" / "best.pt"   # ← set to the real G2 checkpoint
+F3_OUT = WORK / "flops_export" / "F3"
 
-G4 gate status: still 'in_progress' — parameter evidence pending.
+for cfg in ("s1b_bus_seed42", "s1_control_matched_seed42"):   # matched needs s1b first
+    subprocess.check_call([
+        sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
+        "--partition-config", str(REPO_ROOT / "configs" / "partition" / f"{cfg}.yaml"),
+        "--yolo-root", str(YOLO_ROOT),
+        "--output-dir", str(PARTITIONS_DIR),
+    ], cwd=REPO_ROOT)
 
-To complete G4:
-  1. Write ADR-003 specifying F3 instrumentation contract
-  2. Add hooks to server.py + YOLOFlowerClient.fit()
-  3. Re-run this notebook or a follow-up notebook 03b
-  4. Compare parameter drift patterns between S1 and S1-Control
-""")
+if not G2_WEIGHTS.exists():
+    print(f"[SKIP] {G2_WEIGHTS} not found — run notebook 02 (G2) first. G4 stays in_progress.")
+else:
+    subprocess.check_call([
+        sys.executable, str(REPO_ROOT / "scripts" / "run_f3.py"),
+        "--f3-config", str(REPO_ROOT / "configs" / "feasibility" / "f3_matched_bus.yaml"),
+        "--partition-dir", str(PARTITIONS_DIR),
+        "--global-weights", str(G2_WEIGHTS),
+        "--eval-data-yaml", str(DATA_YAML),
+        "--output-dir", str(F3_OUT),
+    ], cwd=REPO_ROOT)
+    print("F3 artifacts:", sorted(str(p) for p in F3_OUT.rglob("summary.yaml")))
 
 # %% [markdown]
 # ## Cell 7 — Register runs in experiment registry
