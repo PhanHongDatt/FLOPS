@@ -121,3 +121,60 @@ def test_target_classes_still_the_contract():
     change. Fail loudly so downstream analyses aren't silently invalidated.
     """
     assert TARGET_CLASSES == ("car", "bus", "truck", "motorcycle")
+
+
+# ── Local-training val stub ──────────────────────────────────────────────────
+# Ultralytics validates on the final epoch even with val=False and then runs
+# final_eval — two passes over the GLOBAL val set per client per round. The
+# returned weights come from the fp32 EMA snapshot, not best.pt, so the val
+# set has no effect on them and can be a few training images.
+
+def _write_dataset_yaml(root: Path, train_value: str) -> Path:
+    import yaml
+    data_yaml = root / "data_C0.yaml"
+    data_yaml.write_text(yaml.safe_dump({
+        "path": str(root), "train": train_value, "val": "images/val",
+        "nc": 4, "names": list(TARGET_CLASSES),
+    }))
+    return data_yaml
+
+
+def test_val_stub_from_image_list(tmp_path):
+    import yaml
+    from src.model.yolo_wrapper import val_stub_data_yaml
+
+    imgs = [str(tmp_path / "images" / "train" / f"{i}.jpg") for i in range(20)]
+    (tmp_path / "C0_train.txt").write_text("\n".join(imgs) + "\n")
+    src = _write_dataset_yaml(tmp_path, str(tmp_path / "C0_train.txt"))
+
+    out = val_stub_data_yaml(src, tmp_path / "run", n_images=8)
+    data = yaml.safe_load(out.read_text())
+    stub = Path(data["val"]).read_text().split()
+    assert stub == imgs[:8]
+    assert {k: data[k] for k in ("path", "train", "nc", "names")} == \
+        {k: yaml.safe_load(src.read_text())[k] for k in ("path", "train", "nc", "names")}
+    assert yaml.safe_load(src.read_text())["val"] == "images/val"  # source untouched
+
+
+def test_val_stub_from_image_directory(tmp_path):
+    import yaml
+    from src.model.yolo_wrapper import val_stub_data_yaml
+
+    img_dir = tmp_path / "images" / "train"
+    img_dir.mkdir(parents=True)
+    for name in ("b.jpg", "a.png", "c.jpg", "notes.txt"):
+        (img_dir / name).write_bytes(b"")
+    src = _write_dataset_yaml(tmp_path, "images/train")  # relative to `path`
+
+    data = yaml.safe_load(val_stub_data_yaml(src, tmp_path / "run", n_images=2).read_text())
+    stub = Path(data["val"]).read_text().split()
+    assert stub == [str(img_dir / "a.png"), str(img_dir / "b.jpg")]
+
+
+def test_val_stub_rejects_empty_train(tmp_path):
+    from src.model.yolo_wrapper import val_stub_data_yaml
+
+    (tmp_path / "empty.txt").write_text("")
+    src = _write_dataset_yaml(tmp_path, str(tmp_path / "empty.txt"))
+    with pytest.raises(ValueError, match="no training images"):
+        val_stub_data_yaml(src, tmp_path / "run", n_images=8)

@@ -175,3 +175,16 @@ def test_weights_survive_in_place_half_of_ema_during_final_val(tmp_path):
     )
     w = model.model.state_dict()["model.0.conv.weight"]
     assert not (w == w.half().float()).all(), "weights are fp16-rounded"
+
+
+@pytest.mark.slow
+def test_local_training_validates_on_stub_not_global_val(tmp_path):
+    data_yaml = _tiny_dataset(tmp_path / "ds")
+    model = build_model(SOURCE)
+    train_one_round(
+        model, data_yaml, epochs=1, batch=2, img_size=64, lr0=0.01, device="cpu",
+        project=tmp_path / "runs", name="c0", workers=0, val_stub_images=2,
+    )
+    val = Path(model.trainer.data["val"])
+    assert val.name == "val_stub.txt"
+    assert len(val.read_text().split()) == 2

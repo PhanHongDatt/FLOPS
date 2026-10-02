@@ -41,6 +41,14 @@ and reproduced):
    snapshot was captured (no silent fallback).
 3. `evaluate()` validates a deep copy of `model.model` and restores the original, so callers
    keep an unfused model.
+4. (2026-10-02, follows from 2) With `run_val=False`, local training validates on a stub of
+   the first 8 training images (`val_stub_data_yaml`) instead of the global val set.
+   Ultralytics validates on the final epoch regardless of `val=False` and then runs
+   `final_eval`, i.e. two global-val passes per client per round. Because the returned
+   weights are the EMA snapshot, validation no longer influences them, so the stub changes
+   no result and removes that compute. Reported metrics come only from `evaluate()`.
+   Applies to G2 `train_centralized.py` too (its reported metrics already come from
+   `evaluate()` on the global val set).
 
 ## Evidence
 

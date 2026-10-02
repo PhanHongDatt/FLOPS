@@ -101,6 +101,7 @@ def train_one_round(
     deterministic: bool = True,
     nbs: int | None = None,
     extra_overrides: dict[str, Any] | None = None,
+    val_stub_images: int = 8,
 ) -> dict[str, float]:
     """One round of local training.
 
@@ -126,6 +127,8 @@ def train_one_round(
     ``nbs`` (nominal batch size) enables gradient accumulation so a small
     ``batch`` can keep the canonical effective batch on a low-VRAM GPU.
     """
+    if not run_val:
+        data_yaml = val_stub_data_yaml(data_yaml, Path(project) / name, n_images=val_stub_images)
     overrides: dict[str, Any] = dict(
         data=str(data_yaml),
         epochs=epochs,
@@ -178,6 +181,46 @@ def train_one_round(
             except (TypeError, ValueError):
                 continue
     return metrics
+
+
+_IMG_SUFFIXES = {".bmp", ".dng", ".jpeg", ".jpg", ".mpo", ".png", ".tif", ".tiff", ".webp", ".pfm"}
+
+
+def _train_images(data: dict[str, Any], data_yaml: Path) -> list[str]:
+    """Image paths of the ``train`` entry: an image-list .txt or an image directory."""
+    root = Path(data.get("path") or data_yaml.parent)
+    train = Path(data["train"])
+    train = train if train.is_absolute() else root / train
+    if train.is_dir():
+        return [str(p) for p in sorted(train.iterdir()) if p.suffix.lower() in _IMG_SUFFIXES]
+    lines = [ln.strip() for ln in train.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    return [ln if Path(ln).is_absolute() else str(train.parent / ln) for ln in lines]
+
+
+def val_stub_data_yaml(data_yaml: Path, out_dir: Path, n_images: int = 8) -> Path:
+    """Copy of ``data_yaml`` whose ``val`` is the first ``n_images`` training images.
+
+    Ultralytics validates on the final epoch even with ``val=False`` and then
+    runs ``final_eval`` [YOLO-DOC: ultralytics 8.3.253 engine/trainer.py] —
+    two passes over the GLOBAL val set per client per round. The weights
+    train_one_round returns are the fp32 EMA snapshot, independent of that
+    validation, so a tiny stub costs nothing scientifically. Reported metrics
+    always come from ``evaluate()`` on the real val set.
+    """
+    import yaml
+
+    data_yaml = Path(data_yaml)
+    data = yaml.safe_load(data_yaml.read_text(encoding="utf-8"))
+    images = _train_images(data, data_yaml)[:n_images]
+    if not images:
+        raise ValueError(f"{data_yaml}: no training images found for the val stub")
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stub = out_dir / "val_stub.txt"
+    stub.write_text("\n".join(images) + "\n", encoding="utf-8")
+    out = out_dir / f"{data_yaml.stem}_valstub.yaml"
+    out.write_text(yaml.safe_dump({**data, "val": str(stub.resolve())}), encoding="utf-8")
+    return out
 
 
 def _load_fp32_ema(model: "YOLO", snapshot: dict[str, Any]) -> None:
