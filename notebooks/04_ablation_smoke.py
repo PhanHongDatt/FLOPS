@@ -41,6 +41,7 @@ if str(REPO_ROOT) not in sys.path:
 subprocess.check_call([
     sys.executable, "-m", "pip", "uninstall", "-q", "-y",
     "tensorflow", "tensorflow-cpu", "keras", "tf-keras",
+    "torchaudio",  # Kaggle ships 2.10 built for torch 2.10; unused here, would mismatch 2.7.1
 ])
 subprocess.check_call([
     sys.executable, "-m", "pip", "install", "-q",

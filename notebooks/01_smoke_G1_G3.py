@@ -37,6 +37,7 @@ import sys
 subprocess.check_call([
     sys.executable, "-m", "pip", "uninstall", "-q", "-y",
     "tensorflow", "tensorflow-cpu", "keras", "tf-keras",
+    "torchaudio",  # Kaggle ships 2.10 built for torch 2.10; unused here, would mismatch 2.7.1
 ])
 
 TORCH_INDEX = "https://download.pytorch.org/whl/cu128"
@@ -78,6 +79,11 @@ subprocess.check_call([
     sys.executable, "-m", "pip", "install", "-q",
     "--no-deps", "-e", REPO_ROOT_SETUP,
 ])
+# The editable install's .pth hook only applies to NEW interpreters (the
+# subprocess-run scripts). This kernel is already running, so add the repo
+# to sys.path for the imports below.
+if REPO_ROOT_SETUP not in sys.path:
+    sys.path.insert(0, REPO_ROOT_SETUP)
 
 # Verify: imports work + environment not broken
 import importlib

@@ -43,6 +43,7 @@ if not (REPO_ROOT / "environment.lock").exists() or (REPO_ROOT / "environment.lo
 subprocess.check_call([
     sys.executable, "-m", "pip", "uninstall", "-q", "-y",
     "tensorflow", "tensorflow-cpu", "keras", "tf-keras",
+    "torchaudio",  # Kaggle ships 2.10 built for torch 2.10; unused here, would mismatch 2.7.1
 ])
 TORCH_INDEX = "https://download.pytorch.org/whl/cu128"
 subprocess.check_call([
