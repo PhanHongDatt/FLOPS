@@ -114,8 +114,9 @@ import mlflow
 EXPECTED = {
     "ultralytics": "8.3.253",
     "flwr": "1.21.0",
-    "mlflow": "3.4.0",
 }
+# mlflow is a range, not a pin: ADR-002-A1 superseded ADR-001's 3.4.0 with <3.0
+# (protobuf<5 for flwr 1.21.0); the old exact check always warned.
 actual = {
     "ultralytics": ultralytics.__version__,
     "flwr": flwr.__version__,
@@ -140,6 +141,9 @@ warnings = []
 for pkg, expected in EXPECTED.items():
     if actual[pkg] != expected:
         warnings.append(f"  {pkg}: expected {expected}, got {actual[pkg]}")
+
+if not mlflow.__version__ < "3.0":
+    warnings.append(f"  mlflow: expected <3.0 (ADR-002-A1), got {mlflow.__version__}")
 
 if warnings:
     print("\n⚠️  Version mismatch vs ADR-001:")

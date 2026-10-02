@@ -94,42 +94,41 @@ DATA_YAML = YOLO_ROOT / "data.yaml"
 print(f"DATA_YAML: {DATA_YAML}")
 
 # %% [markdown]
-# ## Cell 3 — Generate S1 + S1-Control partitions
+# ## Cell 3 — Generate S1b + matched S1-Control partitions (comparison C1)
 #
-# Use existing configs. S1 has C0 missing motorcycle, C1 missing truck.
-# S1-Control uses matched IID split (no forced exclusions per §10).
+# S1b (`configs/partition/s1b_bus_seed42.yaml`): C0, C1 have zero bus; C2 zero
+# truck; C3 all classes. S1-Control-Matched is built FROM S1b (same image count
+# per client, non-target box vector matched, bus present) — generate S1b first.
+# Replaces the old s1_missing_class / s1_control pair, whose "control" was a
+# plain IID split (CLAUDE.md §10). Same partitions as configs/sweeps/c1_h1_missing_class.yaml.
 
 # %%
-for cfg_name in ("s1_missing_class.yaml", "s1_control.yaml"):
-    cfg_path = REPO_ROOT / "configs" / "partition" / cfg_name
+for cfg_name in ("s1b_bus_seed42.yaml", "s1_control_matched_seed42.yaml"):
     subprocess.check_call([
         sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
-        "--partition-config", str(cfg_path),
+        "--partition-config", str(REPO_ROOT / "configs" / "partition" / cfg_name),
         "--yolo-root", str(YOLO_ROOT),
         "--output-dir", str(PARTITIONS_DIR),
     ])
 
-S1_DIR = PARTITIONS_DIR / "s1_mc_seed42"
-S1C_DIR = PARTITIONS_DIR / "s1_control_seed42"
+S1_DIR = PARTITIONS_DIR / "s1b_bus_seed42"
+S1C_DIR = PARTITIONS_DIR / "s1_control_matched_seed42"
 S1_MANIFEST = S1_DIR / "manifest.yaml"
 S1C_MANIFEST = S1C_DIR / "manifest.yaml"
+MISSING_IN_S1 = ("bus", "truck")   # bus: C0, C1 (primary target); truck: C2
 
-# Sanity-check S1 truly has zero motorcycle for C0, zero truck for C1 (§18)
+# Sanity checks (§18): the vacant classes really have zero boxes
 import yaml
-with S1_MANIFEST.open() as f:
-    s1 = yaml.safe_load(f)
-assert s1["class_counts"]["C0"]["motorcycle"] == 0, \
-    f"S1 C0 motorcycle should be 0, got {s1['class_counts']['C0']['motorcycle']}"
-assert s1["class_counts"]["C1"]["truck"] == 0, \
-    f"S1 C1 truck should be 0, got {s1['class_counts']['C1']['truck']}"
-print("✅ S1 partition passes missing-class sanity checks (§18)")
+s1 = yaml.safe_load(S1_MANIFEST.read_text())
+for cid, cls in (("C0", "bus"), ("C1", "bus"), ("C2", "truck")):
+    assert s1["class_counts"][cid][cls] == 0, f"S1b {cid} {cls} should be 0"
+print("✅ S1b passes missing-class sanity checks (§18)")
 
-with S1C_MANIFEST.open() as f:
-    s1c = yaml.safe_load(f)
-# S1-Control should NOT have systemic missing classes (matched control)
-for cid, missing in s1c["missing_classes"].items():
-    if missing:
-        print(f"  ⚠️  S1-Control {cid} accidentally missing {missing} — check partition size")
+report = yaml.safe_load((S1C_DIR / "match_report.yaml").read_text())
+print(f"S1-Control-Matched matched = {report.get('matched')}")
+if not report.get("matched"):
+    print("  ⚠️  Control NOT fully matched — publish match_report.yaml with any result; "
+          "ΔAP is an observation, not a causal Missing-Class effect (§10).")
 
 # %% [markdown]
 # ## Cell 4 — Multi-seed FedAvg loop (S1 + S1-Control × 3 seeds)
@@ -155,6 +154,9 @@ def run_one(scenario_name: str, manifest_path: Path, data_yaml_dir: Path, seed: 
         "--mlflow-uri", MLFLOW_URI,
         "--mlflow-experiment", f"G4-FedAvg-{scenario_name}",
         "--global-data-yaml", str(DATA_YAML),
+        # safe on a fresh run (starts at round 1) and on a finished one (no-op);
+        # re-running this cell after an interruption continues from the last round
+        "--resume",
     ]
     print(f"\n[{scenario_name} seed={seed}] {' '.join(cmd[-8:])}")
     subprocess.check_call(cmd)
@@ -168,12 +170,18 @@ def run_one(scenario_name: str, manifest_path: Path, data_yaml_dir: Path, seed: 
     run_dir = ARTIFACTS_DIR / "runs" / default_run_id("FedAvg", "feasibility", seed, pid)
     return run_dir if run_dir.exists() else None
 
-results: dict[str, dict[int, Path]] = {"S1": {}, "S1-Control": {}}
-for seed in SEEDS:
-    results["S1"][seed] = run_one("S1", S1_MANIFEST, S1_DIR, seed)
-    results["S1-Control"][seed] = run_one("S1-Control", S1C_MANIFEST, S1C_DIR, seed)
+# C1 = 6 FL runs (several GPU hours). Set False in the F2/F3 session and run C1
+# in its own session(s); SEEDS can be split across sessions (e.g. [42] then [123, 2024]).
+RUN_C1 = True
 
-print("\n✅ All 6 runs (2 scenarios × 3 seeds) complete.")
+results: dict[str, dict[int, Path]] = {"S1": {}, "S1-Control": {}}
+if RUN_C1:
+    for seed in SEEDS:
+        results["S1"][seed] = run_one("S1", S1_MANIFEST, S1_DIR, seed)
+        results["S1-Control"][seed] = run_one("S1-Control", S1C_MANIFEST, S1C_DIR, seed)
+    print(f"\n✅ C1 runs complete: 2 scenarios × {len(SEEDS)} seeds.")
+else:
+    print("[SKIP] RUN_C1 = False — C1 FedAvg runs not executed in this session.")
 
 # %% [markdown]
 # ## Cell 5 — Per-class AP aggregation across seeds
@@ -227,7 +235,7 @@ for scenario, seed_runs in results.items():
         m = read_metrics(run_dir)
         rows.append({"scenario": scenario, "seed": seed, **m})
 
-df = pd.DataFrame(rows)
+df = pd.DataFrame(rows) if rows else pd.DataFrame(columns=["scenario", "seed"])
 print("\nRaw per-run metrics:")
 print(df.to_string())
 
@@ -251,7 +259,7 @@ for cls in TARGET_CLASSES:
         "S1_mean": s1_vals.mean(), "S1_std": s1_vals.std(),
         "S1C_mean": s1c_vals.mean(), "S1C_std": s1c_vals.std(),
         "ΔAP": delta, "ΔAP_std_est": delta_std,
-        "is_missing_in_S1": cls in ("motorcycle", "truck"),
+        "is_missing_in_S1": cls in MISSING_IN_S1,
     })
 
 summary = pd.DataFrame(summary_rows)
@@ -273,7 +281,26 @@ print(f"\n✅ Saved to {G4_RESULTS_DIR}")
 # Pass/fail: pre-registered rule in `research/feasibility/F2/README.md`.
 
 # %%
-G2_WEIGHTS = WORK / "g2" / "best.pt"   # ← set to the real G2 checkpoint (also used by Cell 6)
+def find_g2_weights() -> Path:
+    """G2 checkpoint from this session (notebook 02) or an attached output dataset.
+
+    train_centralized.py writes it to
+    artifacts/runs/G2-centralized_<run_class>_seed42_centralized/checkpoint/train/weights/best.pt;
+    notebook 02 Cell 7 exports that run as flops_export/baseline_*/G2/.
+    """
+    patterns = [
+        (ARTIFACTS_DIR / "runs", "G2-centralized_*/checkpoint/train/weights/best.pt"),
+        (WORK / "flops_export", "baseline_*/G2/checkpoint/train/weights/best.pt"),
+        (Path("/kaggle/input"), "**/G2/checkpoint/train/weights/best.pt"),
+    ]
+    for root, pattern in patterns:
+        hits = sorted(root.glob(pattern), key=lambda p: p.stat().st_mtime) if root.exists() else []
+        if hits:
+            return hits[-1]
+    return WORK / "g2" / "best.pt"   # placeholder → cells below print [SKIP]
+
+G2_WEIGHTS = find_g2_weights()   # override manually if needed (also used by Cell 6)
+print("G2_WEIGHTS:", G2_WEIGHTS, "(exists)" if G2_WEIGHTS.exists() else "(NOT FOUND)")
 F2_OUT = WORK / "flops_export" / "F2"
 
 if not G2_WEIGHTS.exists():
@@ -304,9 +331,7 @@ else:
 #
 # Pass/fail is NOT decided here: apply the pre-registered rule in
 # `research/feasibility/F3/README.md` to `summary.yaml` across seeds.
-#
-# Note: Cells 3–5 above still use the old unmatched `s1_control_seed42`; their
-# ΔAP is an observation, not a causal Missing-Class result (CLAUDE.md §10).
+
 
 # %%
 F3_OUT = WORK / "flops_export" / "F3"
@@ -353,7 +378,7 @@ for scenario, seed_runs in results.items():
     for seed, run_dir in seed_runs.items():
         if run_dir is None:
             continue
-        pid = "s1_mc_seed42" if scenario == "S1" else "s1_control_seed42"
+        pid = "s1b_bus_seed42" if scenario == "S1" else "s1_control_matched_seed42"
         new_entries.append({
             "id": f"EXP-Kaggle-G4-FedAvg-{scenario}-seed{seed}-{ts}",
             "gate": "G4-partial",  # partial: prediction evidence only
@@ -408,7 +433,7 @@ print(f"✅ Exported to {EXPORT}")
 # **Interpretation guidance (§20 anti-cherry-picking):**
 # - Report *all* seeds, not only best
 # - Report *all* 4 classes, including where S1 ≥ S1-Control (positive or negative)
-# - If ΔAP for motorcycle/truck is not consistently negative across seeds,
+# - If ΔAP for bus (and truck) is not consistently negative across seeds,
 #   H1 is *weakened*, not strengthened by silence
 #
 # **Next steps:**
