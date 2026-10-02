@@ -16,6 +16,7 @@ where = ["."]
 include = ["src*"]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]   # kaggle/output/ holds downloaded repo copies
 markers = [
     "slow: trains a real (tiny) YOLO model on CPU; needs ultralytics",
 ]
