@@ -166,7 +166,9 @@ def run_one(scenario_name: str, manifest_path: Path, data_yaml_dir: Path, seed: 
         "--resume",
     ]
     print(f"\n[{scenario_name} seed={seed}] {' '.join(cmd[-8:])}")
-    subprocess.check_call(cmd)
+    from src.utils.proc import run_logged  # output → file: the notebook stdout pipe can block (s1 v5)
+    run_logged(cmd, WORK / "flops_export" / "logs" / f"c1_{scenario_name}_seed{seed}.log",
+               env={"YOLO_VERBOSE": "False"})
     # Deterministic run id since ADR-007: compute the directory instead of
     # picking the newest match by mtime. Arm name "FedAvg" is the run prefix.
     import yaml as _yaml
@@ -313,13 +315,14 @@ F2_OUT = WORK / "flops_export" / "F2"
 if not G2_WEIGHTS.exists():
     print(f"[SKIP] {G2_WEIGHTS} not found — run notebook 02 (G2) first.")
 else:
-    subprocess.check_call([
+    from src.utils.proc import run_logged
+    run_logged([
         sys.executable, str(REPO_ROOT / "scripts" / "run_f2.py"),
         "--f2-config", str(REPO_ROOT / "configs" / "feasibility" / "f2_perturb_bus.yaml"),
         "--weights", str(G2_WEIGHTS),
         "--eval-data-yaml", str(DATA_YAML),
         "--output-dir", str(F2_OUT),
-    ], cwd=REPO_ROOT)
+    ], WORK / "flops_export" / "logs" / "f2.log", cwd=REPO_ROOT, env={"YOLO_VERBOSE": "False"})
     print("F2 artifacts:", sorted(str(p) for p in F2_OUT.rglob("summary.yaml")))
 
 # %% [markdown]
@@ -354,14 +357,15 @@ for cfg in ("s1b_bus_seed42", "s1_control_matched_seed42"):   # matched needs s1
 if not G2_WEIGHTS.exists():
     print(f"[SKIP] {G2_WEIGHTS} not found — run notebook 02 (G2) first. G4 stays in_progress.")
 else:
-    subprocess.check_call([
+    from src.utils.proc import run_logged
+    run_logged([
         sys.executable, str(REPO_ROOT / "scripts" / "run_f3.py"),
         "--f3-config", str(REPO_ROOT / "configs" / "feasibility" / "f3_matched_bus.yaml"),
         "--partition-dir", str(PARTITIONS_DIR),
         "--global-weights", str(G2_WEIGHTS),
         "--eval-data-yaml", str(DATA_YAML),
         "--output-dir", str(F3_OUT),
-    ], cwd=REPO_ROOT)
+    ], WORK / "flops_export" / "logs" / "f3.log", cwd=REPO_ROOT, env={"YOLO_VERBOSE": "False"})
     print("F3 artifacts:", sorted(str(p) for p in F3_OUT.rglob("summary.yaml")))
 
 # %% [markdown]

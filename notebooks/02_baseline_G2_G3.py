@@ -147,7 +147,8 @@ cmd = [
     "--mlflow-experiment", "G2-centralized",
 ]
 print("Running:", " ".join(cmd))
-subprocess.check_call(cmd)
+from src.utils.proc import run_logged  # output → file: the notebook stdout pipe can block (s1 v5)
+run_logged(cmd, WORK / "flops_export" / "logs" / "g2_centralized.log", env={"YOLO_VERBOSE": "False"})
 print("\n✅ G2 centralized training complete.")
 
 # Find latest G2 run (exp_id="G2-centralized" per train_centralized.py:59)
@@ -186,7 +187,7 @@ cmd = [
     "--global-data-yaml", str(DATA_YAML),
 ]
 print("Running:", " ".join(cmd))
-subprocess.check_call(cmd)
+run_logged(cmd, WORK / "flops_export" / "logs" / "g3_fedavg.log", env={"YOLO_VERBOSE": "False"})
 print("\n✅ G3 FedAvg baseline complete.")
 
 # Run ids are deterministic since ADR-007 (no timestamp), so the directory is
