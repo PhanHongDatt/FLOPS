@@ -40,9 +40,9 @@ import yaml
 from src.data.partitioner import load_partition_manifest
 from src.experiments.runner import prepare_run, finalize_run
 from src.federated.client import YOLOFlowerClient
-# FedProxClient intentionally NOT imported — see _DISABLED_ALGORITHMS below.
 from src.federated.client_variants import (
     FedNovaClient,
+    FedProxClient,
     LossPreservationClient,
     PreservationClient,
     ScaffoldClient,
@@ -76,6 +76,7 @@ _MECHANISM_CLIENTS = {
 
 # Strategy-specific clients used when mechanism == "none".
 _STRATEGY_CLIENTS = {
+    "FedProx": FedProxClient,      # proximal term via gradient hooks (src/federated/proximal.py)
     "SCAFFOLD": ScaffoldClient,
     "FedNova": FedNovaClient,
 }
@@ -96,14 +97,7 @@ _ABLATIONS: dict[str, dict[str, object]] = {
 # reason. Prevents silently producing results that violate CLAUDE.md §22
 # (labeling one algorithm's results as another).
 _DISABLED_ALGORITHMS: dict[str, str] = {
-    "FedProx": (
-        "FedProx is disabled: the proximal term (mu/2) ||w - w_t||^2 is not "
-        "injected into the Ultralytics trainer. FedProxClient.fit() currently "
-        "falls back to FedAvg behaviour (see src/federated/client_variants.py). "
-        "Enabling this CLI path would label FedAvg results as FedProx, "
-        "violating CLAUDE.md §22 anti-cherry-picking. Ship a proximal-term "
-        "integration ADR + implementation before re-enabling."
-    ),
+    # FedProx re-enabled 2026-10-03: proximal term implemented (ADR-010).
 }
 
 
@@ -385,6 +379,7 @@ def main() -> None:
         "client_num_gpus": fed.get("client_num_gpus", 1.0),
         "keep_last_checkpoints": fed.get("keep_last_checkpoints", 2),
         "prune_client_weights": fed.get("prune_client_weights", True),
+        "proximal_mu": fed.get("proximal_mu", 0.01),    # FedProx only (ADR-010)
     }
 
     eval_config = {

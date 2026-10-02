@@ -47,6 +47,9 @@ federated:
   num_clients: 4
   num_rounds: 10
   local_epochs: 1
+  # FedProx mu [LITERATURE] Li et al. 2020 sweep mu in {0.001, 0.01, 0.1, 1}; 0.01 is
+  # the fixed baseline value here (ADR-010). Same value for every FedProx run.
+  proximal_mu: 0.01
   fraction_fit: 1.0
   fraction_evaluate: 1.0
   algorithms:

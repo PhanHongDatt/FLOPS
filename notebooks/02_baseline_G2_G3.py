@@ -204,6 +204,26 @@ if not g3_run.exists():
 print(f"G3 run dir: {g3_run}")
 
 # %% [markdown]
+# ## Cell 4b — FedProx on S0 IID (feasibility, reference baseline)
+#
+# Same partition, seed, rounds and evaluator as FedAvg; only the client objective
+# differs: F_k(w) + (mu/2)||w - w_global||^2, mu = federated.proximal_mu (ADR-010).
+
+# %%
+RUN_FEDPROX = True
+
+g3p_run = None
+if RUN_FEDPROX:
+    cmd_prox = [c if c != "FedAvg" else "FedProx" for c in cmd]
+    cmd_prox[cmd_prox.index("--mlflow-experiment") + 1] = "G3-FedProx-S0"
+    print("Running:", " ".join(cmd_prox))
+    run_logged(cmd_prox, WORK / "flops_export" / "logs" / "g3_fedprox.log", env={"YOLO_VERBOSE": "False"})
+    g3p_run = ARTIFACTS_DIR / "runs" / default_run_id("FedProx", "feasibility", SEED, _pid)
+    if not g3p_run.exists():
+        raise RuntimeError(f"Expected FedProx run dir not found: {g3p_run}")
+    print(f"✅ FedProx run dir: {g3p_run}")
+
+# %% [markdown]
 # ## Cell 5 — Verify §21 artifacts for BOTH runs
 
 # %%
@@ -284,6 +304,20 @@ new_entries = [
     },
 ]
 
+if g3p_run is not None:
+    new_entries.append({
+        "id": f"EXP-Kaggle-G3-FedProx-S0-feasibility-{ts}",
+        "gate": "G3",
+        "scenario": "S0",
+        "method": "FedProx",
+        "run_class": "feasibility",
+        "status": "completed",
+        "seed": SEED,
+        "rounds": G3_ROUNDS,
+        "partition_id": "s0_iid_seed42",
+        "run_dir": str(g3p_run.relative_to(REPO_ROOT)),
+        "notes": "Kaggle T4 feasibility run, single seed. Proximal term per ADR-010.",
+    })
 registry["experiments"].extend(new_entries)
 with REGISTRY.open("w") as f:
     yaml.dump(registry, f, default_flow_style=False, allow_unicode=True)
@@ -300,8 +334,34 @@ EXPORT = WORK / "flops_export" / f"baseline_{ts}"
 EXPORT.mkdir(parents=True, exist_ok=True)
 shutil.copytree(g2_run, EXPORT / "G2", dirs_exist_ok=True)
 shutil.copytree(g3_run, EXPORT / "G3", dirs_exist_ok=True)
+if g3p_run is not None:
+    shutil.copytree(g3p_run, EXPORT / "G3_FedProx", dirs_exist_ok=True)
 shutil.copy2(REGISTRY, EXPORT / "registry.yaml")
 print(f"✅ Exported to {EXPORT}")
+
+# %% [markdown]
+# ## Cell 7b — Baseline comparison (same evaluator, same val set, seed 42)
+#
+# Feasibility scale, single seed: a sanity comparison, not a reportable result
+# (CLAUDE.md §14 requires 3 seeds). All rows come from the same `evaluate()` on the
+# global val set (AP at conf 0.001, FP/FN at 0.25 — ADR-009).
+
+# %%
+import csv as _csv
+import pandas as _pd
+
+def _final_metrics(run_dir):
+    with (run_dir / "metrics.csv").open() as f:
+        return {r["metric"]: float(r["value"]) for r in _csv.DictReader(f)}
+
+_runs = {"Centralized (G2)": g2_run, "FedAvg (G3)": g3_run}
+if g3p_run is not None:
+    _runs["FedProx"] = g3p_run
+_keys = ["mAP50", "mAP50-95"] + [f"AP50_{c}" for c in ("car", "bus", "truck", "motorcycle")]         + [f"FN_{c}" for c in ("car", "bus", "truck", "motorcycle")]
+comparison = _pd.DataFrame({name: {k: _final_metrics(d).get(k) for k in _keys} for name, d in _runs.items()})
+print(comparison.round(4).to_string())
+comparison.to_csv(EXPORT / "baseline_comparison.csv")
+print(f"✅ Saved {EXPORT / 'baseline_comparison.csv'}")
 
 # %% [markdown]
 # ## Cell 8 — Exit summary

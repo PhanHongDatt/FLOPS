@@ -17,6 +17,7 @@ from flwr.server.strategy import FedProx as _FedProx
 
 
 def build_fedprox(
+    num_rounds: int,             # consumed, not forwarded: flwr.FedProx has no such arg
     proximal_mu: float = 0.01,
     fraction_fit: float = 1.0,
     fraction_evaluate: float = 1.0,

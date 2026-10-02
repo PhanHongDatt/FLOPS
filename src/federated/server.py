@@ -290,6 +290,9 @@ def run_fl_server(
         min_available_clients=fl_config["num_clients"],
         on_fit_config_fn=_fit_config,
     )
+    if algorithm == "FedProx":
+        # Flower's FedProx puts proximal_mu into every fit config (configure_fit)
+        strategy_kwargs["proximal_mu"] = float(fl_config.get("proximal_mu", 0.01))
     if initial_params is not None:
         strategy_kwargs["initial_parameters"] = ndarrays_to_parameters(initial_params)
 

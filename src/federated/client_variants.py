@@ -112,27 +112,28 @@ class FedNovaClient(YOLOFlowerClient):
 
 
 class FedProxClient(YOLOFlowerClient):
-    """FedProx-aware client.
+    """FedProx client: local objective F_k(w) + (mu/2)||w - w^t||^2.
 
-    ⚠️  The proximal term (mu/2)||w - w_t||^2 must be added to the loss
-    at every local SGD step. Ultralytics' trainer does not expose a hook
-    for this without patching. Two options:
-      (a) Monkey-patch the trainer's loss function to add proximal term.
-      (b) Use custom training loop bypassing Ultralytics' trainer.
-
-    Until one is chosen and validated, this client falls back to FedAvg
-    behaviour, which means [NEEDS-VERIFICATION] before FedProx results
-    can be reported as scientifically valid.
+    [LITERATURE] Li et al., 2020 (MLSys). ``proximal_mu`` arrives in the fit
+    config from Flower's FedProx strategy (configure_fit). The proximal gradient
+    is added through per-parameter hooks on the Ultralytics trainer's model
+    (src/federated/proximal.py). Previously this class fell back to FedAvg.
     """
+
+    def _train_kwargs(self) -> dict[str, Any]:
+        return {**super()._train_kwargs(), "proximal_mu": self._proximal_mu}
 
     def fit(
         self,
         parameters: NDArrays,
         config: dict[str, Scalar],
     ) -> tuple[NDArrays, int, dict[str, Scalar]]:
-        # TODO: inject proximal term into ultralytics trainer.
-        # See v8_yolo_prox integration ADR (to be written).
-        return super().fit(parameters, config)
+        if "proximal_mu" not in config:
+            raise ValueError("FedProxClient needs 'proximal_mu' in the fit config (FedProx strategy)")
+        self._proximal_mu = float(config["proximal_mu"])
+        params, n, metrics = super().fit(parameters, config)
+        metrics["proximal_mu"] = self._proximal_mu
+        return params, n, metrics
 
 
 class PreservationClient(YOLOFlowerClient):

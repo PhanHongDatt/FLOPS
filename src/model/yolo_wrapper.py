@@ -102,6 +102,7 @@ def train_one_round(
     nbs: int | None = None,
     extra_overrides: dict[str, Any] | None = None,
     val_stub_images: int = 8,
+    proximal_mu: float = 0.0,
 ) -> dict[str, float]:
     """One round of local training.
 
@@ -163,11 +164,21 @@ def train_one_round(
             )
 
     model.add_callback("on_train_epoch_end", _snapshot_final_ema)
+    # FedProx: mu * (w - w_global) added to every gradient (src/federated/proximal.py)
+    from src.federated.proximal import ProximalTerm
+    prox = ProximalTerm(proximal_mu)
+    if prox.active:
+        model.add_callback("on_train_start", prox.on_train_start)
+        model.add_callback("on_train_end", prox.on_train_end)
     try:
         results = model.train(**overrides)
     finally:
         # callbacks live on the YOLO object and would pile up across FL rounds
         model.callbacks["on_train_epoch_end"].remove(_snapshot_final_ema)
+        if prox.active:
+            model.callbacks["on_train_start"].remove(prox.on_train_start)
+            model.callbacks["on_train_end"].remove(prox.on_train_end)
+            prox.on_train_end(None)   # remove hooks even if training raised
     _load_fp32_ema(model, snapshot)
 
     # With val=False, results_dict is empty or partially populated — that is
