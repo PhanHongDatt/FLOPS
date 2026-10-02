@@ -1,309 +1,203 @@
-# Kaggle Setup — FLOPS G1 → G4 Execution Environment
+# Hướng dẫn chạy FLOPS trên Kaggle (G1 → G5 feasibility)
 
-Hướng dẫn từ zero → chạy được `notebooks/01_smoke_G1_G3.py` trên Kaggle.
-Theo **ADR-002** (Kaggle deployment). Áp dụng cho gates G1–G4 only.
-
-**Không dùng Kaggle cho G10 main experiments** (12h session limit không đủ).
-
----
-
-## 0. Prerequisites
-
-- [ ] Tài khoản Kaggle đã verify phone (yêu cầu để bật GPU + Internet)
-- [ ] Tài khoản BDD100K đã đăng ký tại https://bdd-data.berkeley.edu/ (để tải dataset)
-- [ ] Repo FLOPS đã commit các thay đổi mới nhất (locally)
-- [ ] Local disk trống ~10 GB (để giải nén BDD100K trước khi upload)
+> Cập nhật 2026-10-02, khớp với commit hiện tại trên `main`. Áp dụng cho **G1–G5 ở
+> mức smoke/feasibility** (ADR-002). **Không** dùng Kaggle cho main experiment G10
+> (phiên tối đa 12h, quota GPU ~30h/tuần).
 
 ---
 
-## 1. Tải BDD100K (local, ~1 giờ tùy mạng)
+## 0. Tổng quan — 4 phiên Kaggle
 
-Truy cập https://bdd-data.berkeley.edu/portal.html → login → tải 2 file:
+| Phiên | Notebook | Mục tiêu (gate) | Cần mang vào | Mang ra | Thời gian GPU (ước tính) |
+|---|---|---|---|---|---|
+| **1** | `01_smoke_G1_G3.py` | G1 môi trường · F1 trên stack đã pin · kiểm fp32 trên GPU (ADR-008) · smoke FL | dataset BDD100K | `environment.lock`, `F1_runtime_map.yaml`, run smoke | ~0,5–1h |
+| **2** | `02_baseline_G2_G3.py` | G2 centralized · G3 FedAvg S0 | dataset | run G2 (**có checkpoint G2**), run G3 | ~3–5h |
+| **3** | `03_missing_class_G4.py` (Cell 1–3, 5b, 6; `RUN_C1 = False`) | **F2** + **F3** (G5, bằng chứng G4) | dataset + output phiên 2 | `flops_export/F2`, `flops_export/F3` | ~1,5–2,5h |
+| **4** | `03_missing_class_G4.py` (Cell 1–5, 7–8; `RUN_C1 = True`) | **C1**: S1b vs S1-Control-Matched, 3 seed (bằng chứng dự đoán G4) | dataset | 6 run FL + bảng ΔAP | ~6–9h → **chia 2 phiên** theo seed |
 
-| File | Size | Mô tả |
+Thời gian là ước tính cho GPU T4 và chưa được đo (`[RESOURCE-BUDGET-UNRESOLVED]`).
+Phiên 2 sẽ đo `t_epoch`/`t_eval` thật. **Ghi lại thời gian thực tế của từng phiên** vào
+`research/plan/plan.md` §7.4 trước khi lên kế hoạch các phiên sau.
+
+### Việc phải chốt trước khi chạy
+
+| Trước phiên | Việc | Ở đâu |
 |---|---|---|
-| `bdd100k_images_100k.zip` | ~5.3 GB | 100k ảnh (train 70k + val 10k + test 20k) |
-| `bdd100k_det_20_labels_trainval.zip` | ~55 MB | Detection labels JSON |
-
-Giải nén giữ đúng structure (quan trọng — `scripts/prepare_bdd100k.py` expect đúng path này):
-
-```
-bdd100k/
-├── images/
-│   └── 100k/
-│       ├── train/*.jpg
-│       ├── val/*.jpg
-│       └── test/*.jpg   ← có thể xóa để tiết kiệm dung lượng, không dùng
-└── labels/
-    └── det_20/
-        ├── det_train.json
-        └── det_val.json
-```
-
-**Optional — giảm dung lượng upload:**
-```powershell
-# Xóa test images (không dùng cho G1-G4)
-Remove-Item -Recurse -Force bdd100k/images/100k/test
-```
-
-Sau khi xóa test: dataset còn ~4.5 GB.
+| 2 | Xem lại `warmup_epochs=0` / `close_mosaic=0` của G2 centralized (100 epoch dùng chung giá trị đặt cho round FL 1 epoch; mặc định của Ultralytics là 3 / 10). Đổi thì cần ADR. | `scripts/train_centralized.py`, `configs/base_config.yaml` |
+| 3 | **Chốt `τ_AP`** (đề xuất 0.01) cho luật quyết định F2/F3. Phải chốt **trước khi xem** bất kỳ output thật nào (CLAUDE.md §8). | `research/feasibility/F2/README.md`, `F3/README.md` |
+| 3 | Duyệt ADR-008 (trọng số client: EMA fp32) | `research/decisions/ADR-008-*.md` |
 
 ---
 
-## 2. Upload BDD100K lên Kaggle Dataset (private, ~30–60 phút)
+## 1. Chuẩn bị một lần
 
-**Option A — Kaggle UI (khuyến nghị):**
+### 1.1 Dataset BDD100K → Kaggle Dataset (private)
 
-1. Vào https://www.kaggle.com/datasets → **New Dataset**
-1. Vào **https://www.kaggle.com/datasets** → **New Dataset**
-2. Title: `bdd100k-flops` | Visibility: **Private**
-3. Kéo thả **toàn bộ folder** `D:\FLOPS\bdd100k_kaggle\` vào drop zone
-4. Chờ upload xong (~30–60 phút cho ~4.5 GB tùy mạng)
-5. Click **Create**
-6. Lưu lại slug dạng `<username>/bdd100k-flops` (dùng ở Step 4)
-
-Sau khi upload, dataset sẽ mount trên Kaggle tại:
-```
-/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle/
-├── images/100k/train/
-├── images/100k/val/
-└── labels/det_20/det_train.json
-```
-
-> **Lưu ý**: Private datasets mount theo path dạng
-> `/kaggle/input/datasets/<owner>/<slug>/<folder>/` — khác với public datasets
-> (dạng `/kaggle/input/<slug>/`).
-
----
-
-## 3. Upload FLOPS repo lên Kaggle
-
-### Option A — GitHub private repo (khuyến nghị)
-
-1. Push repo lên GitHub private:
-   ```powershell
-   git remote add origin git@github.com:<user>/FLOPS.git
-   git push -u origin main
+1. Tải từ https://bdd-data.berkeley.edu/portal.html:
+   - `bdd100k_images_100k.zip` (~5,3 GB)
+   - `bdd100k_det_20_labels_trainval.zip` (~55 MB)
+2. Giải nén, **giữ đúng cấu trúc** (có thể xóa `test/` để giảm còn ~4,5 GB):
    ```
-2. Tạo GitHub Personal Access Token với scope `repo`
-   (Settings → Developer settings → Personal access tokens)
-3. Trong Kaggle notebook clone bằng:
+   bdd100k_kaggle/
+   ├── images/100k/{train,val}/*.jpg
+   └── labels/det_20/{det_train.json, det_val.json}
+   ```
+3. Kaggle → **Datasets → New Dataset**, title `bdd100k-flops`, **Private**, kéo thả thư mục `bdd100k_kaggle/`.
+4. Các notebook mặc định đọc dataset tại:
+   ```
+   /kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle
+   ```
+   Nếu owner/slug của bạn khác, sửa biến `BDD100K_RAW` ở Cell 3 (notebook 01) và Cell 2 (notebook 02, 03).
+
+### 1.2 Code
+
+Repo `https://github.com/PhanHongDatt/FLOPS` đang **public**, nên Kaggle clone thẳng được, không cần token.
+Trước mỗi phiên, kiểm tra trên máy local rằng mọi thay đổi đã được push (`git status` sạch, `git log origin/main` chứa commit mới nhất).
+
+### 1.3 Đưa notebook lên Kaggle
+
+Các notebook trong repo ở dạng script `# %%` (mỗi khối `# %%` là một cell). Có hai cách:
+
+- **Cách A (khuyến nghị): chuyển sang `.ipynb` rồi import**
+  ```powershell
+  pip install jupytext
+  jupytext --to ipynb notebooks/01_smoke_G1_G3.py notebooks/02_baseline_G2_G3.py notebooks/03_missing_class_G4.py
+  ```
+  Kaggle → **Code → New Notebook → File → Import Notebook** → chọn file `.ipynb`.
+  Các file `.ipynb` sinh ra này không cần commit.
+- **Cách B:** tạo notebook trống rồi dán từng khối `# %%` vào từng cell.
+
+---
+
+## 2. Quy trình chung cho mỗi phiên
+
+1. **Settings** (panel phải): Accelerator **GPU T4 x2** (hoặc P100) · Internet **On** · Persistence **No**.
+2. **Add Data**: `bdd100k-flops`. Từ phiên 3 trở đi, thêm **output của phiên trước**: Add Data → *Your Work* → chọn notebook → version đã lưu.
+   Output sẽ được mount dưới `/kaggle/input/<tên-notebook>/...`.
+3. **Cell 0 (thêm vào đầu mọi notebook)**: clone repo.
    ```python
-   import subprocess
-   subprocess.check_call([
-       "git", "clone",
-       "https://<TOKEN>@github.com/<user>/FLOPS.git",
-       "/kaggle/working/FLOPS"
-   ])
+   import subprocess, pathlib
+   if not pathlib.Path("/kaggle/working/FLOPS").exists():
+       subprocess.check_call(["git", "clone", "--depth", "1",
+                              "https://github.com/PhanHongDatt/FLOPS.git", "/kaggle/working/FLOPS"])
+   print(subprocess.check_output(["git", "-C", "/kaggle/working/FLOPS", "log", "--oneline", "-1"], text=True))
    ```
-
-### Option B — Upload as Kaggle Dataset (không cần GitHub)
-
-1. Zip repo local (bỏ `data/`, `artifacts/`, `.git/`, `bdd100k*/`):
-   ```powershell
-   Compress-Archive `
-     -Path D:\FLOPS\src, D:\FLOPS\scripts, D:\FLOPS\configs, D:\FLOPS\tests, `
-           D:\FLOPS\notebooks, D:\FLOPS\research, `
-           D:\FLOPS\requirements.txt, D:\FLOPS\environment.lock, `
-           D:\FLOPS\CLAUDE.md, D:\FLOPS\README.md `
-     -DestinationPath D:\FLOPS\flops_repo.zip
-   ```
-2. Upload `flops_repo.zip` lên Kaggle Datasets (tương tự Step 2):
-   - Title: `flops-repo` | Visibility: **Private**
-3. Dataset mount tại `/kaggle/input/flops-repo/flops_repo.zip`
+   Ghi lại commit hash được in ra. Hash này cũng nằm trong `environment.json` của mọi run.
+4. Chạy các cell theo thứ tự (Run All, hoặc từng cell với notebook 03).
+5. **Lưu kết quả**: **Save Version → Save & Run All (Commit)**, hoặc **Quick Save** kèm *Save output*.
+   Mọi thứ cần giữ phải nằm trong `/kaggle/working/flops_export/` (các notebook đã tự copy vào đó).
+   `/kaggle/working` **mất hết** khi phiên kết thúc.
 
 ---
 
-## 4. Tạo Kaggle Notebook
+## 3. Phiên 1: notebook 01 (G1, F1, ADR-008, smoke)
 
-1. Vào **https://www.kaggle.com/code** → **New Notebook**
-2. **Settings** (panel bên phải):
-   - Accelerator: **GPU T4 x2** (hoặc P100 nếu có)
-   - Internet: **On** ← bắt buộc (để pip install)
-   - Persistence: **No**
-   - Environment: **Latest**
-3. **Add Data** (icon `+` bên phải):
-   - Search `bdd100k-flops` → **Add**
-   - Nếu Option B: Search `flops-repo` → **Add**
-4. Mount paths:
-   - `/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle/` → BDD100K dataset
-   - `/kaggle/input/flops-repo/` → FLOPS repo (nếu Option B)
-
----
-
-## 5. Cell setup trong Notebook
-
-Paste lần lượt vào các cell đầu tiên **trước** khi copy notebook 01.
-
-### Cell 0A — Setup repo (nếu Option A GitHub)
-
-```python
-import subprocess
-subprocess.check_call([
-    "git", "clone",
-    "https://<TOKEN>@github.com/<user>/FLOPS.git",
-    "/kaggle/working/FLOPS"
-])
-print("Cloned.")
-```
-
-### Cell 0A — Setup repo (nếu Option B dataset)
-
-```python
-import shutil
-from pathlib import Path
-
-src = Path("/kaggle/input/flops-repo")
-dst = Path("/kaggle/working/FLOPS")
-if not dst.exists():
-    shutil.unpack_archive(src / "flops_repo.zip", dst)
-print("Repo ready at", dst)
-```
-
-### Cell 0B — Verify BDD100K mount
-
-```python
-from pathlib import Path
-
-BDD = Path("/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle")
-assert (BDD / "images/100k/train").exists(), f"Missing train images at {BDD}"
-assert (BDD / "labels/det_20/det_train.json").exists(), "Missing det_train.json"
-print("✅ BDD100K mounted correctly")
-print(f"   Dataset path: {BDD}")
-print(f"   train: {sum(1 for _ in (BDD / 'images/100k/train').glob('*.jpg'))} images")
-print(f"   val:   {sum(1 for _ in (BDD / 'images/100k/val').glob('*.jpg'))} images")
-```
-
----
-
-## 6. Chạy notebook 01
-
-Copy nội dung `notebooks/01_smoke_G1_G3.py` vào các cell tiếp theo (mỗi block `# %%` = 1 cell).
-
-**✅ Path đã được cập nhật sẵn trong notebook** — Cell 3 đã có đúng path:
-
-```python
-BDD100K_RAW = Path("/kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle")
-```
-
-Không cần sửa thêm. Chạy **Run All** hoặc từng cell một.
-
-**Thời gian ước tính (T4 GPU):**
-
-| Cell | Nội dung | Thời gian |
+| Cell | Việc | Kết quả mong đợi |
 |---|---|---|
-| 1 | pip install torch + libs | ~5–8 phút |
-| 2 | Environment audit + freeze | ~10 giây |
-| 3 | Path setup | ~1 giây |
-| 4 | prepare_bdd100k.py (70k ảnh → YOLO format) | ~3–5 phút |
-| 5 | generate_partition.py (scan labels) | ~30 giây |
-| 6 | Smoke FL run (2 rounds, 4 clients, 1 epoch, batch 4) | ~10–20 phút |
-| 7 | Verify §21 artifacts | ~1 giây |
-| 8 | Export to /kaggle/working/flops_export | ~30 giây |
-| 9 | Summary | ~1 giây |
+| 1 / 1b | Gỡ TensorFlow; cài torch 2.7.1+cu128, ultralytics 8.3.253, flwr 1.21.0, mlflow<3; `pip install -e` repo | in `✅ Repo installed, environment intact.` |
+| 2 | Audit version + ghi `environment.lock` (pip freeze) | `✅ All pinned versions match ADR-001` (nếu lệch: ghi addendum ADR-002) |
+| 3 | Đường dẫn; kiểm dataset đã mount | không lỗi `BDD100K dataset not mounted` |
+| **3b** | `verify_map.py` + `check_fp32_upload.py --device 0` | `OK: 6 class-head keys, 780 class-specific elements` **và** `OK: trained client weights are fp32` (dòng trước đó có `amp=True`) |
+| 4 | Convert BDD100K → YOLO | `✅ YOLO dataset at /kaggle/working/data/bdd100k_yolo` |
+| 5 | Partition S0 IID | in class counts của 4 client |
+| 6 | Smoke FedAvg (2 round) | `✅ Smoke FL run complete.` Qua được round 1 là xác nhận các bản sửa ADR-008 (nc=4, không fuse) chạy đúng trên GPU |
+| 7 | Kiểm artifact §21 | không thiếu file |
+| 8 | Export → `flops_export/smoke_*` (gồm `environment.lock`, `F1_runtime_map.yaml`) | |
 
-**Tổng: ~20–35 phút** — hoàn toàn nằm trong Kaggle 12h session.
+**Nếu Cell 3b báo FAIL thì dừng.** Gửi lại log cho mình xem; đừng chạy tiếp phiên 2, vì mọi Δθ của F2/F3 sẽ sai.
 
----
-
-## 7. Export artifacts (sau khi notebook 01 xong)
-
-Kaggle session ephemeral — mọi thứ trong `/kaggle/working/` mất sau khi close.
-
-1. Click **Save Version** góc trên phải notebook
-2. Chọn **Quick Save** → Advanced options → tick **Save output**
-3. Kaggle snapshot `/kaggle/working/flops_export/` vào Output tab
-
-Tải về local và commit:
-
-```powershell
-# Download flops_export.zip từ Output tab, extract rồi:
-Copy-Item flops_export\environment.lock D:\FLOPS\environment.lock
-git add environment.lock
-git commit -m "chore(env): populate environment.lock from Kaggle smoke run"
-```
+**Sau phiên 1** (trên máy local):
+1. Tải output → chép `environment.lock` vào gốc repo, và chép `F1_runtime_map.yaml` thành `research/feasibility/F1/runtime_map.yaml`.
+2. Cập nhật `research/gates.yaml`: G1 → `passed` (kèm ngày); G5 notes: F1 đã xác nhận trên stack đã pin.
+3. Commit + push. Bạn có thể nhờ mình làm bước này: chỉ cần đưa file đã tải về.
 
 ---
 
-## 8. Update gate status (local, sau khi notebook 01 pass)
+## 4. Phiên 2: notebook 02 (G2 centralized, G3 FedAvg)
 
-Sửa `research/gates.yaml`:
+Notebook tự cài lại môi trường (Cell 1). Nếu chưa có dữ liệu YOLO và partition S0 thì Cell 2 tự convert lại (~5 phút).
 
-```yaml
-G1:
-  name: Environment reproducible
-  status: passed                        # ← đổi từ in_progress
-  passed_date: "2026-09-01"             # ← ngày pass thực tế
-  notes: >
-    environment.lock populated from Kaggle T4 smoke session (see ADR-002).
-    All pinned versions per ADR-001 verified in Kaggle environment.
-```
+| Cell | Việc | Ghi chú |
+|---|---|---|
+| 3 | **G2** `train_centralized.py`, feasibility (10 epoch, batch 8) | **Checkpoint G2** nằm ở `artifacts/runs/G2-centralized_feasibility_seed42_centralized/checkpoint/train/weights/best.pt` |
+| 4 | **G3** FedAvg S0, 5 round | `round_metrics.csv` có AP theo lớp từng round |
+| 5–6 | Kiểm §21, ghi registry | |
+| 7 | Export → `flops_export/baseline_*/G2`, `/G3` | thư mục G2 chứa luôn checkpoint |
 
-Commit:
-```powershell
-git add research/gates.yaml environment.lock
-git commit -m "chore(gates): G1 passed via Kaggle smoke session (ADR-002)"
-```
+**Ghi lại** thời gian một epoch (G2) và một lượt eval để điền ngân sách §7.4.
+**Lưu version có output.** Phiên 3 cần output này để lấy checkpoint G2.
+
+Kiểm nhanh trước khi rời phiên: AP50 của **bus** trong `metrics.csv` của G2 phải **> 0**. Nếu bằng 0 thì F2/F3 không đo được gì (script sẽ cảnh báo).
 
 ---
 
-## 9. Troubleshooting
+## 5. Phiên 3: notebook 03, chỉ F2 + F3 (G5)
 
-### "CUDA out of memory" trong FL run
-- Giảm `batch_size` trong `configs/experiments/smoke.yaml` từ 4 → 2
-- Hoặc giảm `client_resources={"num_gpus": 0.25}` → `0.5` trong `server.py`
+**Điều kiện:** đã chốt `τ_AP`; đã Add Data **output của phiên 2**.
 
-### "det_train.json not found"
-- Verify structure:
-  ```
-  !ls /kaggle/input/datasets/phdatt/bdd100k-flops/bdd100k_kaggle/labels/det_20/
-  ```
-- Nếu path khác, sửa `BDD100K_RAW` trong Cell 3 và `notebooks/01_smoke_G1_G3.py`
+1. Chạy Cell 1 (môi trường), Cell 2 (đường dẫn), Cell 3 (partition S1b + matched control).
+   - Cell 3 in `S1-Control-Matched matched = True/False`. `False` vẫn chạy được, nhưng mọi kết luận chỉ là *quan sát*. F3 tự chép `match_report.yaml` vào thư mục output của nó.
+2. Ở Cell 4, đặt **`RUN_C1 = False`**. Cell 4 sẽ in `[SKIP]` và Cell 5 cho bảng rỗng. Có thể bỏ qua cả hai.
+3. **Cell 5b (F2)**: dòng đầu in `G2_WEIGHTS: ... (exists)`. Notebook tự tìm checkpoint trong `artifacts/runs`, `flops_export` và `/kaggle/input/**/G2/...`.
+   Nếu in `(NOT FOUND)`, gán tay `G2_WEIGHTS = Path("/kaggle/input/<...>/G2/checkpoint/train/weights/best.pt")`.
+   - 35 lần đánh giá trên cùng tập val con 2000 ảnh → `flops_export/F2/<run>/summary.yaml` (ma trận hiệu ứng).
+4. **Cell 6 (F3)**: cặp C0 S1b vs C0 matched, 3 seed → `flops_export/F3/<run>/summary.yaml`.
+   - Log có `target_known_before=True` là đúng. `False` nghĩa là checkpoint chưa nhận ra bus, khi đó kết quả là *inconclusive*, không phải kết quả âm.
+5. Cell 8: export. Lưu version có output.
 
-### `pip install ultralytics` bị lỗi dependency
-- Kaggle preinstalled numpy có thể conflict:
-  ```python
-  !pip install --force-reinstall ultralytics==8.3.253
-  ```
-
-### FL run treo ở round 0
-- Thường do `client_resources` conflict với GPU quota:
-  ```python
-  import torch
-  print(torch.cuda.memory_allocated() / 1e9, "GB used")
-  ```
-
-### Version mismatch warning ở Cell 2
-- Kaggle preinstall torch 2.x thấp hơn 2.7.1. Cell 1 reinstall nhưng có thể partial.
-- Nếu version ≠ ADR-001 → ghi addendum vào ADR-002 trước khi tiến sang G2+.
-
-### Notebook 01 pass nhưng `per_class_metrics.csv` missing
-- Verify Cell 6 pass `--global-data-yaml`. Nếu vẫn missing, check log:
-  `"run_fl_server called without global_data_yaml"` trong `run.log`.
-
-### Kaggle "This notebook has crashed" giữa chừng
-- Save version thường xuyên. Restart kernel + run từ cell cuối đã pass.
-- Nếu OOM: giảm batch/rounds.
+**Sau phiên 3:** gửi mình `F2/.../summary.yaml`, `F3/.../summary.yaml`, `metrics.csv` và log. Mình sẽ áp luật đã pre-register và soạn **ADR-003** (Gate A/B/C).
 
 ---
 
-## 10. Sau notebook 01 pass — tiếp theo
+## 6. Phiên 4 (có thể chia 2): notebook 03, C1 (bằng chứng dự đoán G4)
 
-| # | Notebook | Gate | Thời gian ước tính (T4) |
-|---|---|---|---|
-| 1 | 01_smoke_G1_G3.py | G1 (env) | ~30 phút |
-| 2 | 02_baseline_G2_G3.py | G2 + G3 feasibility | ~2–3 giờ |
-| 3 | 03_missing_class_G4.py | G4 partial (3 seeds × 2 scenarios) | ~4–6 giờ |
+1. Cell 1–3 như phiên 3.
+2. Cell 4: `RUN_C1 = True`. Để vừa trong giới hạn 12h, **chia seed**:
+   - Phiên 4a: `SEEDS = [42]`, khoảng 2–3h
+   - Phiên 4b: `SEEDS = [123, 2024]`, khoảng 4–6h
+3. Cell 5: bảng ΔAP theo lớp (S1b − Control). Lớp bị thiếu: **bus** (C0, C1) và **truck** (C2).
+4. Cell 7–8: registry + export. Mỗi phiên lưu version riêng.
 
-Notebook 02 và 03 có thể chạy chung 1 session hoặc split. Notebook 03 cần commit `final_params.npz` về Kaggle Dataset để notebook parameter analysis dùng lại (F3 evidence).
+Nếu kernel bị ngắt giữa một run nhưng phiên vẫn còn, chỉ cần chạy lại Cell 4. `run_one` truyền `--resume`, nên run đã xong sẽ được bỏ qua, run dở dang chạy tiếp từ checkpoint round cuối. Sang phiên mới thì `/kaggle/working` đã bị xóa, nên chạy lại seed đó từ đầu.
+
+Chạy C1 bằng sweep (`scripts/sweep_experiments.py --sweep configs/sweeps/c1_h1_missing_class.yaml`) cũng được, nhưng phải trỏ `--base-dir /kaggle/working/data --global-data-yaml /kaggle/working/data/bdd100k_yolo/data.yaml`, vì notebook sinh partition vào `/kaggle/working/data/partitions`.
 
 ---
 
-## Reference
+## 7. Sau toàn bộ: điều kiện để đóng gate
 
-- ADR-001: environment versions (`research/decisions/ADR-001-environment-versions.md`)
-- ADR-002: Kaggle deployment (`research/decisions/ADR-002-kaggle-deployment.md`)
-- CLAUDE.md §5: single source of truth (environment)
-- CLAUDE.md §7: stage gates
-- CLAUDE.md §14: compute budget + run classes
-- CLAUDE.md §21: artifact contract
+| Gate | Đóng khi | Bằng chứng |
+|---|---|---|
+| G1 | phiên 1 pass, `environment.lock` đã commit | `environment.lock` |
+| G2 / G3 | phiên 2 pass, artifact §21 đầy đủ | `flops_export/baseline_*` |
+| G5 | F1 trên stack đã pin + F2 + F3 → ADR-003 quyết định A/B/C | F1 `runtime_map.yaml`, F2/F3 `summary.yaml` |
+| G4 | F3 (tham số + dự đoán) **và** C1 (ΔAP bus nhất quán qua 3 seed), control `matched: true` | F3 + C1 + `match_report.yaml` |
+
+Không xóa kết quả âm. Không bỏ seed xấu (CLAUDE.md §20).
+
+---
+
+## 8. Xử lý sự cố
+
+| Triệu chứng | Nguyên nhân / cách xử lý |
+|---|---|
+| Cell 3b: `FAIL: uploaded weights are not trained fp32 values` | Thứ tự callback của Ultralytics khác với bản đã kiểm. **Dừng**, gửi log (ADR-008). |
+| Cell 3b: `Expected exactly 6 class-head params` | Version ultralytics khác 8.3.253 hoặc model không phải nc=4. Kiểm lại Cell 1/2. |
+| `size mismatch for model.22.cv3...` | Code cũ: kiểm commit hash ở Cell 0 là bản mới nhất. |
+| `Parameter count mismatch ... 127 state_dict entries` | Model bị fuse: cũng là dấu hiệu code cũ (đã sửa trong ADR-008). |
+| `TypeError: 'str' object is not a mapping` ở `prepare_run` | Code cũ (lỗi đọc `environment.lock` dạng pip freeze, đã sửa 2026-10-02). |
+| `control side ... must have positive target boxes` (F3) | Partition control chưa được sinh, hoặc không có ảnh donor. Chạy lại Cell 3 và xem `match_report.yaml`. |
+| `Checkpoint has zero AP50 for 'bus'` (F2/F3) | Checkpoint G2 chưa học được bus. Kiểm `metrics.csv` của G2; có thể cần train lâu hơn (cần ADR). |
+| `G2_WEIGHTS ... (NOT FOUND)` | Chưa Add Data output của phiên 2, hoặc đường dẫn khác. Gán tay `G2_WEIGHTS`. |
+| CUDA out of memory | Giảm `train.batch_size` trong `configs/experiments/feasibility.yaml`, hoặc đặt `nbs` để giữ batch hiệu dụng (ghi vào config của run). |
+| Cảnh báo version ở Cell 2 | Ghi addendum ADR-002 trước khi sang G2. |
+| `pip` báo lỗi protobuf / mlflow | Cell 1 đã gỡ TensorFlow chưa? `mlflow` phải `<3.0`, `protobuf<5` (ADR-002-A1). |
+| Notebook crash giữa chừng | Lưu version thường xuyên; restart rồi chạy lại từ cell đã pass gần nhất. |
+
+---
+
+## Tham chiếu
+
+ADR-001 (version) · ADR-002 / ADR-002-A1 (Kaggle, pin mlflow/protobuf) · ADR-007 (cấu hình theo client)
+· ADR-008 (model nc=4, trọng số fp32, val stub) · `research/feasibility/F1|F2|F3/README.md`
+· `research/plan/comparison_design.md` (C1) · CLAUDE.md §7 (gate), §8 (F1–F3), §14 (ngân sách), §21 (artifact)
