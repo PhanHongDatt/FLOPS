@@ -34,6 +34,11 @@ train:
   warmup_epochs: 0.0            # H3: Ultralytics default 3.0 > local_epochs=1
   close_mosaic: 0               # freeze augmentation schedule across rounds
   client_run_val: false         # H1/H2: no per-epoch val on the GLOBAL val set
+  # Multi-epoch CENTRALIZED training (G2) keeps Ultralytics' own schedule
+  # defaults (cfg/default.yaml warmup_epochs: 3.0, close_mosaic: 10); the 0 / 0
+  # above are for one-epoch FL rounds only. ADR-009.
+  centralized_warmup_epochs: 3.0
+  centralized_close_mosaic: 10
   deterministic: true
   nbs: null                     # nominal batch for grad accumulation (low VRAM)
 
@@ -66,7 +71,13 @@ federated:
 
 # ── Evaluation ────────────────────────────────────────────────────────────────
 evaluation:
-  conf: 0.25
+  # ADR-009: AP over the full precision-recall curve needs the Ultralytics val
+  # threshold (cfg/default.yaml: "predict=0.25, val=0.001"). With conf=0.001,
+  # Ultralytics fills the confusion matrix (FP/FN) at 0.25 itself
+  # (utils/metrics.py ConfusionMatrix.process_batch). operating_conf is that
+  # operating point, also used for per-class confidence statistics.
+  conf: 0.001
+  operating_conf: 0.25
   iou: 0.70
   workers: 0      # [ENGINEERING] server-side eval runs in the Ray driver: no forked loaders
   metrics:

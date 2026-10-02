@@ -22,7 +22,7 @@ import yaml
 
 from src.experiments.runner import prepare_run, finalize_run
 from src.model.yolo_wrapper import build_model, evaluate, train_one_round
-from src.utils.config import load_experiment_config
+from src.utils.config import build_centralized_train_kwargs, load_experiment_config
 from src.utils.logger import get_logger, setup_mlflow, log_metrics, log_params, end_run
 from src.utils.artifacts import save_yaml
 from src.evaluation.metrics import (
@@ -82,16 +82,13 @@ def main() -> None:
 
     model = build_model(config["model"]["weights"])
 
+    # seed + Ultralytics schedule defaults (warm-up, close_mosaic): ADR-009
     train_metrics = train_one_round(
         model=model,
         data_yaml=args.data_yaml,
-        epochs=config["train"]["epochs"],
-        batch=config["train"]["batch_size"],
-        img_size=config["model"]["image_size"],
-        lr0=config["train"]["lr0"],
-        device=config["train"]["device"],
         project=run_dir / "checkpoint",
         name="train",
+        **build_centralized_train_kwargs(config, seed=args.seed),
     )
     log_metrics({f"train_{k}": v for k, v in train_metrics.items()})
 

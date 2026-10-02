@@ -62,7 +62,8 @@ def _hooks(model_factory, val_yaml: Path, images: list[str], ev: dict[str, Any])
         state=state,
         load=load,
         evaluate=lambda m: evaluate(m, val_yaml, ev["image_size"], ev["conf"], ev["iou"], ev["device"]),
-        confidence=lambda m: confidence_stats(m, images, ev["image_size"], ev["conf"], ev["iou"], ev["device"]),
+        # confidence stats at the operating point, AP at the val threshold (ADR-009)
+        confidence=lambda m: confidence_stats(m, images, ev["image_size"], ev["operating_conf"], ev["iou"], ev["device"]),
     )
 
 
@@ -77,6 +78,7 @@ def main() -> None:
     cfg = load_config(args.f2_config)
     exp = load_experiment_config(Path(cfg["exp_config"]))
     ev = {"image_size": exp["model"]["image_size"], "conf": exp["evaluation"]["conf"],
+          "operating_conf": exp["evaluation"].get("operating_conf", 0.25),
           "iou": exp["evaluation"]["iou"], "device": exp["train"]["device"]}
 
     out_dir = args.output_dir / f"{cfg['exp_id']}_{cfg['run_class']}_{args.weights.stem}"

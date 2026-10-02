@@ -80,7 +80,7 @@ def _hooks(global_weights: Path, base_weights: str, eval_data_yaml: Path, tc: di
         # CLAUDE.md §8 F3 "confidence change": per-class count/mean confidence on a
         # fixed seeded subset (AP above uses the full val set)
         return {**metrics, **confidence_stats(model, conf_images, tc["image_size"],
-                                              tc["conf"], tc["iou"], tc["device"])}
+                                              tc["operating_conf"], tc["iou"], tc["device"])}
 
     def state(model) -> dict[str, np.ndarray]:
         # copies: get_parameters returns views of live CPU tensors

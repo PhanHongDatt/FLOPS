@@ -59,6 +59,7 @@ def build_local_train_config(config: dict[str, Any]) -> dict[str, Any]:
         "image_size": config["model"]["image_size"],
         "lr0": train["lr0"],
         "conf": config["evaluation"]["conf"],
+        "operating_conf": config["evaluation"].get("operating_conf", 0.25),
         "iou": config["evaluation"]["iou"],
         "device": train["device"],
         # Local-training knobs — see yolo_wrapper.train_one_round for why these
@@ -68,5 +69,28 @@ def build_local_train_config(config: dict[str, Any]) -> dict[str, Any]:
         "close_mosaic": train.get("close_mosaic", 0),
         "client_run_val": train.get("client_run_val", False),
         "deterministic": train.get("deterministic", True),
+        "nbs": train.get("nbs"),
+    }
+
+
+def build_centralized_train_kwargs(config: dict[str, Any], seed: int) -> dict[str, Any]:
+    """train_one_round kwargs for the multi-epoch centralized baseline (G2).
+
+    Forwards the run seed (previously dropped, so every G2 seed trained with
+    Ultralytics' seed 0) and uses Ultralytics' schedule defaults for warm-up and
+    mosaic closing, which the one-epoch FL rounds deliberately switch off (ADR-009).
+    """
+    train = config["train"]
+    return {
+        "epochs": train["epochs"],
+        "batch": train["batch_size"],
+        "img_size": config["model"]["image_size"],
+        "lr0": train["lr0"],
+        "device": train["device"],
+        "seed": int(seed),
+        "workers": int(train.get("workers", 2)),
+        "warmup_epochs": float(train.get("centralized_warmup_epochs", 3.0)),
+        "close_mosaic": int(train.get("centralized_close_mosaic", 10)),
+        "deterministic": bool(train.get("deterministic", True)),
         "nbs": train.get("nbs"),
     }

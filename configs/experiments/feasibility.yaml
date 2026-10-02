@@ -1,7 +1,7 @@
 run_class: feasibility
 train:
   epochs: 10
-  batch_size: 8
+  batch_size: 16   # = base_config (thesis); 8 had no recorded reason (ADR-009). nbs 64 keeps the effective batch
 federated:
   num_rounds: 5
   num_clients: 4
