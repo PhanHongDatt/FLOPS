@@ -3,7 +3,79 @@
 # Status values: planned | running | completed | failed-valid | failed-technical | rejected
 # Never delete negative results.
 
-experiments: []
+experiments:
+  - id: EXP-2026-10-03-S2v2-G2-centralized
+    gate: G2
+    scenario: centralized
+    method: YOLOv8n-centralized
+    run_class: feasibility
+    status: failed-technical
+    seed: 42
+    git_commit: 501ef507
+    kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v2
+    notes: 'Trained 10 epochs (~2 h 10 min) then crashed in mlflow.log_metrics on ''metrics/precision(B)'';
+      Kaggle saved no output (>500 files). Fixed: logger sanitises names; results zipped
+      (commit df0de53a). Excluded for a logged technical reason (CLAUDE.md §20).'
+  - id: EXP-2026-10-03-S2v3-G2-centralized
+    gate: G2
+    scenario: centralized
+    method: YOLOv8n-centralized
+    run_class: feasibility
+    status: completed
+    seed: 42
+    partition_id: centralized
+    git_commit: df0de53a
+    kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v3
+    results:
+      mAP50: 0.4883
+      mAP50-95: 0.3232
+      AP50_car: 0.7199
+      AP50_bus: 0.494
+      AP50_truck: 0.5248
+      AP50_motorcycle: 0.2145
+    report: research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md
+    notes: Single seed, feasibility scale — sanity comparison, not reportable (§14).
+      10 epochs, batch 16, warmup 3, close_mosaic 10 (ADR-009); ~143 min.
+  - id: EXP-2026-10-03-S2v3-G3-FedAvg-S0
+    gate: G3
+    scenario: S0
+    method: FedAvg
+    run_class: feasibility
+    status: completed
+    seed: 42
+    partition_id: s0_iid_seed42
+    git_commit: df0de53a
+    kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v3
+    results:
+      mAP50: 0.3769
+      mAP50-95: 0.2438
+      AP50_car: 0.6764
+      AP50_bus: 0.3318
+      AP50_truck: 0.4122
+      AP50_motorcycle: 0.0871
+    report: research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md
+    notes: Single seed, feasibility scale — sanity comparison, not reportable (§14).
+      5 rounds x 1 local epoch, 4 clients; ~103 min; mAP50 still rising at round 5 (+0.030/round).
+  - id: EXP-2026-10-03-S2v3-G3-FedProx-S0
+    gate: G3
+    scenario: S0
+    method: FedProx
+    run_class: feasibility
+    status: completed
+    seed: 42
+    partition_id: s0_iid_seed42
+    git_commit: df0de53a
+    kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v3
+    results:
+      mAP50: 0.3756
+      mAP50-95: 0.2436
+      AP50_car: 0.6784
+      AP50_bus: 0.3316
+      AP50_truck: 0.4094
+      AP50_motorcycle: 0.083
+    report: research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md
+    notes: Single seed, feasibility scale — sanity comparison, not reportable (§14).
+      mu=0.01 (ADR-010); ~118 min; indistinguishable from FedAvg on IID S0 at one seed.
 
 # Example entry:
 # - id: EXP-001

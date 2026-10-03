@@ -24,6 +24,7 @@ def test_packs_results_and_leaves_few_items(tmp_path):
     _tree(work / "flops_export", 300)
     _tree(work / "data" / "bdd100k_yolo", 900)
     _tree(work / "runs", 50)                       # Ultralytics val plots
+    _tree(work / "mlruns", 450)                    # MLflow file store (s2 v3: 492 files)
     (work / "FLOPS" / "src").mkdir(parents=True)
     (work / "FLOPS" / "src" / "x.py").write_text("code")
 
@@ -33,6 +34,7 @@ def test_packs_results_and_leaves_few_items(tmp_path):
     names = zipfile.ZipFile(archive).namelist()
     assert sum(n.startswith("artifacts/runs/") for n in names) == 300
     assert sum(n.startswith("flops_export/") for n in names) == 300
+    assert sum(n.startswith("mlruns/") for n in names) == 450
     assert not any("bdd100k_yolo" in n for n in names)
     remaining = [p for p in work.rglob("*") if p.is_file()]
     assert len(remaining) < 500

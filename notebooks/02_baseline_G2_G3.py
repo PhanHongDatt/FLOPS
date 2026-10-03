@@ -237,8 +237,12 @@ if RUN_FEDPROX:
 # %%
 from src.utils.artifacts import verify_artifacts
 
-for label, run_dir in [("G2", g2_run), ("G3", g3_run)]:
-    missing = verify_artifacts(run_dir)
+_to_verify = [("G2", g2_run, "centralized"), ("G3", g3_run, "federated")]
+if g3p_run is not None:
+    _to_verify.append(("FedProx", g3p_run, "federated"))
+for label, run_dir, run_type in _to_verify:
+    # centralized runs have no partition_manifest.yaml / round_metrics.csv (§21)
+    missing = verify_artifacts(run_dir, run_type=run_type)
     if missing:
         print(f"⚠️  {label} missing artifacts (§21): {missing}")
     else:

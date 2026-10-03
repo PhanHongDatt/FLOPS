@@ -17,8 +17,9 @@ from pathlib import Path
 
 ARCHIVE = "flops_results.zip"
 # (path relative to /kaggle/working, name inside the zip)
-_PACK = (("FLOPS/artifacts/runs", "artifacts/runs"), ("flops_export", "flops_export"))
-_DROP = ("data", "runs", "FLOPS", "flops_export", ".ultralytics")
+_PACK = (("FLOPS/artifacts/runs", "artifacts/runs"), ("flops_export", "flops_export"),
+         ("mlruns", "mlruns"))   # MLflow store: 492 files in s2 v3 alone
+_DROP = ("data", "runs", "FLOPS", "flops_export", "mlruns", ".ultralytics")
 
 
 def finalize_outputs(working: Path = Path("/kaggle/working")) -> Path | None:

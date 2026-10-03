@@ -29,20 +29,23 @@ gates:
 
   G2:
     name: Centralized YOLOv8 baseline reproducible
-    status: code_ready
-    passed_date: null
+    status: passed_feasibility
+    passed_date: "2026-10-03"
     notes: >
-      Code complete: scripts/prepare_bdd100k.py + scripts/train_centralized.py.
-      Blocked on: BDD100K dataset download + GPU host to run.
+      Kaggle s2 v3 (commit df0de53a, T4): 10 epochs, batch 16, seed 42 — mAP50 0.488,
+      mAP50-95 0.323 (AP50 car 0.720 / bus 0.494 / truck 0.525 / motorcycle 0.215).
+      ~13 min/epoch; training loss still decreasing at epoch 10 (not converged).
+      Single seed: main-scale G2 (100 epochs, 3 seeds) still open. EXP-2026-10-03-S2v3-G2-centralized.
 
   G3:
     name: FedAvg baseline reproducible
-    status: code_ready
-    passed_date: null
+    status: passed_feasibility
+    passed_date: "2026-10-03"
     notes: >
-      Code complete: scripts/run_fl_experiment.py + all 4 strategies
-      (FedAvg built-in, FedProx built-in, SCAFFOLD custom Option II,
-      FedNova custom per JYWa reference). Blocked on G2 dataset + GPU.
+      Kaggle s2 v3: FedAvg S0 IID 5 rounds x 1 local epoch — mAP50 0.377 (−0.111 vs G2);
+      FedProx mu=0.01 0.376. ~20 min/round incl. server eval. Not converged at round 5.
+      FL saw 5 data passes vs 10 for G2, so the gap mixes FL cost with compute (report §).
+      SCAFFOLD blocked (ADR-010), FedNova not run. Single seed.
 
   G4:
     name: Missing-Class effect established
