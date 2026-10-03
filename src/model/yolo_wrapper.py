@@ -103,6 +103,7 @@ def train_one_round(
     extra_overrides: dict[str, Any] | None = None,
     val_stub_images: int = 8,
     proximal_mu: float = 0.0,
+    cls_loss_weights: list[float] | None = None,
 ) -> dict[str, float]:
     """One round of local training.
 
@@ -170,11 +171,21 @@ def train_one_round(
     if prox.active:
         model.add_callback("on_train_start", prox.on_train_start)
         model.add_callback("on_train_end", prox.on_train_end)
+    # A2b: per-class BCE weights (rho for locally-missing classes) — src/preservation/rho_loss.py
+    from src.preservation.rho_loss import RhoClassLoss
+    rho_loss = RhoClassLoss(cls_loss_weights or [1.0] * len(TARGET_CLASSES))
+    if rho_loss.active:
+        model.add_callback("on_train_start", rho_loss.on_train_start)
+        model.add_callback("on_train_end", rho_loss.on_train_end)
     try:
         results = model.train(**overrides)
     finally:
         # callbacks live on the YOLO object and would pile up across FL rounds
         model.callbacks["on_train_epoch_end"].remove(_snapshot_final_ema)
+        if rho_loss.active:
+            model.callbacks["on_train_start"].remove(rho_loss.on_train_start)
+            model.callbacks["on_train_end"].remove(rho_loss.on_train_end)
+            rho_loss.on_train_end(None)
         if prox.active:
             model.callbacks["on_train_start"].remove(prox.on_train_start)
             model.callbacks["on_train_end"].remove(prox.on_train_end)

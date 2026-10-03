@@ -18,6 +18,8 @@ import pytest
 
 pytest.importorskip("ultralytics")
 
+import torch  # noqa: E402
+
 from src.data.bdd100k import TARGET_CLASSES
 from src.model.yolo_wrapper import (
     build_model,
@@ -233,3 +235,21 @@ def test_fedprox_term_changes_the_update_in_real_training(tmp_path):
     d0, d_big = drift(0.0, "mu0"), drift(50.0, "mu50")
     assert d0 > 0
     assert d_big < d0          # the proximal term really acts on the trainer's params
+
+
+@pytest.mark.slow
+def test_rho_zero_freezes_the_missing_class_row_in_real_training(tmp_path):
+    """A2b: with rho = 0 for bus, the bus class-head bias gets no gradient (biases
+    have no weight decay), so it is bit-identical after training; car's moves."""
+    data_yaml = _tiny_dataset(tmp_path / "ds")
+    model = build_model(SOURCE)
+    keys = [f"model.22.cv3.{s}.2.bias" for s in range(3)]
+    before = {k: model.model.state_dict()[k].clone() for k in keys}
+    train_one_round(model, data_yaml, epochs=1, batch=2, img_size=64, lr0=0.01, device="cpu",
+                    project=tmp_path / "runs", name="rho0", workers=0, nbs=2,
+                    cls_loss_weights=[1.0, 0.0, 1.0, 1.0])
+    after = model.model.state_dict()
+    bus, car = TARGET_CLASSES.index("bus"), TARGET_CLASSES.index("car")
+    for k in keys:
+        assert torch.equal(after[k][bus], before[k][bus]), k
+    assert any(not torch.equal(after[k][car], before[k][car]) for k in keys)

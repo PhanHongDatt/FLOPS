@@ -1,0 +1,27 @@
+# S1b — PRIMARY Missing-Class scenario (decision D1, research/plan/plan.md §5.2)
+#
+# Target class = bus. Chosen from the real BDD100K counts (plan.md §4): bus has
+# 11,672 train boxes in 13.0% of images, which is enough for AP_bus to be
+# measurable, whereas motorcycle has only 3,002 train / 452 val boxes and its
+# across-seed std would exceed the effect being measured.
+#
+# bus present in 2/4 clients, truck (secondary target) in 3/4.
+partition_id: s1b_bus_2k_seed42
+scenario: S1
+seed: 42
+num_clients: 4
+per_client: 2000         # ADR-011: 4 x 2000 images (plan.md §5.4) so 30 rounds fit the GPU budget
+missing_map:
+  C0: [bus]            # zero bus boxes AND zero bus images
+  C1: [bus]
+  C2: [truck]          # secondary target
+  C3: []               # holds all four classes
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50
+notes: >
+  Missing threshold is zero positive boxes (CLAUDE.md §9) and is not configurable.
+  rare_threshold must stay frozen before any model outcome is inspected.
+  Expect the per-client class distribution to shift as a side effect of image-level
+  exclusion (clients that keep bus receive a higher share of bus images than the
+  13.0% base rate) — report the ACTUAL distribution from the manifest, and use
+  s1_control for the causal comparison.

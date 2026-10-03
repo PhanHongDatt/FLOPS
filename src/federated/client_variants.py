@@ -199,35 +199,27 @@ class PreservationClient(YOLOFlowerClient):
 
 
 class LossPreservationClient(YOLOFlowerClient):
-    """H2 ablation **A2b** — loss-level rho on the vacant class channel.
+    """A2b — loss-level preservation (ADR-006).
 
-    Intended mechanism: scale the per-class BCE term of a locally missing class
-    by rho, so with rho=0 that channel produces no gradient at all — including
-    into the shared earlier convs of the cv3 branch. Unlike A2a this changes the
-    trajectory of SHARED parameters, which is why it is the client-side
-    mechanism that is actually separable from server-side aggregation
-    (research/plan/plan.md §6.3).
-
-    NOT IMPLEMENTED YET, deliberately. It requires ``src/preservation/rho_loss.py``,
-    which depends on the internals of ``ultralytics.utils.loss.v8DetectionLoss``
-    (``self.bce`` reduction/shape, ``init_criterion`` override) plus the
-    weight-decay/EMA interaction described in plan.md §6.1. CLAUDE.md §4 forbids
-    implementing research logic whose justification is still
-    ``[NEEDS-VERIFICATION]``: F1 runtime verification must pass first.
-
-    Raising here — rather than silently falling back to FedAvg — follows the
-    same pattern as FedProxClient so that no run can be mislabelled (§22).
+    The BCE term of each locally-missing class is multiplied by ``rho`` during local
+    training (src/preservation/rho_loss.py). ``missing_classes`` and ``rho`` are
+    per-client constructor arguments (ADR-007). rho = 1 is ordinary FedAvg training.
+    Also reports ``class_counts_json`` (base class) so A4b's server can use it.
     """
+
+    def _train_kwargs(self) -> dict[str, Any]:
+        from src.data.bdd100k import TARGET_CLASSES
+        from src.preservation.rho_loss import class_loss_weights
+        weights = class_loss_weights(TARGET_CLASSES, self.missing_classes, self.rho)
+        return {**super()._train_kwargs(), "cls_loss_weights": weights}
 
     def fit(
         self,
         parameters: NDArrays,
         config: dict[str, Scalar],
     ) -> tuple[NDArrays, int, dict[str, Scalar]]:
-        raise NotImplementedError(
-            "A2b (loss-level rho) is not implemented yet. Blocked on: "
-            "(1) F1 runtime verification of the YOLOv8 parameter map / "
-            "v8DetectionLoss internals for the pinned Ultralytics version; "
-            "(2) src/preservation/rho_loss.py; "
-            "(3) ADR-006 (rho mechanism). See research/plan/plan.md §6.1-§6.3."
-        )
+        params, n, metrics = super().fit(parameters, config)
+        metrics["rho"] = float(self.rho)
+        metrics["mechanism"] = "preservation_loss"
+        metrics["missing_classes"] = json.dumps(self.missing_classes)
+        return params, n, metrics

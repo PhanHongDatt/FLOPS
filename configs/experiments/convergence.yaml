@@ -1,0 +1,13 @@
+# Convergence-length comparison on S1b-2k (ADR-011). Same settings for EVERY arm.
+# 30 rounds x 1 local epoch on 4 x 2000 images; full-val server eval every 5 rounds
+# (+ round 0 and the final round); checkpoint every round.
+run_class: feasibility
+train:
+  batch_size: 16
+federated:
+  num_rounds: 30
+  eval_every: 5
+  fraction_evaluate: 0.0
+notes: >
+  Single seed (42): exploratory comparison of baselines and the proposed method before
+  G4/G5 (CLAUDE.md §7) — not a reportable main result (§14 requires 3 seeds).

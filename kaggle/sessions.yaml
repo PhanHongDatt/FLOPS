@@ -37,3 +37,15 @@ sessions:
     notebook: notebooks/03_missing_class_G4.py
     replace:
       "SEEDS = [42, 123, 2024]  # from base_config.yaml": "SEEDS = [123, 2024]"
+
+  s5a:  # S1b-2k, 30 rounds: baselines + server-side method (ADR-011). ~8 h
+    slug: flops-s5a-s1b-baselines
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0", "FedProx", "A1", "A3"]'
+
+  s5b:  # S1b-2k, 30 rounds: client-side + full method + H1 control (ADR-011). ~6 h
+    slug: flops-s5b-s1b-method
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A2b", "A4b", "A0@control"]'

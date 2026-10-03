@@ -145,6 +145,14 @@ def _build_centralized_evaluate_fn(
             if prune_client_weights:
                 prune_client_round_weights(run_dir, abs_round)
 
+        # Eval cadence (ADR-011): long runs evaluate every k rounds plus the final
+        # round; the checkpoint above is still written every round (resume).
+        eval_every = int(eval_config.get("eval_every", 1))
+        if (not is_initial_eval and eval_every > 1 and abs_round < num_rounds
+                and abs_round % eval_every != 0):
+            logger.info("Round %d (absolute): eval skipped (eval_every=%d)", abs_round, eval_every)
+            return None
+
         if _holder["model"] is None:
             _holder["model"] = build_model(weights)
         model = _holder["model"]

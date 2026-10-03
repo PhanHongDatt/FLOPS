@@ -126,12 +126,17 @@ def test_client_class_selection(algorithm, mechanism, expected):
     assert _pick_client_class(algorithm, mechanism) is expected
 
 
-def test_loss_preservation_client_refuses_to_run_before_f1_and_adr():
-    """A2b must not silently behave like FedAvg: CLAUDE.md §4 forbids shipping
-    research logic whose justification is still [NEEDS-VERIFICATION]."""
+def test_loss_preservation_client_weights_missing_classes(monkeypatch):
+    """A2b (ADR-006): the BCE of each locally-missing class is scaled by rho.
+    Prerequisites now met: F1 runtime on the pinned stack + v8DetectionLoss.bce
+    verified as BCEWithLogitsLoss(reduction='none') over [B, anchors, nc]."""
+    from src.federated.client import YOLOFlowerClient
+
+    monkeypatch.setattr(YOLOFlowerClient, "_train_kwargs", lambda self: {"epochs": 1})
     client = LossPreservationClient.__new__(LossPreservationClient)
-    with pytest.raises(NotImplementedError, match="A2b"):
-        client.fit([], {})
+    client.missing_classes, client.rho = ["bus"], 0.25
+    kw = client._train_kwargs()
+    assert kw == {"epochs": 1, "cls_loss_weights": [1.0, 0.25, 1.0, 1.0]}
 
 
 # ── per-client/round training seed (B3) ───────────────────────────────────

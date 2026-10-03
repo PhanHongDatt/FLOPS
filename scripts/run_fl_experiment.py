@@ -398,6 +398,7 @@ def main() -> None:
         "device": config["train"]["device"],
         "weights": config["model"]["weights"],
         "workers": config["evaluation"].get("workers", 0),
+        "eval_every": fed.get("eval_every", 1),   # ADR-011
     }
 
     param_names: list[str] | None = None
