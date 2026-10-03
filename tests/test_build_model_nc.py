@@ -253,3 +253,12 @@ def test_rho_zero_freezes_the_missing_class_row_in_real_training(tmp_path):
     for k in keys:
         assert torch.equal(after[k][bus], before[k][bus]), k
     assert any(not torch.equal(after[k][car], before[k][car]) for k in keys)
+
+
+def test_ultralytics_mlflow_autologging_is_disabled():
+    """Ultralytics' own MLflow callback logged best.pt + last.pt for every client of every
+    round (s5b: 714 .pt files, 46k files, 4.2 GB in mlruns). Results of record are our CSVs."""
+    from ultralytics.utils import SETTINGS
+
+    build_model(SOURCE)
+    assert SETTINGS["mlflow"] is False

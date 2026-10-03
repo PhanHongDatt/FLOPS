@@ -12,6 +12,20 @@ if TYPE_CHECKING:  # avoid hard dependency at import time
     from ultralytics import YOLO
 
 
+def _disable_ultralytics_mlflow() -> None:
+    """Turn off Ultralytics' built-in MLflow callback before any trainer is created.
+
+    It logs best.pt + last.pt for every client of every round (Kaggle s5b: 714 .pt files,
+    46k files, 4.2 GB of mlruns). The callback is decided when its module is first
+    imported (``SETTINGS["mlflow"]``), so this runs before the first build/train in
+    each process. The project's own MLflow logging (server eval) is unaffected.
+    """
+    from ultralytics.utils import SETTINGS
+
+    if SETTINGS.get("mlflow", False):
+        SETTINGS.update({"mlflow": False})
+
+
 def build_model(weights: str = "yolov8n.pt", init_seed: int = 0) -> "YOLO":
     """Return a YOLO detector with exactly ``len(TARGET_CLASSES)`` classes.
 
@@ -39,6 +53,7 @@ def build_model(weights: str = "yolov8n.pt", init_seed: int = 0) -> "YOLO":
     from ultralytics import YOLO
     from ultralytics.nn.tasks import DetectionModel
 
+    _disable_ultralytics_mlflow()
     nc = len(TARGET_CLASSES)
     with torch.random.fork_rng():
         torch.manual_seed(init_seed)
@@ -129,6 +144,7 @@ def train_one_round(
     ``nbs`` (nominal batch size) enables gradient accumulation so a small
     ``batch`` can keep the canonical effective batch on a low-VRAM GPU.
     """
+    _disable_ultralytics_mlflow()
     if not run_val:
         data_yaml = val_stub_data_yaml(data_yaml, Path(project) / name, n_images=val_stub_images)
     overrides: dict[str, Any] = dict(
