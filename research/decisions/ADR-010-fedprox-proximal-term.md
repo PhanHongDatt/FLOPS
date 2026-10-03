@@ -38,5 +38,11 @@ mu = 0 no-op; frozen params skipped; strategy builds and sends `proximal_mu`; la
 
 ## Not covered
 
-SCAFFOLD still applies no control-variate correction during local training and loses `c_i`
-when Flower recreates clients each round — **not reportable** until fixed (separate ADR).
+SCAFFOLD (reviewed 2026-10-03) is **blocked in `_DISABLED_ALGORITHMS`**: `ScaffoldClient`
+(1) applies no `(c − c_i)` correction during local training, (2) computes `Δc_i` with `−c_i`
+instead of `−c` (Karimireddy et al. 2020, Alg. 1 Option II: `c_i⁺ = c_i − c + (x − y_i)/(K η_l)`),
+(3) uses `K = local_epochs` instead of the number of local optimizer steps, and (4) loses `c_i`
+between rounds because Flower recreates clients. Ultralytics' SGD momentum (0.937), weight decay,
+EMA and gradient accumulation also change the Option II scaling (≈1/(1−β) ≈ 16× for the
+update-to-gradient ratio). A faithful version needs its own ADR. The server strategy itself
+follows Algorithm 1. FedNova not reviewed here.

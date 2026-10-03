@@ -98,6 +98,15 @@ _ABLATIONS: dict[str, dict[str, object]] = {
 # (labeling one algorithm's results as another).
 _DISABLED_ALGORITHMS: dict[str, str] = {
     # FedProx re-enabled 2026-10-03: proximal term implemented (ADR-010).
+    "SCAFFOLD": (
+        "SCAFFOLD is disabled: ScaffoldClient applies no (c - c_i) gradient correction "
+        "during local training, computes delta_c_i with -c_i instead of -c (paper: "
+        "c_i+ = c_i - c + (x - y_i)/(K eta_l)), uses K = local epochs instead of local "
+        "optimizer steps, and loses c_i between rounds because Flower recreates clients. "
+        "Ultralytics' SGD momentum / weight decay / gradient accumulation also change the "
+        "Option II scaling. Results would be FedAvg-like runs labelled SCAFFOLD "
+        "(CLAUDE.md §22). Needs an ADR + faithful implementation before re-enabling."
+    ),
 }
 
 

@@ -104,3 +104,13 @@ def test_launcher_no_longer_blocks_fedprox():
 
     assert "FedProx" not in _DISABLED_ALGORITHMS
     assert _STRATEGY_CLIENTS["FedProx"] is FedProxClient
+
+
+def test_launcher_blocks_unfaithful_scaffold():
+    """ScaffoldClient applies no (c - c_i) correction, uses -c_i instead of -c, K =
+    epochs instead of local steps, and loses c_i between rounds: results would be
+    FedAvg-like runs labelled SCAFFOLD (CLAUDE.md §22)."""
+    from scripts.run_fl_experiment import _DISABLED_ALGORITHMS
+
+    assert "SCAFFOLD" in _DISABLED_ALGORITHMS
+    assert "c_i" in _DISABLED_ALGORITHMS["SCAFFOLD"]
