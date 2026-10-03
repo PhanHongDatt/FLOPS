@@ -277,6 +277,32 @@ S1b (bus có ở C2 và C3; truck có ở C0, C1, C3). Hệ quả:
 | FN bus (conf 0,25) | 942 | 1.376 | 1.371 |
 | Recall bus @0,25 = 1 − FN/1.597 | 41,0 % | 13,8 % | 14,2 % |
 
+**Đường hội tụ s5b** (eval toàn bộ val mỗi 5 round) `[ĐO]`:
+
+| round | mAP50 control | mAP50 A2b | mAP50 A4b | AP50 bus control | AP50 bus A2b | AP50 bus A4b |
+|---:|---:|---:|---:|---:|---:|---:|
+| 5 | 0,2925 | 0,2770 | 0,2680 | 0,2593 | 0,2086 | 0,1663 |
+| 10 | 0,3061 | 0,2930 | 0,2857 | 0,2845 | 0,2506 | 0,2188 |
+| 15 | 0,3076 | 0,2884 | 0,2911 | 0,2964 | 0,2320 | 0,2205 |
+| 20 | **0,3142** | 0,2867 | **0,2937** | **0,3066** | 0,2236 | **0,2555** |
+| 25 | 0,2984 | 0,2861 | 0,2732 | 0,2729 | 0,2195 | 0,1752 |
+| 30 | 0,2911 | 0,2839 | 0,2846 | 0,2556 | 0,2219 | 0,2160 |
+
+**Hai quan sát quan trọng về độ tin cậy:**
+1. **Không đơn điệu, có dấu hiệu quá khớp.** Đối chứng đạt đỉnh ở round 20 rồi giảm 0,023 mAP50 và
+   0,051 AP50 bus tới round 30. Với 2.000 ảnh/client và lr cố định 0,01 không decay, mỗi client đã đi
+   qua dữ liệu của mình 30 lần `[SUY LUẬN]`.
+2. **Dao động giữa hai lần eval liền nhau rất lớn**: AP50 bus của A4b đi 0,2555 → 0,1752 → 0,2160,
+   biên độ ±0,04–0,08. Biên độ này **lớn hơn** chênh lệch cuối giữa các arm (ví dụ A4b − A2b = −0,006).
+   Vì vậy chỉ so ở round cuối với 1 seed là không đủ tin cậy.
+
+**Quy tắc so sánh (khai báo trước khi đọc s5a, CLAUDE.md §20):**
+- **Chính:** trung bình 3 lần eval cuối (round 20, 25, 30), cho **mọi arm như nhau**.
+- **Phụ:** giá trị ở round cuối (30).
+- **Không dùng** "round tốt nhất" để so sánh: chọn theo tập val chính là chọn trên tập test, nên luôn lạc quan.
+
+Theo quy tắc chính, AP50 bus: đối chứng **0,2784**, A2b **0,2217**, A4b **0,2156**.
+
 **s5a (A0, FedProx, A1, A3 trên S1b):** ⏳ *đang chạy, sẽ được điền vào bảng tổng hợp ở §5.4.*
 
 **Quan sát từ s5b** (chưa phải kết luận về phương pháp, vì thiếu A0@S1b để so):
