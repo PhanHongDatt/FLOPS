@@ -77,9 +77,9 @@ print("GPU:", torch.cuda.get_device_name(0))
 
 # %%
 WORK = Path("/kaggle/working")
-YOLO_ROOT = WORK / "data" / "bdd100k_yolo"
+YOLO_ROOT = Path("/kaggle/tmp/data/bdd100k_yolo")   # outside /kaggle/working (500-item output limit)
 DATA_YAML = YOLO_ROOT / "data.yaml"
-PARTITION_DIR = WORK / "partitions" / "s1_mc"
+PARTITION_DIR = Path("/kaggle/tmp/data/partitions") / "s1_mc"
 MANIFEST = PARTITION_DIR / "manifest.yaml"
 MLFLOW_URI = f"file://{WORK}/mlruns"
 

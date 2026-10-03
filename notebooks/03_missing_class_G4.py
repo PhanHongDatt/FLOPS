@@ -85,8 +85,11 @@ from src.utils.kaggle_paths import find_bdd100k_root
 BDD100K_RAW = find_bdd100k_root()
 print("BDD100K_RAW:", BDD100K_RAW)
 WORK = Path("/kaggle/working")
-YOLO_ROOT = WORK / "data" / "bdd100k_yolo"
-PARTITIONS_DIR = WORK / "data" / "partitions"
+# Converted dataset + partitions live OUTSIDE /kaggle/working: Kaggle saves an
+# output only if it has <= 500 items, and ~80k label files there lost a whole run (s2 v2).
+DATA_TMP = Path("/kaggle/tmp/data")
+YOLO_ROOT = DATA_TMP / "bdd100k_yolo"
+PARTITIONS_DIR = DATA_TMP / "partitions"
 ARTIFACTS_DIR = REPO_ROOT / "artifacts"
 MLFLOW_URI = f"file://{WORK / 'mlruns'}"
 
@@ -290,25 +293,12 @@ print(f"\n✅ Saved to {G4_RESULTS_DIR}")
 # Pass/fail: pre-registered rule in `research/feasibility/F2/README.md`.
 
 # %%
-def find_g2_weights() -> Path:
-    """G2 checkpoint from this session (notebook 02) or an attached output dataset.
+from src.utils.kaggle_paths import find_g2_weights
 
-    train_centralized.py writes it to
-    artifacts/runs/G2-centralized_<run_class>_seed42_centralized/checkpoint/train/weights/best.pt;
-    notebook 02 Cell 7 exports that run as flops_export/baseline_*/G2/.
-    """
-    patterns = [
-        (ARTIFACTS_DIR / "runs", "G2-centralized_*/checkpoint/train/weights/best.pt"),
-        (WORK / "flops_export", "baseline_*/G2/checkpoint/train/weights/best.pt"),
-        (Path("/kaggle/input"), "**/G2/checkpoint/train/weights/best.pt"),
-    ]
-    for root, pattern in patterns:
-        hits = sorted(root.glob(pattern), key=lambda p: p.stat().st_mtime) if root.exists() else []
-        if hits:
-            return hits[-1]
-    return WORK / "g2" / "best.pt"   # placeholder → cells below print [SKIP]
-
-G2_WEIGHTS = find_g2_weights()   # override manually if needed (also used by Cell 6)
+# Live G2 run of this session first, then an attached earlier session's output
+# (flops_results.zip from kernel_sources, extracted on demand).
+G2_WEIGHTS = find_g2_weights(search_roots=[ARTIFACTS_DIR / "runs"]) or WORK / "g2" / "best.pt"
+# ↑ override manually if needed (also used by Cell 6); the placeholder makes the cells below [SKIP]
 print("G2_WEIGHTS:", G2_WEIGHTS, "(exists)" if G2_WEIGHTS.exists() else "(NOT FOUND)")
 F2_OUT = WORK / "flops_export" / "F2"
 

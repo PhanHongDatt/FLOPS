@@ -32,3 +32,35 @@ def test_folder_without_labels_is_ignored(tmp_path):
 def test_missing_dataset_raises(tmp_path):
     with pytest.raises(FileNotFoundError, match="bdd100k-flops"):
         find_bdd100k_root(tmp_path)
+
+
+def _g2_zip(path, rel="artifacts/runs/G2-centralized_feasibility_seed42_centralized/checkpoint/train/weights/best.pt"):
+    import zipfile
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path, "w") as z:
+        z.writestr(rel, b"weights")
+    return path
+
+
+def test_find_g2_weights_inside_attached_results_zip(tmp_path):
+    from src.utils.kaggle_paths import find_g2_weights
+    _g2_zip(tmp_path / "input" / "flops-s2-baseline-g2-g3" / "flops_results.zip")
+    found = find_g2_weights(input_root=tmp_path / "input", search_roots=[], extract_to=tmp_path / "x")
+    assert found is not None and found.read_bytes() == b"weights"
+    assert found.name == "best.pt"
+
+
+def test_find_g2_weights_prefers_live_run(tmp_path):
+    from src.utils.kaggle_paths import find_g2_weights
+    live = tmp_path / "runs" / "G2-centralized_feasibility_seed42_centralized" / "checkpoint" / "train" / "weights"
+    live.mkdir(parents=True)
+    (live / "best.pt").write_bytes(b"live")
+    _g2_zip(tmp_path / "input" / "k" / "flops_results.zip")
+    found = find_g2_weights(input_root=tmp_path / "input", search_roots=[tmp_path / "runs"],
+                            extract_to=tmp_path / "x")
+    assert found.read_bytes() == b"live"
+
+
+def test_find_g2_weights_none(tmp_path):
+    from src.utils.kaggle_paths import find_g2_weights
+    assert find_g2_weights(input_root=tmp_path / "nope", search_roots=[], extract_to=tmp_path / "x") is None

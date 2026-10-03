@@ -204,8 +204,11 @@ if not BDD100K_RAW.exists():
     )
 
 WORK = Path("/kaggle/working")
-YOLO_ROOT = WORK / "data" / "bdd100k_yolo"
-PARTITIONS_DIR = WORK / "data" / "partitions"
+# Converted dataset + partitions live OUTSIDE /kaggle/working: Kaggle saves an
+# output only if it has <= 500 items, and ~80k label files there lost a whole run (s2 v2).
+DATA_TMP = Path("/kaggle/tmp/data")
+YOLO_ROOT = DATA_TMP / "bdd100k_yolo"
+PARTITIONS_DIR = DATA_TMP / "partitions"
 ARTIFACTS_DIR = REPO_ROOT / "artifacts"
 MLFLOW_URI = f"file://{WORK / 'mlruns'}"
 

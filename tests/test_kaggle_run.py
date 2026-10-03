@@ -55,7 +55,9 @@ def test_notebook_pins_commit_and_applies_overrides(tmp_path):
     body = "\n".join(sources)
     assert "RUN_C1 = False" in body and "RUN_C1 = True" not in body
     assert "SEEDS = [42]\n" in body
-    assert "bdd100k_yolo" in sources[-1]          # cleanup cell keeps the output small
+    # results are zipped at the end AND after any failed cell (500-item output limit)
+    assert "finalize_outputs" in sources[-1]
+    assert "post_run_cell" in sources[0] and "error_in_exec" in sources[0]
 
 
 def test_override_must_match_exactly_once(tmp_path):
@@ -76,3 +78,16 @@ def test_repo_sessions_file_is_valid():
     for sid, s in cfg["sessions"].items():
         for src in s.get("kernel_sources", []):
             assert src in cfg["sessions"], f"{sid} depends on unknown session {src}"
+
+
+def test_extract_results_zip(tmp_path):
+    import zipfile
+
+    from scripts.kaggle_run import extract_results
+
+    z = tmp_path / "flops_results.zip"
+    with zipfile.ZipFile(z, "w") as f:
+        f.writestr("artifacts/runs/r/metrics.csv", "metric,value\n")
+    out = extract_results(tmp_path)
+    assert (out / "artifacts" / "runs" / "r" / "metrics.csv").exists()
+    assert extract_results(tmp_path / "empty") is None

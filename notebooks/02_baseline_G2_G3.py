@@ -90,8 +90,11 @@ from src.utils.kaggle_paths import find_bdd100k_root
 BDD100K_RAW = find_bdd100k_root()
 print("BDD100K_RAW:", BDD100K_RAW)
 WORK = Path("/kaggle/working")
-YOLO_ROOT = WORK / "data" / "bdd100k_yolo"
-PARTITIONS_DIR = WORK / "data" / "partitions"
+# Converted dataset + partitions live OUTSIDE /kaggle/working: Kaggle saves an
+# output only if it has <= 500 items, and ~80k label files there lost a whole run (s2 v2).
+DATA_TMP = Path("/kaggle/tmp/data")
+YOLO_ROOT = DATA_TMP / "bdd100k_yolo"
+PARTITIONS_DIR = DATA_TMP / "partitions"
 ARTIFACTS_DIR = REPO_ROOT / "artifacts"
 MLFLOW_URI = f"file://{WORK / 'mlruns'}"
 

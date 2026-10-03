@@ -120,7 +120,11 @@ python scripts/kaggle_run.py s1 output   # tải output + log về kaggle/output
   để xem trước, không đẩy lên.
 - Notebook tự dò đường mount dataset (`src/utils/kaggle_paths.py`), vì kernel đẩy qua API có thể thấy
   `/kaggle/input/bdd100k-flops/` thay vì `/kaggle/input/datasets/phdatt/bdd100k-flops/`.
-- Ô cuối tự xóa `data/bdd100k_yolo` để output nhẹ; giữ lại `flops_export/` và `FLOPS/artifacts/`.
+- **Kaggle chỉ lưu output khi `/kaggle/working` có ≤ 500 file** (s2 v2 mất trắng checkpoint G2 vì vượt giới hạn).
+  Vì vậy dataset YOLO và partition nằm ở `/kaggle/tmp/data` (không tính vào output), còn kết quả được gói
+  thành **`flops_results.zip`** ở cuối notebook **và ngay khi một cell bị lỗi** (hook `post_run_cell`).
+  Lệnh `output` ở local tự giải nén zip; phiên 3 tự lấy checkpoint G2 từ zip của phiên 2.
+- Bước dài có watchdog: hủy nếu 60 phút không có tiến triển, cộng giới hạn tổng thời gian.
 - Theo dõi log trực tiếp: mở `https://www.kaggle.com/code/phdatt/<slug>` (link được in ra sau `push`).
 - Chạy `s3` **sau khi `s2` đã complete**, vì `kernel_sources` lấy output của version mới nhất của `s2`.
 

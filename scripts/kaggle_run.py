@@ -33,13 +33,24 @@ if not REPO.exists():
     subprocess.check_call(["git", "clone", "{repo_url}", str(REPO)])
 subprocess.check_call(["git", "-C", str(REPO), "checkout", "--quiet", "{sha}"])
 print("FLOPS commit:", subprocess.check_output(["git", "-C", str(REPO), "rev-parse", "HEAD"], text=True).strip())
+
+# Kaggle saves an output only if /kaggle/working holds <= 500 items. Pack results
+# into flops_results.zip after ANY failed cell (papermill stops there, so the last
+# cell would never run) — s2 v2 lost a finished G2 run this way.
+import sys
+sys.path.insert(0, str(REPO))
+from src.utils.kaggle_finalize import finalize_outputs
+
+def _flops_finalize_on_error(result):
+    if result.error_in_exec is not None or result.error_before_exec is not None:
+        print("cell failed -> results packed:", finalize_outputs())
+
+get_ipython().events.register("post_run_cell", _flops_finalize_on_error)
 '''
 
-_CLEANUP_CELL = '''# Auto-generated: drop the converted dataset (symlinks + ~80k label files) so the
-# kernel output stays small; flops_export/ and FLOPS/artifacts/ are kept.
-import shutil
-shutil.rmtree("/kaggle/working/data/bdd100k_yolo", ignore_errors=True)
-print("cleanup done")
+_CLEANUP_CELL = '''# Auto-generated: pack results into one zip and drop bulky trees (500-item output limit).
+from src.utils.kaggle_finalize import finalize_outputs
+print("results packed:", finalize_outputs())
 '''
 
 
@@ -97,6 +108,18 @@ def build_session(cfg: dict[str, Any], sid: str, sha: str, build_root: Path) -> 
     return out
 
 
+def extract_results(folder: Path) -> Path | None:
+    """Unpack a downloaded flops_results.zip next to it; return the folder or None."""
+    import zipfile
+
+    archive = Path(folder) / "flops_results.zip"
+    if not archive.exists():
+        return None
+    with zipfile.ZipFile(archive) as z:
+        z.extractall(folder)
+    return Path(folder)
+
+
 def _git(*args: str) -> str:
     return subprocess.check_output(["git", "-C", str(ROOT), *args], text=True).strip()
 
@@ -144,7 +167,10 @@ def main() -> None:
     else:
         dest = OUTPUT_DIR / args.session
         dest.mkdir(parents=True, exist_ok=True)
-        sys.exit(_kaggle("kernels", "output", kernel, "-p", str(dest)))
+        code = _kaggle("kernels", "output", kernel, "-p", str(dest))
+        if extract_results(dest):
+            print(f"extracted flops_results.zip into {dest}")
+        sys.exit(code)
 
 
 if __name__ == "__main__":
