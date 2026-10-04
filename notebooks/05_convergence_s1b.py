@@ -100,6 +100,7 @@ print("matched control:", yaml.safe_load((CTRL / "match_report.yaml").read_text(
 from src.utils.proc import run_logged
 
 ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this
+SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)
 RHO = "0.25"
 
 def arm_command(arm: str) -> tuple[list[str], Path]:
@@ -110,7 +111,7 @@ def arm_command(arm: str) -> tuple[list[str], Path]:
         "--partition", str(partition / "manifest.yaml"),
         "--data-yaml-dir", str(partition),
         "--run-class", "feasibility", "--exp-config", str(EXP_CFG),
-        "--seed", "42", "--mlflow-uri", MLFLOW_URI,
+        "--seed", str(SEED), "--mlflow-uri", MLFLOW_URI,
         "--mlflow-experiment", "S1b-2k-convergence",
         "--global-data-yaml", str(DATA_YAML), "--resume",
     ]
@@ -130,6 +131,9 @@ for arm in ARMS:
     except Exception as exc:   # keep going: one arm must not cost the others
         outcomes[arm] = f"failed: {type(exc).__name__}"
         print(f"⚠️  {arm} failed: {exc}")
+    # pack what exists so far: a session cut short (quota, crash) keeps finished arms
+    from src.utils.kaggle_finalize import finalize_outputs
+    print("packed so far:", finalize_outputs(WORK, drop=False))
 print(outcomes)
 
 # %% [markdown]

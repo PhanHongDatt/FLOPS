@@ -55,3 +55,15 @@ def test_nothing_to_pack(tmp_path):
     work = tmp_path / "working"
     work.mkdir()
     assert finalize_outputs(work) is None
+
+
+def test_pack_without_dropping_keeps_working_trees(tmp_path):
+    """Called after every arm: results so far are zipped, the run keeps going."""
+    work = tmp_path / "working"
+    _tree(work / "FLOPS" / "artifacts" / "runs", 4)
+    archive = finalize_outputs(work, drop=False)
+    assert archive.exists()
+    assert (work / "FLOPS" / "artifacts" / "runs").exists()      # nothing removed
+    _tree(work / "FLOPS" / "artifacts" / "runs" / "arm2", 2)
+    names = zipfile.ZipFile(finalize_outputs(work, drop=False)).namelist()
+    assert sum(n.startswith("artifacts/runs/") for n in names) == 6

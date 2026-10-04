@@ -49,3 +49,17 @@ sessions:
     notebook: notebooks/05_convergence_s1b.py
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A2b", "A4b", "A0@control"]'
+
+  s6a:  # extra seed 123 for H1 + full method (A0, A0@control, A4b), same partition/protocol as s5
+    slug: flops-s6a-seed123
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0", "A0@control", "A4b"]'
+      'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 123'
+
+  s6b:  # extra seed 2024 (same arms)
+    slug: flops-s6b-seed2024
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0", "A0@control", "A4b"]'
+      'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 2024'

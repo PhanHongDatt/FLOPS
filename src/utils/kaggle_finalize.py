@@ -22,9 +22,10 @@ _PACK = (("FLOPS/artifacts/runs", "artifacts/runs"), ("flops_export", "flops_exp
 _DROP = ("data", "runs", "FLOPS", "flops_export", "mlruns", ".ultralytics")
 
 
-def finalize_outputs(working: Path = Path("/kaggle/working")) -> Path | None:
-    """Add results to ``flops_results.zip`` (merging with an earlier archive) and
-    remove the bulky directories. Returns the archive path, or None if nothing to pack."""
+def finalize_outputs(working: Path = Path("/kaggle/working"), drop: bool = True) -> Path | None:
+    """Add results to ``flops_results.zip`` (merging with an earlier archive) and, when
+    ``drop``, remove the bulky directories. ``drop=False`` packs mid-run (after each arm)
+    without disturbing the session. Returns the archive path, or None if nothing to pack."""
     working = Path(working)
     archive = working / ARCHIVE
     files: dict[str, Path] = {}
@@ -48,6 +49,7 @@ def finalize_outputs(working: Path = Path("/kaggle/working")) -> Path | None:
             out.write(path, name)
     tmp.replace(archive)
 
-    for rel in _DROP:
-        shutil.rmtree(working / rel, ignore_errors=True)
+    if drop:
+        for rel in _DROP:
+            shutil.rmtree(working / rel, ignore_errors=True)
     return archive
