@@ -56,6 +56,10 @@ gates:
       2026-10-02: F3 tooling code_ready (src/experiments/f3.py, scripts/run_f3.py,
       notebook 03 Cell 6); pre-registered rule DRAFT in research/feasibility/F3/README.md
       awaits author approval (tau_AP). Needs G2 checkpoint + GPU.
+      2026-10-04 prediction evidence (exploratory, 1 seed, S1b-2k, 30 rounds): FedAvg on S1b
+      vs matched control AP50 bus 0.2314 vs 0.2783 (-0.047, ~4 sigma of a rough noise estimate),
+      recall@0.25 12.7% vs 38.9%. Control holds 2.03x the bus boxes. Still needs F3 parameter
+      evidence and 3 seeds before G4 can pass.
 
   G5:
     name: YOLO class-intervention feasibility established

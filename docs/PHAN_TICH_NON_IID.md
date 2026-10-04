@@ -18,7 +18,9 @@
 | Cơ chế gây quên? | Với client không có bus, BCE chỉ sinh **gradient đẩy logit bus xuống**: 134.400 số hạng âm mỗi batch 16 ảnh, 0 số hạng dương | `[YOLO-DOC]` + tính toán §3.1 |
 | Phần tham số "riêng của lớp"? | Chỉ **780 / 3.022.085 phần tử (0,026 %)**: 6 tensor `cv3.{0,1,2}.2` | `[ĐO]` F1 §2.3 |
 | Phương pháp đề xuất làm gì? | A3: gộp hàng tham số của lớp *c* chỉ từ client có lớp *c*; A2b: nhân BCE của lớp vắng với ρ = 0,25 (giảm 4× áp lực đẩy xuống); A4b = A2b + A3 | §4 |
-| Kết quả hiện có (S1b-2k, 30 round, 1 seed)? | Xem §5.3. **Thăm dò**: G4/G5 chưa pass, 1 seed | `[ĐO]` |
+| Missing-Class có gây hại không? | **Có**: FedAvg trên S1b mất −0,047 AP50 bus (−16,9 %) so với đối chứng matched; recall bus @0,25 giảm 38,9 % → 12,7 % | `[ĐO]` §5.4–5.5 |
+| Phương pháp đề xuất có khắc phục được không? | **Chưa** ở dạng hiện tại: A3 −0,024, A2b −0,010, A4b −0,016 AP50 bus so với FedAvg; FP bus tăng 82–202 %, FN gần như không đổi | `[ĐO]` §5.5 |
+| Độ tin cậy? | 1 seed, thăm dò (G4/G5 chưa pass). Sàn nhiễu ước lượng ≈ 0,023 AP50 bus từ cặp A3 ≡ A1 | §5.4 |
 
 ---
 
@@ -314,9 +316,70 @@ Theo quy tắc chính, AP50 bus: đối chứng **0,2784**, A2b **0,2217**, A4b 
 3. motorcycle ≈ 0,005 AP50 ở mọi arm: với 347 box train toàn federation, lớp này **không học được** ở quy
    mô 2k, nên không dùng để kết luận.
 
-### 5.4 Bảng tổng hợp S1b-2k
+### 5.4 Bảng tổng hợp S1b-2k: 7 arm, 30 round, seed 42 `[ĐO]`
 
-⏳ Được điền sau khi s5a hoàn tất.
+**Quy tắc chính** (khai báo ở §5.3 trước khi đọc s5a): trung bình eval ở round 20, 25, 30. Δ so với A0 (FedAvg trên S1b).
+
+| Arm | Vai trò | mAP50 | AP50 bus | Δ bus vs A0 | AP50 truck | FP bus @0,25 | FN bus @0,25 | Recall bus @0,25 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| A0 @ đối chứng | đối chứng H1 (bus ở cả 4 client) | **0,3012** | **0,2783** | **+0,0469 (+20,3 %)** | 0,2977 | 2.705 | 975 | 38,9 % |
+| **A0 FedAvg** | baseline | 0,2879 | 0,2314 | 0 | 0,2907 | 298 | 1.394 | 12,7 % |
+| FedProx μ 0,01 | baseline | 0,2903 | 0,2341 | +0,0027 (+1,2 %) | 0,2957 | 307 | 1.409 | 11,8 % |
+| A1 class-count | đối chứng H3 | 0,2837 | 0,2108 | −0,0206 (−8,9 %) | 0,2930 | 448 (+50 %) | 1.398 | 12,5 % |
+| A3 class-aware | phương pháp, server | 0,2841 | 0,2075 | −0,0239 (−10,3 %) | 0,2940 | 541 (+82 %) | 1.396 | 12,6 % |
+| A2b ρ 0,25 | phương pháp, client | 0,2855 | 0,2217 | −0,0097 (−4,2 %) | 0,2903 | 617 (+107 %) | 1.383 | 13,4 % |
+| **A4b = A2b + A3** | **phương pháp đầy đủ** | 0,2838 | 0,2156 | −0,0158 (−6,8 %) | 0,2895 | 900 (+202 %) | 1.341 | 16,0 % |
+
+![AP50 bus và FP bus theo round](../research/experiment_registry/reports/2026-10-04_s5_bus_curves.png)
+
+Giá trị ở round cuối (quy tắc phụ): AP50 bus = 0,2556 / 0,2247 / 0,2252 / 0,1676 / 0,1809 / 0,2219 / 0,2160
+(cùng thứ tự). Thứ hạng giữa các arm không đổi so với quy tắc chính, trừ việc A1 và A3 đổi chỗ cho nhau.
+
+**Sàn nhiễu** (§4.2: A3 ≡ A1 về thuật toán trong S1b, nên mọi chênh lệch giữa hai arm này là nhiễu chạy lại):
+- Theo từng lần eval: |A3 − A1| trung bình **0,0225**, tối đa **0,052** AP50 bus.
+- Theo quy tắc chính: |A3 − A1| = **0,0033**.
+- Ước lượng thô (một cặp): độ lệch chuẩn mỗi lần eval ≈ 0,014 ⇒ hiệu hai run (trung bình 3 eval) có
+  độ lệch chuẩn ≈ 0,0115 ⇒ **ngưỡng phân biệt ≈ 2σ ≈ 0,023 AP50 bus**. Cần 3 seed để có ước lượng thật.
+
+### 5.5 Diễn giải (tách quan sát và suy luận, CLAUDE.md §24)
+
+**H1: Missing-Class gây thiệt hại cho lớp vắng.** ✅ *Được ủng hộ (thăm dò, 1 seed).*
+- Quan sát: so với đối chứng, A0 trên S1b mất **−0,047 AP50 bus (−16,9 %)**, khoảng **4σ** theo ước lượng
+  trên. Recall bus ở 0,25 tụt từ 38,9 % xuống 12,7 % (FN tăng 975 → 1.394, +43 %).
+- Lớp không vắng gần như không đổi: car 0,6243 so với 0,6260; truck (vắng ở C2 trong **cả hai**
+  partition) 0,2977 so với 0,2907.
+- Giới hạn: đối chứng có 2,03× box bus (§2.2), nên đây là hiệu ứng gộp của "vắng ở 2/4 client" và
+  "ít dữ liệu bus hơn". Cần bằng chứng tham số (F3) mới đủ G4 (CLAUDE.md §8).
+
+**H3: gộp nhận biết lớp ở server (A3, và đối chứng A1).** ❌ *Không được ủng hộ trong thí nghiệm này.*
+- Quan sát: A1 và A3 có AP50 bus thấp hơn A0 lần lượt 0,021 và 0,024 (sát ngưỡng 2σ). **FP bus tăng
+  50–82 %, trong khi FN gần như không đổi** (1.394 → 1.396–1.398).
+- Suy luận: loại C0/C1 khỏi hàng bus không giúp mô hình **tìm thêm bus** (FN không giảm), mà lại làm nó
+  **báo nhầm bus nhiều hơn**. Ảnh của C0/C1 không có bus, nên đóng vai trò **mẫu âm hợp lệ** ("đây là
+  cảnh không có bus") cho hàng bus. Bỏ chúng đi thì mất tín hiệu hiệu chỉnh này.
+- Đúng như dự đoán ở §4.2, A3 và A1 không phân biệt được với nhau (0,0033).
+
+**H2: bảo toàn phía client (A2b, ρ 0,25).** ❌ *Không được ủng hộ ở ρ = 0,25.*
+- Quan sát: AP50 bus −0,010 so với A0 (dưới ngưỡng nhiễu), **FP bus +107 %**, FN −0,7 %.
+- Đây chính là **dự đoán có thể bác bỏ** đã ghi trong ADR-006 và plan.md §6.1: giảm áp lực âm thì FP tăng.
+  Ở ρ = 0,25 nó **đã xảy ra**, và không đi kèm cải thiện recall đáng kể.
+
+**Phương pháp đầy đủ A4b.** ❌ *Không vượt FedAvg trong thí nghiệm này.*
+- AP50 bus −0,016 so với A0 (dưới ngưỡng nhiễu); recall tăng nhẹ (12,7 % → 16,0 %), nhưng **FP bus gấp
+  3,0 lần** (298 → 900).
+- **Mẫu nhất quán:** càng giảm tín hiệu âm từ client vắng bus, FP bus càng tăng:
+  A0 298 → A1 448 → A3 541 → A2b 617 → A4b 900. Trong khi đó FN chỉ dao động trong khoảng 1.341–1.409.
+
+**FedProx.** Không khác FedAvg (+0,003 AP50 bus, dưới ngưỡng nhiễu), giống như trên S0.
+
+**Hội tụ.** Mọi arm đạt đỉnh trong khoảng round 10–20 rồi giảm (ví dụ A0 mAP50 0,292 ở r20 → 0,286 ở
+r30; đối chứng 0,314 → 0,291). Với 2.000 ảnh/client và lr cố định 0,01, **30 round là quá dài**: hiện
+tượng quá khớp xuất hiện sau khoảng 20 round `[SUY LUẬN]`.
+
+> **Kết luận thăm dò:** trong thiết lập này (S1b-2k, 30 round, 1 seed), Missing-Class **có gây hại**
+> cho lớp vắng (H1), nhưng **phương pháp đề xuất ở dạng hiện tại không khắc phục được**: nó đổi một chút
+> recall lấy nhiều FP hơn. Theo CLAUDE.md §22, đây là một **kết quả âm hợp lệ** và phải được báo cáo,
+> không được chỉnh thí nghiệm để ép ra kết quả dương. Cần 3 seed để khẳng định.
 
 ---
 
@@ -334,17 +397,20 @@ Theo quy tắc chính, AP50 bus: đối chứng **0,2784**, A2b **0,2217**, A4b 
 
 ---
 
-## 7. Lộ trình giải quyết Non-IID (định lượng theo ngân sách)
+## 7. Lộ trình giải quyết Non-IID (định lượng theo ngân sách, cập nhật theo kết quả §5.5)
 
-| Bước | Mục tiêu | Chi phí GPU | Điều kiện để chuyển bước |
+Kết quả §5.5 cho thấy vấn đề **không** nằm ở chỗ client vắng bus "đẩy sai" hàng bus (bỏ hoặc giảm tín hiệu
+đó chỉ làm FP tăng), mà ở **thiếu tín hiệu dương** (FN cao: recall 12,7 % so với 38,9 % ở đối chứng có 2,03×
+box bus). Lộ trình được điều chỉnh theo hướng đó:
+
+| Bước | Mục tiêu | Chi phí GPU | Ghi chú |
 |---|---|---:|---|
-| 1. Đọc s5a, tính sàn nhiễu \|A3 − A1\| | Biết chênh lệch nào là thật | 0 | — |
-| 2. F2 + F3 (phiên 3) | G5: hàng lớp có tác động riêng không? Quên nằm ở đâu? | ~2 giờ | Chốt τ_AP |
-| 3. Quét ρ (A2b), 1 seed | Chọn ρ* trước khi chạy main (không tune trên kết quả cuối) | ~3,3 giờ | — |
-| 4. S1d hoặc τ_elig = 50 | Cho H3 khác A1 | ~1–2 giờ/arm | — |
-| 5. Main: 3 seed × {A0, FedProx, A1, A3, A2b(ρ*), A4b, A0@control} | Kết quả báo cáo được (§14, §22) | ~23 giờ (chia 2 tuần quota) | G4 + G5 pass |
-
----
+| 1. 3 seed cho A0, A0@control, A4b (và A3) | Khẳng định hoặc bác bỏ H1 và kết quả âm của phương pháp với std thật | ~4 arm × 2 seed thêm × ~70 phút ≈ 9,5 giờ | Bắt buộc trước mọi kết luận (§14) |
+| 2. Tách tập validation khỏi tập test | Chọn round / dừng sớm không dùng tập test (hiện quá khớp sau ~20 round) | ~0 (chia lại val) | Cần ADR |
+| 3. Quét ρ ∈ {0,5; 0,75} cho A2b | Xem có vùng ρ nào cải thiện recall mà không làm FP tăng vọt | ~2 × 70 phút | ρ = 1 chính là A0 |
+| 4. F2 + F3 | G5: quên nằm ở hàng lớp hay ở đặc trưng dùng chung | ~2 giờ | Cần chốt τ_AP |
+| 5. Đối chứng cân số box bus | Tách "vắng ở client" khỏi "ít dữ liệu bus" trong H1 | ~70 phút | Đối chứng có cùng 1.367 box bus |
+| 6. Main 3 seed đủ 7 arm | Kết quả báo cáo được | ~23 giờ (2 tuần quota) | Sau G4 + G5 |
 
 ## 8. Nguồn
 
