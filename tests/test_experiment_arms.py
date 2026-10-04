@@ -23,9 +23,13 @@ from scripts.run_fl_experiment import (  # noqa: E402
     _STRATEGIES,
     _pick_client_class,
     _resolve_arms,
+    exp_id_for_arm,
 )
 from src.federated.client import YOLOFlowerClient, derive_local_seed  # noqa: E402
 from src.federated.client_variants import (  # noqa: E402
+    EFLClient,
+    FocalClient,
+    NTDClient,
     FedNovaClient,
     LossPreservationClient,
     PreservationClient,
@@ -41,7 +45,33 @@ def _args(**kw) -> argparse.Namespace:
 
 # ── ablation presets ──────────────────────────────────────────────────────
 def test_every_plan_arm_has_a_preset():
-    assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b"}
+    assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c"}
+
+
+@pytest.mark.parametrize("arm,mech,client", [("A5", "ntd", NTDClient), ("A6", "efl", EFLClient),
+                                             ("A6c", "focal", FocalClient)])
+def test_loss_variant_arms_need_no_rho(arm, mech, client):
+    algo, m, rho = _resolve_arms(_args(ablation=arm))
+    assert (algo, m, rho) == ("FedAvg", mech, 1.0)
+    assert _pick_client_class(algo, m) is client
+    assert exp_id_for_arm(arm, m, rho) == arm
+    with pytest.raises(SystemExit):
+        _resolve_arms(_args(ablation=arm, rho=0.5))
+
+
+def test_rho_arm_ids_unchanged():
+    assert exp_id_for_arm("A4b", "preservation_loss", 0.25) == "A4b_rho0.25"
+
+
+def test_loss_variant_client_passes_spec(tmp_path, monkeypatch):
+    import src.federated.client as base
+    monkeypatch.setattr(base, "build_model", lambda w: None)
+    c = EFLClient(client_id="C0", partition_id=0, data_yaml=tmp_path / "d.yaml", weights="w",
+                  train_config={"local_epochs": 1, "batch_size": 16, "image_size": 640, "lr0": 0.01},
+                  run_dir=tmp_path)
+    spec = c._train_kwargs()["cls_loss"]
+    assert spec["kind"] == "efl"
+    assert Path(spec["state_path"]) == tmp_path / "clients" / "C0" / "efl_state.json"
 
 
 @pytest.mark.parametrize("arm", sorted(_ABLATIONS))

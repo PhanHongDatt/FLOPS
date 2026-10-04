@@ -245,3 +245,167 @@ experiments:
     report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
     notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed),
       single seed (ADR-011).
+  - id: EXP-2026-10-04-S6-A0at-control-seed123
+    gate: G4 (H1 control)
+    scenario: S1-Control-Matched-2k
+    method: A0@control
+    run_class: feasibility
+    status: completed
+    seed: 123
+    partition_id: s1_control_matched_2k_seed42
+    git_commit: 42d9d2d
+    kaggle_kernel: phdatt/flops-s6a-seed123 v2
+    results:
+      rule_mean_r20_30:
+        mAP50: 0.2923
+        AP50_bus: 0.2624
+        FP_bus: 3094.0
+        FN_bus: 887.6667
+    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
+      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
+  - id: EXP-2026-10-04-S6-A0-seed123
+    gate: G4 (H1 control)
+    scenario: S1b-2k
+    method: A0
+    run_class: feasibility
+    status: completed
+    seed: 123
+    partition_id: s1b_bus_2k_seed42
+    git_commit: 42d9d2d
+    kaggle_kernel: phdatt/flops-s6a-seed123 v2
+    results:
+      rule_mean_r20_30:
+        mAP50: 0.2873
+        AP50_bus: 0.2253
+        FP_bus: 244.0
+        FN_bus: 1430.6667
+    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
+      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
+  - id: EXP-2026-10-04-S6-A4b_rho0.25-seed123
+    gate: G6/G7 (exploratory)
+    scenario: S1b-2k
+    method: A4b_rho0.25
+    run_class: feasibility
+    status: completed
+    seed: 123
+    partition_id: s1b_bus_2k_seed42
+    git_commit: 42d9d2d
+    kaggle_kernel: phdatt/flops-s6a-seed123 v2
+    results:
+      rule_mean_r20_30:
+        mAP50: 0.2828
+        AP50_bus: 0.2099
+        FP_bus: 1022.3333
+        FN_bus: 1332.0
+    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
+      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
+  - id: EXP-2026-10-04-S6-A0at-control-seed2024
+    gate: G4 (H1 control)
+    scenario: S1-Control-Matched-2k
+    method: A0@control
+    run_class: feasibility
+    status: completed
+    seed: 2024
+    partition_id: s1_control_matched_2k_seed42
+    git_commit: 42d9d2d
+    kaggle_kernel: phdatt/flops-s6b-seed2024 v2
+    results:
+      rule_mean_r20_30:
+        mAP50: 0.3007
+        AP50_bus: 0.2793
+        FP_bus: 3467.3333
+        FN_bus: 892.6667
+    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
+      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
+  - id: EXP-2026-10-04-S6-A0-seed2024
+    gate: G4 (H1 control)
+    scenario: S1b-2k
+    method: A0
+    run_class: feasibility
+    status: completed
+    seed: 2024
+    partition_id: s1b_bus_2k_seed42
+    git_commit: 42d9d2d
+    kaggle_kernel: phdatt/flops-s6b-seed2024 v2
+    results:
+      rule_mean_r20_30:
+        mAP50: 0.2873
+        AP50_bus: 0.2267
+        FP_bus: 409.0
+        FN_bus: 1393.3333
+    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
+      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
+  - id: EXP-2026-10-04-S6-A4b_rho0.25-seed2024
+    gate: G6/G7 (exploratory)
+    scenario: S1b-2k
+    method: A4b_rho0.25
+    run_class: feasibility
+    status: completed
+    seed: 2024
+    partition_id: s1b_bus_2k_seed42
+    git_commit: 42d9d2d
+    kaggle_kernel: phdatt/flops-s6b-seed2024 v2
+    results:
+      rule_mean_r20_30:
+        mAP50: 0.2814
+        AP50_bus: 0.2146
+        FP_bus: 1115.3333
+        FN_bus: 1328.3333
+    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
+      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
+  - id: EXP-2026-10-05-S7-D1-errors
+    gate: G4 (diagnostic)
+    scenario: S1b-2k / control
+    method: D1 error decomposition (ADR-014)
+    run_class: feasibility
+    status: planned
+    seed: 42
+    kaggle_kernel: phdatt/flops-s7a-diagnostics
+    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+    notes: Round-30 checkpoints of s5a/s5b/s6a/s6b; no training.
+  - id: EXP-2026-10-05-S7-A0at-pooled
+    gate: G4 (diagnostic)
+    scenario: S1b-pooled-IID-2k
+    method: A0@pooled (D3, ADR-014)
+    run_class: feasibility
+    status: planned
+    seed: 42
+    kaggle_kernel: phdatt/flops-s7a-diagnostics
+    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+    notes: Same 8,000 images as S1b re-dealt evenly; isolates distribution from data quantity.
+  - id: EXP-2026-10-05-S7-A6c
+    gate: G6 (exploratory control)
+    scenario: S1b-2k
+    method: A6c focal loss (ADR-013)
+    run_class: feasibility
+    status: planned
+    seed: 42
+    kaggle_kernel: phdatt/flops-s7a-diagnostics
+    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+    notes: 'Control for A6: focal loss without equalisation.'
+  - id: EXP-2026-10-05-S7-A5
+    gate: G6 (exploratory)
+    scenario: S1b-2k
+    method: A5 not-true distillation (ADR-012)
+    run_class: feasibility
+    status: planned
+    seed: 42
+    kaggle_kernel: phdatt/flops-s7b-directions
+    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+    notes: FedNTD adapted to the sigmoid head; tau = beta = 1 (official defaults).
+  - id: EXP-2026-10-05-S7-A6
+    gate: G6 (exploratory)
+    scenario: S1b-2k
+    method: A6 Equalized Focal Loss (ADR-013)
+    run_class: feasibility
+    status: planned
+    seed: 42
+    kaggle_kernel: phdatt/flops-s7b-directions
+    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+    notes: EFL gamma_b 2, alpha 0.25, s 4; per-client statistics.

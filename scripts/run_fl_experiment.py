@@ -9,6 +9,7 @@ The experiment matrix has TWO independent axes (research/plan/plan.md §7.1):
     server strategy   : FedAvg | FedProx | SCAFFOLD | FedNova
                         ClassCountFedAvg (A1) | ClassAwareAgg (A3/A4)
     client mechanism  : none | preservation_param (A2a) | preservation_loss (A2b)
+                        ntd (A5) | efl (A6) | focal (A6c)
 
 ``--ablation`` is a preset that fills both plus ``--rho``; explicit flags win.
 
@@ -41,9 +42,12 @@ from src.data.partitioner import load_partition_manifest
 from src.experiments.runner import prepare_run, finalize_run
 from src.federated.client import YOLOFlowerClient
 from src.federated.client_variants import (
+    EFLClient,
     FedNovaClient,
     FedProxClient,
+    FocalClient,
     LossPreservationClient,
+    NTDClient,
     PreservationClient,
     ScaffoldClient,
 )
@@ -67,11 +71,18 @@ _STRATEGIES = (
 _CLASS_AWARE_STRATEGIES = ("ClassAwareAgg", "ClassCountFedAvg")
 
 # ── Client mechanisms ─────────────────────────────────────────────────────
-_MECHANISMS = ("none", "preservation_param", "preservation_loss")
+_MECHANISMS = ("none", "preservation_param", "preservation_loss", "ntd", "efl", "focal")
+
+# Mechanisms parameterised by rho (H2). The loss variants carry their own
+# literature defaults (ADR-012/013) and take no rho.
+_RHO_MECHANISMS = ("preservation_param", "preservation_loss")
 
 _MECHANISM_CLIENTS = {
     "preservation_param": PreservationClient,     # A2a
     "preservation_loss": LossPreservationClient,  # A2b (gated on F1 + ADR-006)
+    "ntd": NTDClient,                             # A5  (ADR-012)
+    "efl": EFLClient,                             # A6  (ADR-013)
+    "focal": FocalClient,                         # A6c (ADR-013)
 }
 
 # Strategy-specific clients used when mechanism == "none".
@@ -91,6 +102,10 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     # A4a is a numerical IDENTITY test against A3, not a separate arm (§6.3).
     "A4a": {"algorithm": "ClassAwareAgg",    "mechanism": "preservation_param"},
     "A4b": {"algorithm": "ClassAwareAgg",    "mechanism": "preservation_loss"},
+    # Directions after the s5/s6 negative result (ADR-012, ADR-013); exploratory.
+    "A5":  {"algorithm": "FedAvg",           "mechanism": "ntd"},
+    "A6":  {"algorithm": "FedAvg",           "mechanism": "efl"},
+    "A6c": {"algorithm": "FedAvg",           "mechanism": "focal"},
 }
 
 # Algorithms recognised by argparse but blocked at runtime with a scientific
@@ -152,14 +167,16 @@ def _resolve_arms(args: argparse.Namespace) -> tuple[str, str, float]:
         mechanism = "none"
 
     rho = args.rho
-    if mechanism != "none" and rho is None:
+    if mechanism in _RHO_MECHANISMS and rho is None:
         raise SystemExit(
             f"--rho is required for --client-mechanism {mechanism}. There is no "
             "literature-supported default (plan.md §7.3): rho is a "
             "[THESIS-HYPOTHESIS] value selected by the pre-registered sweep over "
             "{0, 0.25, 1}. Pass it explicitly so the run is self-documenting."
         )
-    if mechanism == "none":
+    if mechanism not in _RHO_MECHANISMS:
+        if rho is not None and mechanism != "none":
+            raise SystemExit(f"--rho does not apply to --client-mechanism {mechanism}.")
         rho = 1.0
 
     if mechanism != "none" and algorithm in ("SCAFFOLD", "FedNova"):
@@ -177,7 +194,7 @@ def exp_id_for_arm(arm: str, mechanism: str, rho: float) -> str:
     Shared with scripts/sweep_experiments.py so the sweep can predict a cell's
     run directory and decide skip / resume without re-running it.
     """
-    return f"{arm}_rho{rho:g}" if mechanism != "none" else arm
+    return f"{arm}_rho{rho:g}" if mechanism in _RHO_MECHANISMS else arm
 
 
 def mechanism_for_arm(arm: str) -> str:

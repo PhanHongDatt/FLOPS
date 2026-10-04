@@ -10,6 +10,9 @@
 # - Controls: A1 class-count FedAvg (H3 control), A0 on S1-Control-Matched (H1 control)
 # - Proposed: A3 class-aware aggregation (server), A2b loss-level rho (client, ADR-006),
 #   A4b = A2b + A3 (full method). rho = 0.25 fixed in advance, not tuned (§20).
+# - Directions after the s5/s6 negative result (sessions s7a/s7b): A5 not-true distillation
+#   (ADR-012), A6 Equalized Focal Loss + A6c plain focal control (ADR-013), and the
+#   diagnostics D1 error decomposition + D3 = A0 on the pooled re-split of S1b (ADR-014).
 #
 # **Status:** exploratory — G4/G5 not yet passed (CLAUDE.md §7), single seed (§14).
 
@@ -73,7 +76,8 @@ if not (YOLO_ROOT / "data.yaml").exists():
     ])
 DATA_YAML = YOLO_ROOT / "data.yaml"
 
-for cfg in ("s1b_bus_2k_seed42", "s1_control_matched_2k_seed42"):   # matched is built from S1b
+for cfg in ("s1b_bus_2k_seed42", "s1_control_matched_2k_seed42",   # matched + pooled are built from S1b
+            "s1b_pooled_iid_2k_seed42"):
     subprocess.check_call([
         sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
         "--partition-config", str(REPO_ROOT / "configs" / "partition" / f"{cfg}.yaml"),
@@ -83,11 +87,36 @@ for cfg in ("s1b_bus_2k_seed42", "s1_control_matched_2k_seed42"):   # matched is
 import yaml
 S1B = PARTITIONS_DIR / "s1b_bus_2k_seed42"
 CTRL = PARTITIONS_DIR / "s1_control_matched_2k_seed42"
+POOLED = PARTITIONS_DIR / "s1b_pooled_iid_2k_seed42"
 s1b = yaml.safe_load((S1B / "manifest.yaml").read_text())
 for cid, cls in (("C0", "bus"), ("C1", "bus"), ("C2", "truck")):
     assert s1b["class_counts"][cid][cls] == 0, f"S1b-2k {cid} {cls} must be 0"
 print("S1b-2k images/client:", {c: len(v) for c, v in s1b["client_assignments"].items()})
 print("matched control:", yaml.safe_load((CTRL / "match_report.yaml").read_text()).get("matched"))
+pooled = yaml.safe_load((POOLED / "manifest.yaml").read_text())
+pooled_imgs = sorted(sum(pooled["client_assignments"].values(), []))
+assert pooled_imgs == sorted(sum(s1b["client_assignments"].values(), [])), "pooled must hold exactly the S1b images"
+print("pooled re-split class counts:", pooled["class_counts"])
+
+# %% [markdown]
+# ## Cell 2b — D1: error decomposition of finished runs (ADR-014)
+#
+# Needs the outputs of s5a/s5b/s6a/s6b attached as kernel sources (session s7a); other
+# sessions skip it. Round-30 global checkpoints, conf 0.001, FP/FN split at 0.25.
+
+# %%
+RUN_D1 = False   # session s7a sets True
+if RUN_D1:
+    from src.utils.proc import run_logged
+    try:   # a diagnostic must not cost the training arms below
+        run_logged([sys.executable, str(REPO_ROOT / "scripts" / "analyze_errors.py"),
+                    "--data-yaml", str(YOLO_ROOT / "data.yaml"), "--roots", "/kaggle/input",
+                    "--out", str(WORK / "flops_export" / "d1_errors.csv"), "--targets", "bus", "truck",
+                    "--batch", "8"],   # small batches: Ultralytics' NMS time limit drops boxes
+                   LOGS / "d1_errors.log", timeout=3 * 3600, stall_timeout=3600,
+                   watch_dir=WORK / "flops_export")
+    except Exception as exc:
+        print(f"⚠️  D1 failed: {exc}")
 
 # %% [markdown]
 # ## Cell 3 — Run the arms
@@ -103,9 +132,11 @@ ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions ov
 SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)
 RHO = "0.25"
 
+PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED}
+
 def arm_command(arm: str) -> tuple[list[str], Path]:
-    partition = CTRL if arm.endswith("@control") else S1B
-    name = arm.split("@")[0]
+    name, _, where = arm.partition("@")
+    partition = PARTITIONS[where]
     cmd = [
         sys.executable, str(REPO_ROOT / "scripts" / "run_fl_experiment.py"),
         "--partition", str(partition / "manifest.yaml"),

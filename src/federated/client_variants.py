@@ -223,3 +223,51 @@ class LossPreservationClient(YOLOFlowerClient):
         metrics["mechanism"] = "preservation_loss"
         metrics["missing_classes"] = json.dumps(self.missing_classes)
         return params, n, metrics
+
+
+class LossVariantClient(YOLOFlowerClient):
+    """A5 / A6 / A6c — classification-loss variants (ADR-012, ADR-013).
+
+    Every client trains with the variant (as in FedNTD / EFL); only the loss changes,
+    aggregation stays FedAvg. Subclasses fix ``LOSS_SPEC``. Reports
+    ``class_counts_json`` through the base class like every client.
+    """
+
+    LOSS_SPEC: dict[str, Any] = {}
+
+    def _loss_spec(self) -> dict[str, Any]:
+        return dict(self.LOSS_SPEC)
+
+    def _train_kwargs(self) -> dict[str, Any]:
+        return {**super()._train_kwargs(), "cls_loss": self._loss_spec()}
+
+    def fit(
+        self,
+        parameters: NDArrays,
+        config: dict[str, Scalar],
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
+        params, n, metrics = super().fit(parameters, config)
+        metrics["mechanism"] = str(self.LOSS_SPEC["kind"])
+        return params, n, metrics
+
+
+class NTDClient(LossVariantClient):
+    """A5: not-true distillation from the received global model; official defaults tau = beta = 1."""
+
+    LOSS_SPEC = {"kind": "ntd", "beta": 1.0, "tau": 1.0}
+
+
+class EFLClient(LossVariantClient):
+    """A6: Equalized Focal Loss; gradient statistics kept per client across rounds."""
+
+    LOSS_SPEC = {"kind": "efl", "gamma": 2.0, "alpha": 0.25, "scale": 4.0}
+
+    def _loss_spec(self) -> dict[str, Any]:
+        return {**super()._loss_spec(),
+                "state_path": str(Path(self.run_dir) / "clients" / self.client_id / "efl_state.json")}
+
+
+class FocalClient(LossVariantClient):
+    """A6c: plain focal loss (EFL with equal factors) — the control that isolates equalization."""
+
+    LOSS_SPEC = {"kind": "focal", "gamma": 2.0, "alpha": 0.25}

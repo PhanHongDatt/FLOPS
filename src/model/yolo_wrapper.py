@@ -119,6 +119,7 @@ def train_one_round(
     val_stub_images: int = 8,
     proximal_mu: float = 0.0,
     cls_loss_weights: list[float] | None = None,
+    cls_loss: dict[str, Any] | None = None,
 ) -> dict[str, float]:
     """One round of local training.
 
@@ -172,6 +173,15 @@ def train_one_round(
     if extra_overrides:
         overrides.update(extra_overrides)
 
+    # A5 / A6 / A6c: classification-loss variant — src/preservation/loss_plugins.py.
+    # Built (and validated) before any callback is attached, so a bad spec leaks nothing.
+    plugin = None
+    if cls_loss:
+        if cls_loss_weights and any(w != 1.0 for w in cls_loss_weights):
+            raise ValueError("cls_loss and cls_loss_weights both replace criterion.bce; use one")
+        from src.preservation.loss_plugins import build_loss_plugin
+        plugin = build_loss_plugin(cls_loss)
+
     snapshot: dict[str, Any] = {}
 
     def _snapshot_final_ema(trainer: Any) -> None:
@@ -193,6 +203,9 @@ def train_one_round(
     if rho_loss.active:
         model.add_callback("on_train_start", rho_loss.on_train_start)
         model.add_callback("on_train_end", rho_loss.on_train_end)
+    if plugin is not None:
+        model.add_callback("on_train_start", plugin.on_train_start)
+        model.add_callback("on_train_end", plugin.on_train_end)
     try:
         results = model.train(**overrides)
     finally:
@@ -202,6 +215,10 @@ def train_one_round(
             model.callbacks["on_train_start"].remove(rho_loss.on_train_start)
             model.callbacks["on_train_end"].remove(rho_loss.on_train_end)
             rho_loss.on_train_end(None)
+        if plugin is not None:
+            model.callbacks["on_train_start"].remove(plugin.on_train_start)
+            model.callbacks["on_train_end"].remove(plugin.on_train_end)
+            plugin.on_train_end(None)
         if prox.active:
             model.callbacks["on_train_start"].remove(prox.on_train_start)
             model.callbacks["on_train_end"].remove(prox.on_train_end)

@@ -33,6 +33,7 @@ if str(_REPO_ROOT) not in sys.path:
 from scripts.run_fl_experiment import (  # noqa: E402
     _ABLATIONS,
     _STRATEGIES,
+    _RHO_MECHANISMS,
     exp_id_for_arm,
     mechanism_for_arm,
 )
@@ -93,12 +94,14 @@ def _normalise_arm(entry: Any, defaults: dict[str, Any]) -> tuple[str, float | N
         )
     rho = opts.get("rho", defaults.get("rho"))
     tau = int(opts.get("tau_elig", defaults.get("tau_elig", 1)))
-    if mechanism_for_arm(arm) != "none" and rho is None:
+    if mechanism_for_arm(arm) in _RHO_MECHANISMS and rho is None:
         raise SystemExit(
             f"Arm {arm} applies a client mechanism, so the sweep must state rho "
             "explicitly (plan.md §7.3 — rho is selected by the pre-registered sweep, "
             "it has no default)."
         )
+    if mechanism_for_arm(arm) not in _RHO_MECHANISMS:
+        rho = None                      # A5/A6/A6c and baselines take no --rho
     return arm, (float(rho) if rho is not None else None), tau
 
 

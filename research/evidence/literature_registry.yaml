@@ -213,6 +213,113 @@ entries:
       across clients (Section 9, CLAUDE.md). Dataset version and download
       source must be recorded in environment.lock before use.
 
+  # ── DIRECTIONS AFTER THE s5/s6 NEGATIVE RESULT (ADR-012/013, verified 2026-10-05) ──
+
+  - id: fedntd
+    title: "Preservation of the Global Knowledge by Not-True Distillation in Federated Learning"
+    authors:
+      - "Gihun Lee"
+      - "Minchan Jeong"
+      - "Yongjin Shin"
+      - "Sangmin Bae"
+      - "Se-Young Yun"
+    year: 2022
+    venue: "Advances in Neural Information Processing Systems 35 (NeurIPS 2022)"
+    source_url: "https://proceedings.neurips.cc/paper_files/paper/2022/hash/fadec8f2e65f181d777507d1df69b92f-Abstract-Conference.html"
+    arxiv_id: "2106.03097"
+    code_url: "https://github.com/Lee-Gihun/FedNTD"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      Local training forgets out-of-distribution (locally absent) knowledge; distil the frozen
+      global model's predictions on the not-true classes (KL with temperature tau, weight beta;
+      official defaults tau = 1, beta = 1, criterion.py / config/fedntd.json).
+    role: adaptation
+    notes: "A5 (ADR-012): softmax-over-not-true KL adapted to per-entry Bernoulli KL for the sigmoid head."
+
+  - id: shmelkov2017
+    title: "Incremental Learning of Object Detectors without Catastrophic Forgetting"
+    authors:
+      - "Konstantin Shmelkov"
+      - "Cordelia Schmid"
+      - "Karteek Alahari"
+    year: 2017
+    venue: "IEEE International Conference on Computer Vision (ICCV 2017)"
+    source_url: "https://arxiv.org/abs/1708.06977"
+    arxiv_id: "1708.06977"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      Distilling a frozen detector's classification and box responses preserves classes that
+      are absent from the new training data.
+    role: motivation
+
+  - id: efl2022
+    title: "Equalized Focal Loss for Dense Long-Tailed Object Detection"
+    authors:
+      - "Bo Li"
+      - "Yongqiang Yao"
+      - "Jingru Tan"
+      - "Gang Zhang"
+      - "Fengwei Yu"
+      - "Jianwei Lu"
+      - "Ye Luo"
+    year: 2022
+    venue: "IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2022)"
+    source_url: "https://arxiv.org/abs/2201.02593"
+    arxiv_id: "2201.02593"
+    code_url: "https://github.com/ModelTC/EOD (up/tasks/det/plugins/efl/models/losses/efl.py)"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      Category-specific focusing gamma_j = gamma_b + s(1 - g_j) and weighting gamma_j / gamma_b,
+      g_j = accumulated positive/negative gradient ratio; gamma_b = 2, alpha = 0.25, s = 4 in the
+      authors' YOLOX configs.
+    role: adaptation
+    notes: "A6 (ADR-013): statistics kept per client instead of all-reduced; A6c = plain focal control."
+
+  - id: eqlv2_2021
+    title: "Equalization Loss v2: A New Gradient Balance Approach for Long-tailed Object Detection"
+    authors:
+      - "Jingru Tan"
+      - "Xin Lu"
+      - "Gang Zhang"
+      - "Changqing Yin"
+      - "Quanquan Li"
+    year: 2021
+    venue: "IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2021)"
+    source_url: "https://arxiv.org/abs/2012.08548"
+    arxiv_id: "2012.08548"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: "Per-class positive/negative gradient balancing for sigmoid detectors (RoI-based); predecessor of EFL."
+    role: motivation
+
+  - id: seesaw2021
+    title: "Seesaw Loss for Long-Tailed Instance Segmentation"
+    authors:
+      - "Jiaqi Wang"
+      - "Wenwei Zhang"
+      - "Yuhang Zang"
+      - "Yuhang Cao"
+      - "Jiangmiao Pang"
+      - "Tao Gong"
+      - "Kai Chen"
+      - "Ziwei Liu"
+      - "Chen Change Loy"
+      - "Dahua Lin"
+    year: 2021
+    venue: "IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2021)"
+    source_url: "https://arxiv.org/abs/2008.10032"
+    arxiv_id: "2008.10032"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      Suppressing negative gradients of tail classes (mitigation) raises their false positives;
+      a compensation factor restores the penalty on misclassified samples. Explains the A2b/A4b
+      FP increase; softmax-based, not reused directly.
+    role: motivation
+
 # ── ENTRIES REQUIRING ADDITIONAL VERIFICATION ──────────────────────────────
 # Add here if a source cannot currently be accessed.
 # Format: id, claim, what_to_verify, priority

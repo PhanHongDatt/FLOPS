@@ -36,6 +36,7 @@ from src.data.partitioner import (
     load_partition_manifest,
     partition_iid,
     partition_matched_control,
+    partition_pooled_iid,
     partition_missing_class,
     save_match_report,
     save_partition_manifest,
@@ -170,6 +171,22 @@ def _dispatch_matched_control(
     )
 
 
+def _dispatch_pooled(config: dict[str, Any], label_dir: Path, output_dir: Path) -> PartitionManifest:
+    """D3 (ADR-014): the reference partition's own images, re-dealt evenly."""
+    ref = config.get("reference_manifest")
+    if not ref:
+        raise ValueError("scenario S1-Pooled-IID requires 'reference_manifest'")
+    ref_path = Path(ref) if Path(ref).is_absolute() else output_dir / ref
+    if not ref_path.exists():
+        raise FileNotFoundError(f"reference manifest {ref_path} not found — generate it first")
+    return partition_pooled_iid(
+        reference=load_partition_manifest(ref_path),
+        label_dir=label_dir,
+        seed=int(config["seed"]),
+        partition_id=str(config["partition_id"]),
+    )
+
+
 def _write_client_image_list(
     client_id: str,
     image_names: list[str],
@@ -239,6 +256,8 @@ def generate_partition_artifacts(
                 "be published together with match_report.yaml (CLAUDE.md §10).",
                 config["partition_id"],
             )
+    elif config["scenario"] == "S1-Pooled-IID":
+        manifest = _dispatch_pooled(config, label_dir, output_dir)
     else:
         manifest = _dispatch_partition(config, images, label_dir)
 

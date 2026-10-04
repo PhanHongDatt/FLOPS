@@ -18,9 +18,10 @@
 | Cơ chế gây quên? | Với client không có bus, BCE chỉ sinh **gradient đẩy logit bus xuống**: 134.400 số hạng âm mỗi batch 16 ảnh, 0 số hạng dương | `[YOLO-DOC]` + tính toán §3.1 |
 | Phần tham số "riêng của lớp"? | Chỉ **780 / 3.022.085 phần tử (0,026 %)**: 6 tensor `cv3.{0,1,2}.2` | `[ĐO]` F1 §2.3 |
 | Phương pháp đề xuất làm gì? | A3: gộp hàng tham số của lớp *c* chỉ từ client có lớp *c*; A2b: nhân BCE của lớp vắng với ρ = 0,25 (giảm 4× áp lực đẩy xuống); A4b = A2b + A3 | §4 |
-| Missing-Class có gây hại không? | **Có**: FedAvg trên S1b mất −0,047 AP50 bus (−16,9 %) so với đối chứng matched; recall bus @0,25 giảm 38,9 % → 12,7 % | `[ĐO]` §5.4–5.5 |
-| Phương pháp đề xuất có khắc phục được không? | **Chưa** ở dạng hiện tại: A3 −0,024, A2b −0,010, A4b −0,016 AP50 bus so với FedAvg; FP bus tăng 82–202 %, FN gần như không đổi | `[ĐO]` §5.5 |
-| Độ tin cậy? | 1 seed, thăm dò (G4/G5 chưa pass). Sàn nhiễu ước lượng ≈ 0,023 AP50 bus từ cặp A3 ≡ A1 | §5.4 |
+| Missing-Class có gây hại không? | **Có, ở cả 3 seed**: FedAvg trên S1b mất **−0,046 ± 0,008** AP50 bus so với đối chứng matched, chủ yếu do bỏ sót bus (FN +487 ± 63) | `[ĐO]` §5.6 |
+| Phương pháp đề xuất có khắc phục được không? | **Không** ở dạng hiện tại: A4b **−0,014 ± 0,002** AP50 bus so với FedAvg ở cả 3 seed (FP bus +696, FN −72); A3 −0,024, A2b −0,010 (1 seed) | `[ĐO]` §5.5–5.6 |
+| Hướng tiếp theo? | Chẩn đoán D1/D3 + A5 (FedNTD) + A6 (EFL, đối chứng A6c), chạy song song | §7 |
+| Độ tin cậy? | 3 seed cho A0, A0@control, A4b (std A0 = 0,003 AP50 bus); các arm khác 1 seed. Thăm dò: G4/G5 chưa pass | §5.6 |
 
 ---
 
@@ -383,11 +384,34 @@ tượng quá khớp xuất hiện sau khoảng 20 round `[SUY LUẬN]`.
 
 ---
 
+### 5.6 Xác nhận 3 seed (42 · 123 · 2024): A0, A0@control, A4b `[ĐO]`
+
+Cùng partition và giao thức như §5.3, chỉ đổi seed huấn luyện (phiên s6a/s6b, commit `42d9d2d`).
+Quy tắc khai báo trước: trung bình các lần eval ở round 20/25/30; hiệu ứng ghép cặp theo seed
+(`scripts/analyze_seeds.py`).
+
+| | mAP50 | AP50 bus | AP50 truck | AP50 car | FP bus | FN bus |
+|---|---:|---:|---:|---:|---:|---:|
+| A0 FedAvg (S1b) | 0,288 ± 0,000 | 0,228 ± 0,003 | 0,291 ± 0,001 | 0,628 ± 0,002 | 317 ± 84 | 1.406 ± 21 |
+| A0@control | 0,298 ± 0,005 | 0,273 ± 0,009 | 0,288 ± 0,012 | 0,625 ± 0,001 | 3.089 ± 381 | 919 ± 49 |
+| A4b ρ 0,25 | 0,283 ± 0,001 | 0,213 ± 0,003 | 0,287 ± 0,003 | 0,624 ± 0,002 | 1.013 ± 108 | 1.334 ± 7 |
+| **H1 = A0 − control** | −0,011 ± 0,005 | **−0,046 ± 0,008** | +0,002 ± 0,012 | +0,003 ± 0,001 | −2.772 ± 332 | +487 ± 63 |
+| **A4b − A0** | −0,005 ± 0,001 | **−0,014 ± 0,002** | −0,003 ± 0,003 | −0,004 ± 0,004 | +696 ± 88 | −72 ± 24 |
+
+- **H1 được ủng hộ ở cả 3 seed** (cùng dấu, −0,037 đến −0,053). Thiệt hại chủ yếu là **bỏ sót bus**
+  (FN +487). Car và truck gần như không đổi.
+- **A4b kém A0 ở cả 3 seed** (−0,012 đến −0,016): tìm thêm ~72 bus nhưng thêm ~700 FP bus (gấp ~3,2 lần).
+  Kết quả âm của §5.5 được xác nhận, không phải nhiễu.
+- **Sàn nhiễu thật** nhỏ hơn ước lượng 1 seed: std của A0 qua seed là 0,003 AP50 bus (ước lượng cũ
+  ±0,023 từ cặp A3 ≡ A1 là quá rộng).
+- Giới hạn còn nguyên: đối chứng có 2,03× box bus (H1 là hiệu ứng gộp), G4/G5 chưa pass; FedProx, A1,
+  A3, A2b vẫn 1 seed.
+
 ## 6. Hạn chế và mức độ tin cậy
 
 | Hạn chế | Hệ quả định lượng | Cách khắc phục |
 |---|---|---|
-| **1 seed** | Không có std; chênh lệch < sàn nhiễu (ước lượng bằng \|A3 − A1\|) là không phân biệt được | 3 seed (§14): 7 arm × 3 seed × ~65 phút ≈ 23 giờ GPU |
+| **3 seed chỉ cho A0, A0@control, A4b** | FedProx, A1, A3, A2b vẫn 1 seed: chỉ là xu hướng | 3 seed cho các arm còn lại khi cần ablation (§11) |
 | G4/G5 chưa pass | Kết quả của phương pháp là thăm dò, chưa đủ để kết luận "hiệu quả" | F2 + F3 (~2 giờ) → ADR-003 |
 | Đối chứng có 2,03× box bus | H1 đo hiệu ứng gộp của "vắng" + "ít dữ liệu" | Nêu rõ khi báo cáo; có thể thêm đối chứng cân số box |
 | A3 ≡ A1 trong S1b | H3 chưa có cơ hội khác A1 | Kịch bản S1d (bus vắng ở mọi client có mặt trong một số round) hoặc τ_elig = 50 |
@@ -397,30 +421,37 @@ tượng quá khớp xuất hiện sau khoảng 20 round `[SUY LUẬN]`.
 
 ---
 
-## 7. Lộ trình giải quyết Non-IID (định lượng theo ngân sách, cập nhật theo kết quả §5.5)
+## 7. Lộ trình giải quyết Non-IID (cập nhật 2026-10-05 theo §5.6)
 
-Kết quả §5.5 cho thấy vấn đề **không** nằm ở chỗ client vắng bus "đẩy sai" hàng bus (bỏ hoặc giảm tín hiệu
-đó chỉ làm FP tăng), mà ở **thiếu tín hiệu dương** (FN cao: recall 12,7 % so với 38,9 % ở đối chứng có 2,03×
-box bus). Lộ trình được điều chỉnh theo hướng đó:
+§5.6 cho thấy hướng "làm yếu tín hiệu từ client thiếu lớp" (A2b/A3/A4b) đi sai: tín hiệu âm có ích,
+bỏ đi thì FP tăng. Đợt tiếp theo (s7a/s7b, seed 42, cùng giao thức ADR-011) chạy song song hai chẩn
+đoán và hai hướng mới có cơ sở văn liệu. Quy tắc đọc kết quả được khai báo trước trong từng ADR.
 
-| Bước | Mục tiêu | Chi phí GPU | Ghi chú |
-|---|---|---:|---|
-| 1. 3 seed cho A0, A0@control, A4b (và A3) | Khẳng định hoặc bác bỏ H1 và kết quả âm của phương pháp với std thật | ~4 arm × 2 seed thêm × ~70 phút ≈ 9,5 giờ | Bắt buộc trước mọi kết luận (§14) |
-| 2. Tách tập validation khỏi tập test | Chọn round / dừng sớm không dùng tập test (hiện quá khớp sau ~20 round) | ~0 (chia lại val) | Cần ADR |
-| 3. Quét ρ ∈ {0,5; 0,75} cho A2b | Xem có vùng ρ nào cải thiện recall mà không làm FP tăng vọt | ~2 × 70 phút | ρ = 1 chính là A0 |
-| 4. F2 + F3 | G5: quên nằm ở hàng lớp hay ở đặc trưng dùng chung | ~2 giờ | Cần chốt τ_AP |
-| 5. Đối chứng cân số box bus | Tách "vắng ở client" khỏi "ít dữ liệu bus" trong H1 | ~70 phút | Đối chứng có cùng 1.367 box bus |
-| 6. Main 3 seed đủ 7 arm | Kết quả báo cáo được | ~23 giờ (2 tuần quota) | Sau G4 + G5 |
+| Arm / bước | Câu hỏi | Cơ sở | Phiên |
+|---|---|---|---|
+| **D1** phân tích lỗi (không huấn luyện) | FN bus thêm ở S1b là điểm thấp, nhầm sang truck hay mất hẳn? FP của A4b rơi vào đâu? | `[ENGINEERING]` ADR-014 | s7a |
+| **D3** A0 trên partition gộp-chia-lại | Cùng 8.000 ảnh của S1b chia đều: thiệt hại do **phân bố** hay do **ít dữ liệu bus**? | `[ENGINEERING]` ADR-014 | s7a |
+| **A5** chưng cất not-true (FedNTD) | Giữ tri thức bus của mô hình toàn cục mà **không bỏ** tín hiệu âm | `[LITERATURE]` Lee et al., NeurIPS 2022 → `[GIẢ THUYẾT]` cho head sigmoid, ADR-012 | s7b |
+| **A6** Equalized Focal Loss | Chỉ bớt mẫu âm **dễ**, giữ phạt các dự đoán bus sai tự tin (thứ A2b thiếu) | `[LITERATURE]` Li et al., CVPR 2022 → `[GIẢ THUYẾT]` thống kê theo client, ADR-013 | s7b |
+| **A6c** focal loss thường | Đối chứng: phần cải thiện của A6 có phải chỉ do đổi sang focal loss? | `[YOLO-DOC]` + ADR-013 | s7a |
+
+Chi phí ước tính ≈ 8 giờ GPU (2 phiên song song, mỗi phiên ~4 giờ). Cận trên tập trung (D4) được hoãn
+vì cần ~3 giờ một GPU và trả lời câu hỏi FL-so-với-tập-trung, không phải câu hỏi thiếu lớp (ADR-014).
+Sau đợt này: arm nào qua quy tắc khai báo trước thì chạy thêm seed 123/2024; F2 + F3 vẫn cần cho G4/G5.
 
 ## 8. Nguồn
 
 - Mã nguồn: `src/model/parameter_map.py`, `src/federated/strategies/class_aware_agg.py`,
   `src/preservation/rho_loss.py`, `src/federated/proximal.py`, `src/data/partitioner.py`.
-- Quyết định: `research/decisions/ADR-006`, `-008`, `-009`, `-010`, `-011`; `research/plan/plan.md` §5–§7.
+- Quyết định: `research/decisions/ADR-006`, `-008`, `-009`, `-010`, `-011`, `-012`, `-013`, `-014`;
+  `research/plan/plan.md` §5–§7.
 - Kết quả: `research/experiment_registry/registry.yaml`,
   `research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md`; log Kaggle
   `flops-s2-baseline-g2-g3` v3, `flops-s5b-s1b-method` v1, `flops-s5a-s1b-baselines` v1.
 - Văn liệu (đã kiểm trong `research/evidence/literature_registry.yaml`): McMahan et al. 2017 (AISTATS,
   arXiv:1602.05629); Li et al. 2020 (MLSys, arXiv:1812.06127); Karimireddy et al. 2020 (ICML,
   arXiv:1910.06378); Wang et al. 2020 (NeurIPS, arXiv:2007.07481); Zhao et al. 2018 (arXiv:1806.00582);
-  Yu et al. 2020 BDD100K (CVPR, arXiv:1805.04687); Ultralytics YOLOv8 (phần mềm, 8.3.253).
+  Yu et al. 2020 BDD100K (CVPR, arXiv:1805.04687); Ultralytics YOLOv8 (phần mềm, 8.3.253);
+  Lee et al. 2022 FedNTD (NeurIPS, arXiv:2106.03097); Li et al. 2022 EFL (CVPR, arXiv:2201.02593);
+  Tan et al. 2021 EQL v2 (CVPR, arXiv:2012.08548); Wang et al. 2021 Seesaw (CVPR, arXiv:2008.10032);
+  Shmelkov et al. 2017 (ICCV, arXiv:1708.06977).

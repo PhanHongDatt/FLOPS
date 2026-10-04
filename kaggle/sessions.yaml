@@ -63,3 +63,18 @@ sessions:
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0", "A0@control", "A4b"]'
       'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 2024'
+
+  s7a:  # diagnostics (ADR-014): D1 error decomposition of s5/s6 checkpoints, D3 = A0 on the pooled
+        # re-split, plus A6c (focal control for A6). Seed 42, same protocol as s5. ~4 h
+    slug: flops-s7a-diagnostics
+    notebook: notebooks/05_convergence_s1b.py
+    kernel_sources: [s5a, s5b, s6a, s6b]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0@pooled", "A6c"]'
+      'RUN_D1 = False   # session s7a sets True': 'RUN_D1 = True'
+
+  s7b:  # new directions (ADR-012, ADR-013): A5 not-true distillation, A6 Equalized Focal Loss. ~4 h
+    slug: flops-s7b-directions
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A5", "A6"]'

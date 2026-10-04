@@ -1,0 +1,18 @@
+# D3 — pooled re-split of S1b-2k (diagnostic, ADR-014)
+#
+# Exactly the 8,000 images of s1b_bus_2k_seed42 (same 1,367 bus boxes, same truck,
+# car, motorcycle totals), re-dealt evenly over the same 4 clients, stratified by the
+# set of classes each image contains. Nothing changes except WHO holds the images.
+#
+#   S1b vs pooled   -> effect of the Missing-Class distribution, data held fixed
+#   pooled vs matched control -> effect of having less bus data (1,367 vs 2,781 boxes)
+#
+# PREREQUISITE: generate s1b_bus_2k_seed42 first (reference_manifest is resolved
+# under --output-dir).
+partition_id: s1b_pooled_iid_2k_seed42
+scenario: S1-Pooled-IID
+seed: 42
+num_clients: 4
+reference_manifest: s1b_bus_2k_seed42/manifest.yaml
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50

@@ -610,3 +610,57 @@ def save_match_report(report: MatchReport, output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as f:
         yaml.dump(report.to_dict(), f, default_flow_style=False, allow_unicode=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pooled re-split (diagnostic D3, ADR-014)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def partition_pooled_iid(
+    reference: PartitionManifest,
+    label_dir: Path,
+    seed: int,
+    partition_id: str,
+) -> PartitionManifest:
+    """Re-deal EXACTLY the reference partition's images evenly over the same clients.
+
+    The pooled data are identical to the reference (same images, same box totals of
+    every class), so a reference-vs-pooled difference can only come from WHO holds
+    the images — the Missing-Class distribution — not from how much bus data
+    exists. That is the confound the matched control could not remove (it has
+    2.03x the bus boxes, ADR-014).
+
+    Stratified by class-presence signature: images are grouped by the set of
+    classes they contain, each group is shuffled with ``seed``, and the groups are
+    dealt round-robin with one running pointer, so every client receives the same
+    image count (±1) and near-equal shares of each signature.
+    """
+    clients = sorted(reference.client_assignments)
+    pool = sorted({n for imgs in reference.client_assignments.values() for n in imgs})
+    index = load_label_index(pool, label_dir)
+    strata: dict[tuple[str, ...], list[str]] = {}
+    for name in pool:
+        key = tuple(c for c in TARGET_CLASSES if index[name][c] > 0)
+        strata.setdefault(key, []).append(name)
+
+    rng = random.Random(seed)
+    splits: dict[str, list[str]] = {cid: [] for cid in clients}
+    k = 0
+    for key in sorted(strata):
+        group = list(strata[key])
+        rng.shuffle(group)
+        for name in group:
+            splits[clients[k % len(clients)]].append(name)
+            k += 1
+
+    counts = {cid: _sum_counts(imgs, index) for cid, imgs in splits.items()}
+    missing = {cid: [c for c in TARGET_CLASSES if counts[cid][c] == 0] for cid in clients}
+    return PartitionManifest(
+        partition_id=partition_id,
+        seed=seed,
+        scenario="S1-Pooled-IID",
+        num_clients=len(clients),
+        client_assignments=splits,
+        class_counts=counts,
+        missing_classes=missing,
+    )

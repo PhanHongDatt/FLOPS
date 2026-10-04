@@ -58,6 +58,7 @@ def paired_effect(table: dict[str, dict[str, Any]], arm: str, ref: str) -> dict[
 
 
 def main() -> None:
+    sys.stdout.reconfigure(encoding="utf-8")   # "±" / "−" on a cp1252 Windows console
     roots = [Path(p) for p in sys.argv[1:]]
     for metric in METRICS:
         table = summarise(roots, metric)
