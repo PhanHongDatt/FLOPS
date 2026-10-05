@@ -480,6 +480,8 @@ experiments:
       FN_bus: 1265.0
   interpretation: 'B1 − A0 = +0.043 AP50 bus (pre-training on the sample helps); B1 stays below T (0.275 vs 0.289):
     FedAvg erodes the teacher''s bus knowledge.'
+  deviation: 'Round 11 aggregated 3/4 clients: C2 failed with EOFError reading the shared labels/train.cache (concurrent
+    client rewrite). All other rounds 4/4.'
 - id: EXP-2026-10-05-S8-B2
   gate: G6 (exploratory, server-sample setting)
   scenario: S1b-2k + server sample 1k
@@ -547,3 +549,13 @@ experiments:
     The server fine-tune shared the clients'' label folder, hence Ultralytics'' label cache, which concurrent rewrites
     corrupted. Metrics frozen at AP50 bus 0.251 from round 5 on — not a valid B2 result. Fixed: the server sample
     gets its own YOLO tree; re-run as v2.'
+- id: EXP-2026-10-06-S8c-B2-v2
+  gate: G6 (exploratory, server-sample setting)
+  scenario: S1b-2k + server sample 1k
+  method: B2 FedAvg from T + server fine-tune (re-run v2)
+  run_class: feasibility
+  status: running
+  seed: 42
+  git_commit: d01e466
+  kaggle_kernel: goshihayashi/flops-s8c-b2-rerun v2
+  notes: Public mirror solesensei/solesensei_bdd100k (verified complete and box-identical); teacher sha256 0aa06f52.

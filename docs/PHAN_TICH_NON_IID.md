@@ -23,6 +23,7 @@
 | Thiệt hại do phân bố hay do ít dữ liệu? | **Cả hai**: cùng dữ liệu chia đều (D3) tốt hơn S1b **+0,029** AP50 bus; phần còn lại (+0,018) do ít box bus (seed 42) | `[ĐO]` §5.7 |
 | Bus bị bỏ sót đi đâu? | Phần lớn bị **nhầm thành truck/car** (+204 / +202 so với control), +193 không phát hiện | `[ĐO]` D1 §5.7 |
 | Hướng mới A5 (FedNTD), A6 (EFL)? | **Bác bỏ** theo quy tắc khai báo trước: −0,024 và −0,075 AP50 bus so với FedAvg | `[ĐO]` §5.7 |
+| Khi server có 1.000 ảnh có nhãn? | Teacher T + **chưng cất từ T cố định (P1)**: 0,300 AP50 bus, **+0,025 so với FedAvg cùng khởi tạo (B1)**; bảo toàn ρ không thêm gì; còn chờ đối chứng B2 | `[ĐO]` §5.8 |
 | Độ tin cậy? | 3 seed cho A0, A0@control, A4b (std A0 = 0,003 AP50 bus); các arm khác 1 seed. Thăm dò: G4/G5 chưa pass | §5.6 |
 
 ---
@@ -455,6 +456,44 @@ trong ADR-012/013/014. So sánh với A0 seed 42 (AP50 bus 0,231; std của A0 q
 > chủ yếu là **nhầm bus thành truck/car**. Cả bốn cách can thiệp vào loss phía client đã thử
 > (A2b, A4b, A5, A6) đều **không** vượt FedAvg. Đây là các kết quả âm hợp lệ (§22).
 
+### 5.8 Đợt s8: server giữ 1.000 ảnh có nhãn — teacher, pre-train, chưng cất (seed 42, thăm dò) `[ĐO]`
+
+**Đổi giả định (ADR-015):** server có 1.000 ảnh train có nhãn, rút ngẫu nhiên (seed 42) từ các ảnh
+**không client nào giữ**; client giữ nguyên partition S1b-2k. Cùng giao thức ADR-011.
+
+| Arm | Khởi tạo | Client | Server | mAP50 | AP50 bus | AP50 truck | AP50 car | FP bus | FN bus |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|
+| A0 FedAvg (không dữ liệu server) | COCO | FedAvg | — | 0,288 | 0,231 | 0,291 | 0,626 | 298 | 1.394 |
+| **T** teacher | COCO | — | 50 epoch trên 1.000 ảnh | 0,321 | 0,289 | 0,334 | 0,647 | 684 | 1.257 |
+| B1 | T | FedAvg | — | 0,318 | 0,275 | 0,313 | 0,646 | 468 | 1.265 |
+| B2 | T | FedAvg | + fine-tune mỗi vòng | — | — | — | — | — | — |
+| **P1** | T | KD từ **T cố định** | — | **0,338** | **0,300** | **0,357** | **0,657** | 764 | 1.311 |
+| P2 | T | P1 + ρ 0,25 | — | 0,332 | 0,293 | 0,344 | 0,656 | 1.130 | 1.275 |
+
+(T: một lần đánh giá sau khi train; các arm FL: trung bình vòng 20/25/30.) B2 lần 1 (s8a) lỗi ở vòng 2;
+lần 2 (s8c_g v1) chỉ train được vòng 1 vì cache nhãn dùng chung bị hỏng — **không hợp lệ**, đã sửa và
+đang chạy lại (v2, tài khoản khác, bản BDD100K công khai đã kiểm trùng khớp 100 % ảnh và nhãn).
+
+**Đọc theo quy tắc khai báo trước (ADR-015)**
+- B1 − A0 = **+0,043** AP50 bus (≥ +0,010) → pre-train trên tập server **giúp rõ rệt**.
+- **P1 − B1 = +0,025** AP50 bus, +0,020 mAP50 (≥ +0,010) → **chưng cất từ teacher cố định có đóng góp**
+  (điều kiện 1 đạt). Điều kiện 2 (P1 không kém B2 quá 0,005) **chờ B2**.
+- P2 − P1 = −0,006 → bảo toàn ρ **không thêm gì**.
+
+**Diễn giải**
+- B1 bắt đầu từ T (0,289) rồi bị FedAvg **kéo xuống** (0,275): đây chính là hiện tượng quên. P1 **giữ và
+  vượt** T (0,300), đồng thời truck +0,044, car +0,011 so với B1 — khớp với D1 (tri thức phân biệt các lớp
+  xe được giữ lại) `[SUY LUẬN]`. Khác A5 (thất bại) ở chỗ teacher **cố định, không bị FL làm suy giảm**.
+- T chỉ 1.000 ảnh nhưng cao hơn mọi arm FL dùng 8.000 ảnh; T dùng lịch train tập trung (warm-up, giảm lr),
+  FL thì lr cố định mỗi vòng → **lịch huấn luyện của FL có thể đang kìm hiệu năng** (chưa kiểm chứng).
+- FN bus @0,25 vẫn cao ở **mọi** cấu hình (kể cả control 59 %, truck 67–84 %): phần lớn là giới hạn của
+  mô hình nền (YOLOv8n, 640px, bus nhỏ) và của ngưỡng cố định; P1 có AP cao nhất nhưng cho điểm bus thận
+  trọng hơn nên recall @0,25 thấp — cần tập validation riêng để chọn ngưỡng theo lớp.
+- B1 vòng 11 chỉ gộp 3/4 client (lỗi đọc cache của C2); các run khác đủ 4/4 mọi vòng.
+
+> **Tạm kết luận (1 seed):** khi server có một ít dữ liệu có nhãn, **chưng cất từ teacher cố định (P1)**
+> là cách đầu tiên vượt rõ đối chứng cùng điểm xuất phát (B1). Cần B2 và seed 123/2024 trước khi khẳng định.
+
 ## 6. Hạn chế và mức độ tin cậy
 
 | Hạn chế | Hệ quả định lượng | Cách khắc phục |
@@ -486,6 +525,11 @@ bỏ đi thì FP tăng. Đợt tiếp theo (s7a/s7b, seed 42, cùng giao thức 
 Chi phí ước tính ≈ 8 giờ GPU (2 phiên song song, mỗi phiên ~4 giờ). Cận trên tập trung (D4) được hoãn
 vì cần ~3 giờ một GPU và trả lời câu hỏi FL-so-với-tập-trung, không phải câu hỏi thiếu lớp (ADR-014).
 Sau đợt này: arm nào qua quy tắc khai báo trước thì chạy thêm seed 123/2024; F2 + F3 vẫn cần cho G4/G5.
+
+**Cập nhật sau s8 (ADR-015):** hướng có triển vọng là **teacher trên dữ liệu server + chưng cất (P1)**.
+Việc tiếp theo, theo thứ tự: (1) B2 để chốt điều kiện 2; (2) seed 123/2024 cho B1 và P1; (3) tách tập
+validation để chọn ngưỡng theo lớp (FN); (4) kiểm tra lịch huấn luyện của FL (lr giảm dần) vì T cho thấy
+lịch tập trung tốt hơn rõ.
 
 ## 8. Nguồn
 
