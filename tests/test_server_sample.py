@@ -112,7 +112,8 @@ def test_server_finetune_wraps_aggregation(tmp_path, monkeypatch):
 
     calls = []
     model = SimpleNamespace(params=None)
-    monkeypatch.setattr(yw, "build_model", lambda w: model)
+    builds = []
+    monkeypatch.setattr(yw, "build_model", lambda w: builds.append(w) or model)
     monkeypatch.setattr(yw, "set_parameters", lambda m, p: setattr(m, "params", [a.copy() for a in p]))
     monkeypatch.setattr(yw, "get_parameters", lambda m: m.params)
 
@@ -128,3 +129,5 @@ def test_server_finetune_wraps_aggregation(tmp_path, monkeypatch):
     assert parameters_to_ndarrays(params)[0].tolist() == [1.0, 1.0]     # fine-tuned params are returned
     assert metrics["server_finetune"] == 1
     assert calls[0]["name"] == "round_7" and calls[0]["epochs"] == 1 and calls[0]["workers"] == 0
+    strategy.aggregate_fit(4, [], [])
+    assert len(builds) == 2          # a new YOLO object per round (train() is single-use)

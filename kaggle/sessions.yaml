@@ -99,3 +99,10 @@ sessions:
     kernel_sources: [s8t]
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P1", "P2"]'
+
+  s8c:  # ADR-015: B2 re-run after s8a's B2 crashed in round 2 (server reused one YOLO object). ~2.5 h
+    slug: flops-s8c-b2-rerun
+    notebook: notebooks/05_convergence_s1b.py
+    kernel_sources: [s8t]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["B2"]'

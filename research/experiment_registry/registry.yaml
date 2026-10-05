@@ -440,48 +440,105 @@ experiments:
   scenario: S1b-2k + server sample 1k
   method: T teacher on server 1k sample (ADR-015)
   run_class: feasibility
-  status: planned
+  status: completed
   seed: 42
-  kaggle_kernel: phdatt/flops-s8t-teacher
+  kaggle_kernel: phdatt/flops-s8t-teacher v1
   decision_rule: pre-declared in ADR-015
   notes: 50 epochs, G2 schedule, final EMA; evaluated on the global val set.
+  git_commit: de48fe8
+  partition_id: server_sample_1k_seed42
+  results:
+    val:
+      mAP50: 0.321
+      AP50_bus: 0.2888
+      AP50_car: 0.6475
+      AP50_truck: 0.3344
+      AP50_motorcycle: 0.0132
+      FP_bus: 684.0
+      FN_bus: 1257.0
+  interpretation: 'T alone (1,000 images, 50 centralized epochs, G2 schedule with warm-up + lr decay) beats every
+    FL arm on S1b-2k (A0: AP50 bus 0.231, mAP50 0.288). Schedule differs from the FL rounds (constant lr per round,
+    no decay), so not a clean data comparison.'
 - id: EXP-2026-10-05-S8-B1
   gate: G6 (exploratory, server-sample setting)
   scenario: S1b-2k + server sample 1k
   method: B1 FedAvg from T
   run_class: feasibility
-  status: planned
+  status: completed
   seed: 42
-  kaggle_kernel: phdatt/flops-s8a-server-baselines
+  kaggle_kernel: phdatt/flops-s8a-server-baselines v1
   decision_rule: pre-declared in ADR-015
   notes: Pre-training control.
+  git_commit: de48fe8
+  partition_id: s1b_bus_2k_seed42
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.3175
+      AP50_bus: 0.2746
+      AP50_truck: 0.3126
+      FP_bus: 468.3333
+      FN_bus: 1265.0
+  interpretation: 'B1 − A0 = +0.043 AP50 bus (pre-training on the sample helps); B1 stays below T (0.275 vs 0.289):
+    FedAvg erodes the teacher''s bus knowledge.'
 - id: EXP-2026-10-05-S8-B2
   gate: G6 (exploratory, server-sample setting)
   scenario: S1b-2k + server sample 1k
   method: B2 FedAvg from T + server fine-tune
   run_class: feasibility
-  status: planned
+  status: failed-technical
   seed: 42
-  kaggle_kernel: phdatt/flops-s8a-server-baselines
+  kaggle_kernel: phdatt/flops-s8a-server-baselines v1
   decision_rule: pre-declared in ADR-015
-  notes: Strongest direct use of the sample.
+  notes: 'Crashed in round 2: server fine-tune reused one YOLO object and Ultralytics'' train() is single-use (KeyError
+    ''model''). Fixed (fresh model per round); re-run as s8c.'
+  git_commit: de48fe8
 - id: EXP-2026-10-05-S8-P1
   gate: G6 (exploratory, server-sample setting)
   scenario: S1b-2k + server sample 1k
   method: P1 KD from fixed T
   run_class: feasibility
-  status: planned
+  status: completed
   seed: 42
-  kaggle_kernel: phdatt/flops-s8b-teacher-kd
+  kaggle_kernel: phdatt/flops-s8b-teacher-kd v1
   decision_rule: pre-declared in ADR-015
   notes: FedNTD form, beta = tau = 1.
+  git_commit: de48fe8
+  partition_id: s1b_bus_2k_seed42
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.3378
+      AP50_bus: 0.2996
+      AP50_truck: 0.3574
+      FP_bus: 764.3333
+      FN_bus: 1310.6667
+  interpretation: P1 − B1 = +0.025 AP50 bus, +0.020 mAP50 (KD condition 1 met); condition 2 (vs B2) pending the
+    B2 re-run. P1 ends above T (0.300 vs 0.289).
 - id: EXP-2026-10-05-S8-P2
   gate: G6 (exploratory, server-sample setting)
   scenario: S1b-2k + server sample 1k
   method: P2 P1 + rho 0.25
   run_class: feasibility
-  status: planned
+  status: completed
   seed: 42
-  kaggle_kernel: phdatt/flops-s8b-teacher-kd
+  kaggle_kernel: phdatt/flops-s8b-teacher-kd v1
   decision_rule: pre-declared in ADR-015
   notes: Author's preservation on top of KD.
+  git_commit: de48fe8
+  partition_id: s1b_bus_2k_seed42
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.3317
+      AP50_bus: 0.2932
+      AP50_truck: 0.3437
+      FP_bus: 1130.3333
+      FN_bus: 1274.6667
+  interpretation: 'P2 − P1 = −0.006 AP50 bus: rho preservation adds nothing on top of KD (threshold +0.010).'
+- id: EXP-2026-10-05-S8c-B2
+  gate: G6 (exploratory, server-sample setting)
+  scenario: S1b-2k + server sample 1k
+  method: B2 FedAvg from T + server fine-tune (re-run)
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s8c-b2-rerun
+  decision_rule: pre-declared in ADR-015

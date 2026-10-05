@@ -228,7 +228,6 @@ def _wrap_server_finetune(strategy: Any, finetune: dict[str, Any], run_dir: Path
     from src.federated.client import derive_local_seed
     from src.model.yolo_wrapper import build_model, get_parameters, set_parameters, train_one_round
 
-    holder: dict[str, Any] = {"model": None}
     original = strategy.aggregate_fit
 
     def aggregate_fit(server_round: int, results: Any, failures: Any) -> Any:
@@ -236,9 +235,10 @@ def _wrap_server_finetune(strategy: Any, finetune: dict[str, Any], run_dir: Path
         if params is None:
             return params, metrics
         abs_round = round_offset + server_round
-        if holder["model"] is None:
-            holder["model"] = build_model(weights)
-        model = holder["model"]
+        # A fresh YOLO object every round: Ultralytics' YOLO.train() cannot be called twice on
+        # the same object (8.3.253 engine/model.py reads self.overrides["model"], which the
+        # first train() replaced) — s8a B2 v1 crashed in round 2 with KeyError: 'model'.
+        model = build_model(weights)
         set_parameters(model, parameters_to_ndarrays(params))
         logger.info("Round %d (absolute): server fine-tune on %s started", abs_round, finetune["data_yaml"])
         train_one_round(
