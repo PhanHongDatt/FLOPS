@@ -156,7 +156,13 @@ def main() -> None:
         folder = build_session(cfg, args.session, sha, BUILD_DIR)
         print(f"built {folder} (commit {sha[:8]})")
         if args.action == "push":
-            code = _kaggle("kernels", "push", "-p", str(folder))
+            # The Kaggle CLI exits 0 even when it rejects the push (e.g. "Kernel push error:
+            # Maximum weekly GPU quota of 30.00 hours reached"), so read its output too.
+            res = subprocess.run([sys.executable, "-m", "kaggle", "kernels", "push", "-p", str(folder)],
+                                 capture_output=True, text=True)
+            out = (res.stdout or "") + (res.stderr or "")
+            print(out, end="")
+            code = res.returncode or (1 if "push error" in out.lower() else 0)
             if code == 0:
                 print(f"\nRunning on Kaggle: https://www.kaggle.com/code/{kernel}\n"
                       f"  status: python scripts/kaggle_run.py {args.session} status\n"
