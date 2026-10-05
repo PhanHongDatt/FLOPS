@@ -183,3 +183,28 @@ def test_missing_yolo_root_raises():
                 yolo_root=tmp_path / "nonexistent",
                 output_dir=tmp_path / "partitions",
             )
+
+
+def test_server_sample_gets_its_own_label_folder(tmp_path):
+    """ADR-015 / s8c_g B2 v1: a server dataset sharing labels/train with the clients shares
+    Ultralytics' labels/train.cache and corrupted it under concurrent rewrites."""
+    imgs = [f"img_{i:03d}.jpg" for i in range(40)]
+    cmap = {n: [0, 1, 2, 3] for n in imgs}
+    root = _make_yolo_root(tmp_path, imgs, cmap)
+    (root / "labels" / "val").mkdir(parents=True)
+    out = tmp_path / "parts"
+    s1b = _write_config(tmp_path, {"partition_id": "ref", "scenario": "S0", "seed": 1, "num_clients": 2,
+                                   "per_client": 10})
+    generate_partition_artifacts(s1b, root, out)
+    cfg = tmp_path / "server.yaml"
+    cfg.write_text(yaml.safe_dump({"partition_id": "srv", "scenario": "Server-Sample", "seed": 1, "n_images": 5,
+                                   "exclude_manifests": ["ref/manifest.yaml"]}))
+    _, yamls = generate_partition_artifacts(cfg, root, out)
+    data = yaml.safe_load(yamls["S"].read_text())
+    srv_root = Path(data["path"])
+    assert srv_root != root.resolve() and srv_root == (out / "srv" / "yolo").resolve()
+    train = [Path(ln) for ln in Path(data["train"]).read_text().split()]
+    assert len(train) == 5 and all(p.parent == srv_root / "images" / "train" for p in train)
+    labels = sorted((srv_root / "labels" / "train").iterdir())
+    assert len(labels) == 5 and not any(l.is_symlink() for l in labels)   # real files: own folder, own cache
+    assert (srv_root / "images" / "val").exists()

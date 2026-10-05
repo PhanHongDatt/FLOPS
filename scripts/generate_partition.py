@@ -206,6 +206,38 @@ def _dispatch_server_sample(config: dict[str, Any], images: list[str], label_dir
     )
 
 
+def _isolated_yolo_root(manifest: PartitionManifest, yolo_root: Path, out_dir: Path) -> Path:
+    """A private YOLO tree for the manifest's images: linked images, COPIED label files (so the
+    label folder — and Ultralytics' cache next to it — is its own), shared val linked as is."""
+    import os
+    import shutil
+
+    root = out_dir / "yolo"
+    img_dir, lbl_dir = root / "images" / "train", root / "labels" / "train"
+    img_dir.mkdir(parents=True, exist_ok=True)
+    lbl_dir.mkdir(parents=True, exist_ok=True)
+    for imgs in manifest.client_assignments.values():
+        for name in imgs:
+            src_img = (yolo_root / "images" / "train" / name).resolve()
+            dst_img = img_dir / name
+            if not dst_img.exists():
+                try:
+                    os.symlink(src_img, dst_img)
+                except OSError:
+                    shutil.copy2(src_img, dst_img)
+            src_lbl = yolo_root / "labels" / "train" / (Path(name).stem + ".txt")
+            if src_lbl.exists():
+                shutil.copy2(src_lbl, lbl_dir / src_lbl.name)
+    for sub in ("images", "labels"):
+        dst = root / sub / "val"
+        if not dst.exists():
+            try:
+                os.symlink((yolo_root / sub / "val").resolve(), dst, target_is_directory=True)
+            except OSError:
+                shutil.copytree(yolo_root / sub / "val", dst)
+    return root
+
+
 def _write_client_image_list(
     client_id: str,
     image_names: list[str],
@@ -287,11 +319,16 @@ def generate_partition_artifacts(
     logger.info("Wrote manifest: %s", manifest_path)
 
     data_yaml_map: dict[str, Path] = {}
+    # The server sample gets its own YOLO tree (ADR-015): Ultralytics keys its label cache on
+    # the label FOLDER (labels/train.cache), so a server fine-tune sharing labels/train with
+    # the clients overwrote their cache and concurrent client rewrites corrupted it
+    # (s8c_g B2 v1: every client failed from round 2 with "UnpicklingError: invalid load key").
+    src_root = _isolated_yolo_root(manifest, yolo_root, out_dir) if config["scenario"] == "Server-Sample" else yolo_root
     for client_id, client_images in manifest.client_assignments.items():
         train_list = _write_client_image_list(
-            client_id, client_images, yolo_root, out_dir
+            client_id, client_images, src_root, out_dir
         )
-        data_yaml = _write_client_data_yaml(client_id, train_list, yolo_root, out_dir)
+        data_yaml = _write_client_data_yaml(client_id, train_list, src_root, out_dir)
         data_yaml_map[client_id] = data_yaml
         logger.info(
             "Client %s: %d images | class_counts=%s | missing=%s",

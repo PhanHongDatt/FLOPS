@@ -538,7 +538,12 @@ experiments:
   scenario: S1b-2k + server sample 1k
   method: B2 FedAvg from T + server fine-tune (re-run)
   run_class: feasibility
-  status: planned
+  status: failed-technical
   seed: 42
-  kaggle_kernel: phdatt/flops-s8c-b2-rerun
+  kaggle_kernel: goshihayashi/flops-s8c-b2-rerun v1
   decision_rule: pre-declared in ADR-015
+  git_commit: 8fff2e9
+  notes: 'Only round 1 trained: from round 2 all 4 clients failed every round (UnpicklingError loading labels/train.cache).
+    The server fine-tune shared the clients'' label folder, hence Ultralytics'' label cache, which concurrent rewrites
+    corrupted. Metrics frozen at AP50 bus 0.251 from round 5 on — not a valid B2 result. Fixed: the server sample
+    gets its own YOLO tree; re-run as v2.'
