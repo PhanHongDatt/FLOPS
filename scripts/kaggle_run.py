@@ -67,6 +67,14 @@ def _apply_replacements(text: str, replace: dict[str, str]) -> str:
     return text
 
 
+def session_owner(cfg: dict[str, Any], sid: str) -> str:
+    """Kaggle account a session runs under: its own ``owner`` or the file-wide one.
+
+    A session on another account needs that account's token in KAGGLE_API_TOKEN when it is
+    pushed / queried (never stored in the repo)."""
+    return str(cfg["sessions"][sid].get("owner", cfg["owner"]))
+
+
 def build_session(cfg: dict[str, Any], sid: str, sha: str, build_root: Path) -> Path:
     """Write <build_root>/<sid>/{<slug>.ipynb, kernel-metadata.json}; return the folder."""
     import jupytext
@@ -89,8 +97,9 @@ def build_session(cfg: dict[str, Any], sid: str, sha: str, build_root: Path) -> 
     out.mkdir(parents=True, exist_ok=True)
     code_file = f"{s['slug']}.ipynb"
     nbformat.write(nb, out / code_file)
+    owner = session_owner(cfg, sid)
     meta = {
-        "id": f"{cfg['owner']}/{s['slug']}",
+        "id": f"{owner}/{s['slug']}",
         "title": s["slug"],               # Kaggle derives the slug from the title
         "code_file": code_file,
         "language": "python",
@@ -99,9 +108,10 @@ def build_session(cfg: dict[str, Any], sid: str, sha: str, build_root: Path) -> 
         "enable_gpu": "true",
         "enable_internet": "true",
         "machine_shape": cfg.get("machine_shape", ""),
-        "dataset_sources": list(cfg.get("dataset_sources", [])),
+        "dataset_sources": list(s.get("dataset_sources", cfg.get("dataset_sources", []))),
         "competition_sources": [],
-        "kernel_sources": [f"{cfg['owner']}/{sessions[k]['slug']}" for k in s.get("kernel_sources", [])],
+        "kernel_sources": [k if "/" in k else f"{session_owner(cfg, k)}/{sessions[k]['slug']}"
+                           for k in s.get("kernel_sources", [])],
         "model_sources": [],
     }
     (out / "kernel-metadata.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
@@ -149,7 +159,7 @@ def main() -> None:
     cfg = load_sessions()
     if args.session not in cfg["sessions"]:
         sys.exit(f"unknown session {args.session!r}; defined: {sorted(cfg['sessions'])}")
-    kernel = f"{cfg['owner']}/{cfg['sessions'][args.session]['slug']}"
+    kernel = f"{session_owner(cfg, args.session)}/{cfg['sessions'][args.session]['slug']}"
 
     if args.action in ("build", "push"):
         sha = _pushed_head() if args.action == "push" else _git("rev-parse", "HEAD")

@@ -141,7 +141,14 @@ if RUN_TEACHER:
 from src.utils.kaggle_paths import find_output_file
 _live = sorted((REPO_ROOT).glob(TEACHER_GLOB))
 TEACHER = _live[-1] if _live else find_output_file(TEACHER_GLOB)
-print("teacher:", TEACHER)
+if TEACHER is None:   # other accounts: the s8t teacher uploaded as a dataset (flops-teacher-s8t)
+    _ds = [q for pat in ("*/teacher.npz", "datasets/*/*/teacher.npz") for q in sorted(Path("/kaggle/input").glob(pat))]
+    TEACHER = _ds[0] if _ds else None
+if TEACHER is not None:
+    import hashlib
+    print("teacher:", TEACHER, "sha256", hashlib.sha256(Path(TEACHER).read_bytes()).hexdigest())
+else:
+    print("teacher: none")
 
 # %% [markdown]
 # ## Cell 3 — Run the arms

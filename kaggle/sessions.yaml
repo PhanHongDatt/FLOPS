@@ -106,3 +106,25 @@ sessions:
     kernel_sources: [s8t]
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["B2"]'
+
+  # ── Sessions on other accounts (phdatt's weekly GPU quota ran out 2026-10-05). They use the
+  # public mirror solesensei/solesensei_bdd100k (same images, box-identical labels for the four
+  # classes) and the s8t teacher uploaded as <owner>/flops-teacher-s8t (sha256 0aa06f52…).
+  # Push with that account's token in KAGGLE_API_TOKEN; tokens are never stored in the repo.
+
+  s8c_g:  # B2 re-run (seed 42) on goshihayashi. ~2.5 h
+    slug: flops-s8c-b2-rerun
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k, goshihayashi/flops-teacher-s8t]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["B2"]'
+
+  s9a_x:  # seed 123 for B1 and P1 on alexnguyen273. ~4 h
+    slug: flops-s9a-seed123-b1-p1
+    owner: alexnguyen273
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k, alexnguyen273/flops-teacher-s8t]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["B1", "P1"]'
+      'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 123'
