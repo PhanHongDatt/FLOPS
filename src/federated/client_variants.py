@@ -271,3 +271,37 @@ class FocalClient(LossVariantClient):
     """A6c: plain focal loss (EFL with equal factors) — the control that isolates equalization."""
 
     LOSS_SPEC = {"kind": "focal", "gamma": 2.0, "alpha": 0.25}
+
+
+class TeacherKDClient(LossVariantClient):
+    """P1 (ADR-015): not-true distillation from a FIXED teacher trained on the server's
+    labelled sample (``train_config["teacher_params"]``, same file for every client),
+    instead of A5's round-by-round global model. Same KD form and defaults as A5."""
+
+    LOSS_SPEC = {"kind": "ntd", "beta": 1.0, "tau": 1.0}
+
+    def _loss_spec(self) -> dict[str, Any]:
+        teacher = self.train_config.get("teacher_params")
+        if not teacher:
+            raise ValueError(f"{type(self).__name__} needs train_config['teacher_params'] (--teacher-params)")
+        return {**super()._loss_spec(), "teacher_path": str(teacher)}
+
+
+class TeacherKDRhoClient(TeacherKDClient):
+    """P2 (ADR-015): P1 + A2b's rho weighting of the locally missing classes' BCE."""
+
+    def _loss_spec(self) -> dict[str, Any]:
+        from src.data.bdd100k import TARGET_CLASSES
+        from src.preservation.rho_loss import class_loss_weights
+        return {**super()._loss_spec(),
+                "class_weights": class_loss_weights(TARGET_CLASSES, self.missing_classes, self.rho)}
+
+    def fit(
+        self,
+        parameters: NDArrays,
+        config: dict[str, Scalar],
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
+        params, n, metrics = super().fit(parameters, config)
+        metrics["rho"] = float(self.rho)
+        metrics["missing_classes"] = json.dumps(self.missing_classes)
+        return params, n, metrics

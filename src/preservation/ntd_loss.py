@@ -31,6 +31,7 @@ scores the same batch, and wraps ``criterion.bce``; ``on_train_end`` restores bo
 from __future__ import annotations
 
 import copy
+from pathlib import Path
 from typing import Any
 
 import torch
@@ -44,6 +45,23 @@ def bernoulli_kl(student_logits: torch.Tensor, teacher_logits: torch.Tensor, tau
     cross = F.binary_cross_entropy_with_logits(zs, pt, reduction="none")
     entropy = F.binary_cross_entropy_with_logits(zt, pt, reduction="none")
     return (cross - entropy) * tau * tau
+
+
+def load_ordered_state(module: torch.nn.Module, npz_path: Path) -> None:
+    """Load a ``get_parameters``-ordered .npz (arr_0..arr_N = state_dict order) into ``module``."""
+    import numpy as np
+
+    with np.load(npz_path) as data:
+        arrays = [data[k] for k in sorted(data.files, key=lambda k: int(k.split("_")[-1]))]
+    state = module.state_dict()
+    if len(arrays) != len(state):
+        raise ValueError(f"{npz_path}: {len(arrays)} arrays for {len(state)} state_dict entries")
+    new = {}
+    for (k, ref), arr in zip(state.items(), arrays):
+        if tuple(arr.shape) != tuple(ref.shape):
+            raise ValueError(f"{npz_path}: {k} has shape {arr.shape}, model expects {tuple(ref.shape)}")
+        new[k] = torch.as_tensor(arr).to(dtype=ref.dtype, device=ref.device)
+    module.load_state_dict(new, strict=True)
 
 
 class _NTDBCE(torch.nn.Module):
@@ -101,12 +119,20 @@ class _TeacherCriterion:
 
 
 class NotTrueDistillation:
-    """Ultralytics callbacks for A5. beta = 0 disables it (ordinary training)."""
+    """Ultralytics callbacks for A5 (teacher = received global model) and P1/P2 (ADR-015:
+    teacher = a FIXED model loaded from ``teacher_path``). beta = 0 disables it.
 
-    def __init__(self, beta: float = 1.0, tau: float = 1.0) -> None:
+    ``class_weights`` (P2) additionally scales each class's ordinary BCE term, i.e. the
+    A2b rho weighting (rho_loss.py) underneath the distillation.
+    """
+
+    def __init__(self, beta: float = 1.0, tau: float = 1.0, teacher_path: str | Path | None = None,
+                 class_weights: list[float] | None = None) -> None:
         if beta < 0 or tau <= 0:
             raise ValueError(f"need beta >= 0 and tau > 0, got beta={beta}, tau={tau}")
         self.beta, self.tau = float(beta), float(tau)
+        self.teacher_path = Path(teacher_path) if teacher_path else None
+        self.class_weights = [float(w) for w in class_weights] if class_weights else None
         self._model: Any = None
         self._criterion: Any = None
         self._original_bce: Any = None
@@ -124,10 +150,17 @@ class NotTrueDistillation:
         if isinstance(model.criterion, _TeacherCriterion):   # re-entry
             return
         crit = model.criterion
-        teacher = copy.deepcopy(model).eval()
+        teacher = copy.deepcopy(model)
+        if self.teacher_path is not None:
+            load_ordered_state(teacher, self.teacher_path)
+        teacher.eval()
         for p in teacher.parameters():
             p.requires_grad_(False)
-        bce = _NTDBCE(crit.bce, self.beta, self.tau)
+        base = crit.bce
+        if self.class_weights is not None and any(w != 1.0 for w in self.class_weights):
+            from src.preservation.rho_loss import _WeightedBCE
+            base = _WeightedBCE(base, self.class_weights)
+        bce = _NTDBCE(base, self.beta, self.tau)
         self._model, self._criterion, self._original_bce = model, crit, crit.bce
         crit.bce = bce
         model.criterion = _TeacherCriterion(crit, teacher, bce)

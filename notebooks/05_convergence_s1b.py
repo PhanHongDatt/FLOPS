@@ -77,7 +77,7 @@ if not (YOLO_ROOT / "data.yaml").exists():
 DATA_YAML = YOLO_ROOT / "data.yaml"
 
 for cfg in ("s1b_bus_2k_seed42", "s1_control_matched_2k_seed42",   # matched + pooled are built from S1b
-            "s1b_pooled_iid_2k_seed42"):
+            "s1b_pooled_iid_2k_seed42", "server_sample_1k_seed42"):  # server sample excludes all three
     subprocess.check_call([
         sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
         "--partition-config", str(REPO_ROOT / "configs" / "partition" / f"{cfg}.yaml"),
@@ -88,6 +88,7 @@ import yaml
 S1B = PARTITIONS_DIR / "s1b_bus_2k_seed42"
 CTRL = PARTITIONS_DIR / "s1_control_matched_2k_seed42"
 POOLED = PARTITIONS_DIR / "s1b_pooled_iid_2k_seed42"
+SERVER = PARTITIONS_DIR / "server_sample_1k_seed42"
 s1b = yaml.safe_load((S1B / "manifest.yaml").read_text())
 for cid, cls in (("C0", "bus"), ("C1", "bus"), ("C2", "truck")):
     assert s1b["class_counts"][cid][cls] == 0, f"S1b-2k {cid} {cls} must be 0"
@@ -97,6 +98,9 @@ pooled = yaml.safe_load((POOLED / "manifest.yaml").read_text())
 pooled_imgs = sorted(sum(pooled["client_assignments"].values(), []))
 assert pooled_imgs == sorted(sum(s1b["client_assignments"].values(), [])), "pooled must hold exactly the S1b images"
 print("pooled re-split class counts:", pooled["class_counts"])
+server = yaml.safe_load((SERVER / "manifest.yaml").read_text())
+assert not set(server["client_assignments"]["S"]) & set(pooled_imgs), "server sample overlaps the clients"
+print("server sample (ADR-015):", len(server["client_assignments"]["S"]), "images,", server["class_counts"]["S"])
 
 # %% [markdown]
 # ## Cell 2b — D1: error decomposition of finished runs (ADR-014)
@@ -117,6 +121,27 @@ if RUN_D1:
                    watch_dir=WORK / "flops_export")
     except Exception as exc:
         print(f"⚠️  D1 failed: {exc}")
+
+# %% [markdown]
+# ## Cell 2c — Teacher T on the server's 1,000-image sample (ADR-015)
+#
+# Session s8t trains it (50 epochs, G2 schedule); s8a/s8b load that same teacher from the
+# s8t output (kernel source) so every arm uses one teacher.
+
+# %%
+RUN_TEACHER = False   # session s8t sets True
+TEACHER_GLOB = "artifacts/runs/T-teacher_*/checkpoint/teacher.npz"
+if RUN_TEACHER:
+    from src.utils.proc import run_logged
+    run_logged([sys.executable, str(REPO_ROOT / "scripts" / "train_server_teacher.py"),
+                "--data-yaml", str(SERVER / "data_S.yaml"), "--global-data-yaml", str(DATA_YAML),
+                "--exp-config", str(EXP_CFG), "--epochs", "50", "--seed", "42"],
+               LOGS / "teacher.log", env={"YOLO_VERBOSE": "False"}, timeout=3 * 3600,
+               stall_timeout=3600, watch_dir=ARTIFACTS_DIR / "runs")
+from src.utils.kaggle_paths import find_output_file
+_live = sorted((REPO_ROOT).glob(TEACHER_GLOB))
+TEACHER = _live[-1] if _live else find_output_file(TEACHER_GLOB)
+print("teacher:", TEACHER)
 
 # %% [markdown]
 # ## Cell 3 — Run the arms
@@ -147,8 +172,14 @@ def arm_command(arm: str) -> tuple[list[str], Path]:
         "--global-data-yaml", str(DATA_YAML), "--resume",
     ]
     cmd += ["--algorithm", "FedProx"] if name == "FedProx" else ["--ablation", name]
-    if name in ("A2b", "A4b"):
+    if name in ("A2b", "A4b", "P2"):
         cmd += ["--rho", RHO]
+    if name in ("B1", "B2", "P1", "P2"):                       # ADR-015
+        if TEACHER is None:
+            raise FileNotFoundError("no teacher.npz: run s8t first and attach it as a kernel source")
+        cmd += ["--teacher-params", str(TEACHER)]
+    if name == "B2":
+        cmd += ["--server-data-yaml", str(SERVER / "data_S.yaml")]
     return cmd, partition
 
 outcomes = {}

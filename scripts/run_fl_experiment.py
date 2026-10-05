@@ -9,7 +9,7 @@ The experiment matrix has TWO independent axes (research/plan/plan.md §7.1):
     server strategy   : FedAvg | FedProx | SCAFFOLD | FedNova
                         ClassCountFedAvg (A1) | ClassAwareAgg (A3/A4)
     client mechanism  : none | preservation_param (A2a) | preservation_loss (A2b)
-                        ntd (A5) | efl (A6) | focal (A6c)
+                        ntd (A5) | efl (A6) | focal (A6c) | kd_teacher (P1) | kd_teacher_rho (P2)
 
 ``--ablation`` is a preset that fills both plus ``--rho``; explicit flags win.
 
@@ -50,6 +50,8 @@ from src.federated.client_variants import (
     NTDClient,
     PreservationClient,
     ScaffoldClient,
+    TeacherKDClient,
+    TeacherKDRhoClient,
 )
 from src.federated.server import run_fl_server
 from src.utils.config import build_local_train_config, load_experiment_config
@@ -71,11 +73,12 @@ _STRATEGIES = (
 _CLASS_AWARE_STRATEGIES = ("ClassAwareAgg", "ClassCountFedAvg")
 
 # ── Client mechanisms ─────────────────────────────────────────────────────
-_MECHANISMS = ("none", "preservation_param", "preservation_loss", "ntd", "efl", "focal")
+_MECHANISMS = ("none", "preservation_param", "preservation_loss", "ntd", "efl", "focal",
+               "kd_teacher", "kd_teacher_rho")
 
 # Mechanisms parameterised by rho (H2). The loss variants carry their own
 # literature defaults (ADR-012/013) and take no rho.
-_RHO_MECHANISMS = ("preservation_param", "preservation_loss")
+_RHO_MECHANISMS = ("preservation_param", "preservation_loss", "kd_teacher_rho")
 
 _MECHANISM_CLIENTS = {
     "preservation_param": PreservationClient,     # A2a
@@ -83,6 +86,8 @@ _MECHANISM_CLIENTS = {
     "ntd": NTDClient,                             # A5  (ADR-012)
     "efl": EFLClient,                             # A6  (ADR-013)
     "focal": FocalClient,                         # A6c (ADR-013)
+    "kd_teacher": TeacherKDClient,                # P1  (ADR-015)
+    "kd_teacher_rho": TeacherKDRhoClient,         # P2  (ADR-015)
 }
 
 # Strategy-specific clients used when mechanism == "none".
@@ -106,6 +111,12 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     "A5":  {"algorithm": "FedAvg",           "mechanism": "ntd"},
     "A6":  {"algorithm": "FedAvg",           "mechanism": "efl"},
     "A6c": {"algorithm": "FedAvg",           "mechanism": "focal"},
+    # Server holds a labelled 1,000-image sample (ADR-015). Every arm starts from the
+    # teacher trained on it (--teacher-params); B2 also fine-tunes on it after each round.
+    "B1":  {"algorithm": "FedAvg", "mechanism": "none",           "teacher_init": True},
+    "B2":  {"algorithm": "FedAvg", "mechanism": "none",           "teacher_init": True, "server_ft": True},
+    "P1":  {"algorithm": "FedAvg", "mechanism": "kd_teacher",     "teacher_init": True},
+    "P2":  {"algorithm": "FedAvg", "mechanism": "kd_teacher_rho", "teacher_init": True},
 }
 
 # Algorithms recognised by argparse but blocked at runtime with a scientific
@@ -294,6 +305,11 @@ def main() -> None:
                     help="Client-side mechanism (H2). Default: none")
     ap.add_argument("--rho", type=float, default=None,
                     help="Preservation factor; required when a client mechanism is set")
+    ap.add_argument("--teacher-params", type=Path, default=None,
+                    help="Teacher .npz trained on the server sample (ADR-015): initial global "
+                         "parameters of B1/B2/P1/P2 and the fixed KD teacher of P1/P2")
+    ap.add_argument("--server-data-yaml", type=Path, default=None,
+                    help="data.yaml of the server's labelled sample; B2 fine-tunes on it each round")
     ap.add_argument("--tau-elig", type=int, default=1,
                     help="Eligibility threshold for class-aware aggregation "
                          "(plan.md §5.1: primary 1, sensitivity variant 50)")
@@ -327,6 +343,11 @@ def main() -> None:
     faulthandler.dump_traceback_later(int(os.environ.get("FLOPS_HANG_DUMP_SECS", "1800")), repeat=True)
 
     algorithm, mechanism, rho = _resolve_arms(args)
+    preset = _ABLATIONS.get(args.ablation or "", {})
+    if preset.get("teacher_init") and (args.teacher_params is None or not args.teacher_params.exists()):
+        raise SystemExit(f"--ablation {args.ablation} needs an existing --teacher-params (ADR-015)")
+    if preset.get("server_ft") and (args.server_data_yaml is None or not args.server_data_yaml.exists()):
+        raise SystemExit(f"--ablation {args.ablation} needs an existing --server-data-yaml (ADR-015)")
 
     if algorithm in _DISABLED_ALGORITHMS:
         raise NotImplementedError(_DISABLED_ALGORITHMS[algorithm])
@@ -371,6 +392,10 @@ def main() -> None:
 
     fed = config["federated"]
     train_config = build_local_train_config(config)
+    if mechanism in ("kd_teacher", "kd_teacher_rho"):
+        if args.teacher_params is None:
+            raise SystemExit(f"--client-mechanism {mechanism} needs --teacher-params")
+        train_config["teacher_params"] = str(args.teacher_params.resolve())
 
     client_cls = _pick_client_class(algorithm, mechanism)
     num_val_examples = _count_val_examples(args.global_data_yaml)
@@ -436,6 +461,12 @@ def main() -> None:
         eval_config=eval_config if args.global_data_yaml else None,
         strategy_options=strategy_options,
         resume=args.resume,
+        init_params_path=args.teacher_params if preset.get("teacher_init") else None,
+        server_finetune=({"data_yaml": str(args.server_data_yaml), "epochs": 1, "seed": args.seed,
+                          "batch_size": train_config["batch_size"], "image_size": train_config["image_size"],
+                          "lr0": train_config["lr0"], "device": train_config["device"],
+                          "nbs": train_config.get("nbs")}
+                         if preset.get("server_ft") else None),
     )
 
     finalize_run(run_dir, algorithm=algorithm)

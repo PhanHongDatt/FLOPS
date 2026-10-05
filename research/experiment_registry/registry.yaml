@@ -435,3 +435,53 @@ experiments:
   interpretation: 'Rejected by ADR-013 rule: AP50 bus −0.075 vs A0 (A6 − A6c = +0.022: equalisation helps relative
     to focal, but the focal form costs more).'
   report: docs/PHAN_TICH_NON_IID.md §5.7
+- id: EXP-2026-10-05-S8-T
+  gate: G6 (exploratory, server-sample setting)
+  scenario: S1b-2k + server sample 1k
+  method: T teacher on server 1k sample (ADR-015)
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s8t-teacher
+  decision_rule: pre-declared in ADR-015
+  notes: 50 epochs, G2 schedule, final EMA; evaluated on the global val set.
+- id: EXP-2026-10-05-S8-B1
+  gate: G6 (exploratory, server-sample setting)
+  scenario: S1b-2k + server sample 1k
+  method: B1 FedAvg from T
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s8a-server-baselines
+  decision_rule: pre-declared in ADR-015
+  notes: Pre-training control.
+- id: EXP-2026-10-05-S8-B2
+  gate: G6 (exploratory, server-sample setting)
+  scenario: S1b-2k + server sample 1k
+  method: B2 FedAvg from T + server fine-tune
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s8a-server-baselines
+  decision_rule: pre-declared in ADR-015
+  notes: Strongest direct use of the sample.
+- id: EXP-2026-10-05-S8-P1
+  gate: G6 (exploratory, server-sample setting)
+  scenario: S1b-2k + server sample 1k
+  method: P1 KD from fixed T
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s8b-teacher-kd
+  decision_rule: pre-declared in ADR-015
+  notes: FedNTD form, beta = tau = 1.
+- id: EXP-2026-10-05-S8-P2
+  gate: G6 (exploratory, server-sample setting)
+  scenario: S1b-2k + server sample 1k
+  method: P2 P1 + rho 0.25
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s8b-teacher-kd
+  decision_rule: pre-declared in ADR-015
+  notes: Author's preservation on top of KD.

@@ -2,6 +2,8 @@
 
 A spec is a plain dict so it can travel through the client's train kwargs:
   {"kind": "ntd",   "beta": 1.0, "tau": 1.0}                         A5  (ADR-012)
+  {"kind": "ntd", ..., "teacher_path": "teacher.npz",
+   "class_weights": [1, 0.25, 1, 1]}                                  P1 / P2 (ADR-015)
   {"kind": "efl",   "gamma": 2.0, "alpha": 0.25, "scale": 4.0,
    "state_path": ".../efl_state.json"}                                A6  (ADR-013)
   {"kind": "focal", "gamma": 2.0, "alpha": 0.25}                      A6c (ADR-013)
@@ -21,7 +23,9 @@ LOSS_KINDS = ("ntd", "efl", "focal")
 def build_loss_plugin(spec: dict[str, Any]) -> Any:
     kind = spec.get("kind")
     if kind == "ntd":
-        return NotTrueDistillation(beta=float(spec.get("beta", 1.0)), tau=float(spec.get("tau", 1.0)))
+        return NotTrueDistillation(beta=float(spec.get("beta", 1.0)), tau=float(spec.get("tau", 1.0)),
+                                   teacher_path=spec.get("teacher_path"),
+                                   class_weights=spec.get("class_weights"))
     if kind in ("efl", "focal"):
         state = spec.get("state_path")
         return FocalClassLoss(

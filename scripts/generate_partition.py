@@ -37,6 +37,7 @@ from src.data.partitioner import (
     partition_iid,
     partition_matched_control,
     partition_pooled_iid,
+    partition_server_sample,
     partition_missing_class,
     save_match_report,
     save_partition_manifest,
@@ -187,6 +188,24 @@ def _dispatch_pooled(config: dict[str, Any], label_dir: Path, output_dir: Path) 
     )
 
 
+def _dispatch_server_sample(config: dict[str, Any], images: list[str], label_dir: Path,
+                            output_dir: Path) -> PartitionManifest:
+    """ADR-015: labelled sample held by the server, disjoint from every listed client partition."""
+    exclude: set[str] = set()
+    for ref in config.get("exclude_manifests") or []:
+        ref_path = Path(ref) if Path(ref).is_absolute() else output_dir / ref
+        if not ref_path.exists():
+            raise FileNotFoundError(f"exclude manifest {ref_path} not found — generate it first")
+        for imgs in load_partition_manifest(ref_path).client_assignments.values():
+            exclude.update(imgs)
+    return partition_server_sample(
+        image_names=images, label_dir=label_dir, exclude=exclude,
+        n_images=int(config["n_images"]), seed=int(config["seed"]),
+        partition_id=str(config["partition_id"]),
+        min_boxes_per_class=int(config.get("min_boxes_per_class", 1)),
+    )
+
+
 def _write_client_image_list(
     client_id: str,
     image_names: list[str],
@@ -258,6 +277,8 @@ def generate_partition_artifacts(
             )
     elif config["scenario"] == "S1-Pooled-IID":
         manifest = _dispatch_pooled(config, label_dir, output_dir)
+    elif config["scenario"] == "Server-Sample":
+        manifest = _dispatch_server_sample(config, images, label_dir, output_dir)
     else:
         manifest = _dispatch_partition(config, images, label_dir)
 

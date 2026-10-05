@@ -78,3 +78,24 @@ sessions:
     notebook: notebooks/05_convergence_s1b.py
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A5", "A6"]'
+
+  s8t:  # ADR-015: draw the server's 1,000-image sample and train the teacher T (50 epochs). ~45 min
+    slug: flops-s8t-teacher
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = []'
+      'RUN_TEACHER = False   # session s8t sets True': 'RUN_TEACHER = True'
+
+  s8a:  # ADR-015: B1 (FedAvg from T), B2 (+ server fine-tune on the sample). Needs s8t. ~4 h
+    slug: flops-s8a-server-baselines
+    notebook: notebooks/05_convergence_s1b.py
+    kernel_sources: [s8t]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["B1", "B2"]'
+
+  s8b:  # ADR-015: P1 (KD from fixed T), P2 (P1 + rho 0.25). Needs s8t. ~4 h
+    slug: flops-s8b-teacher-kd
+    notebook: notebooks/05_convergence_s1b.py
+    kernel_sources: [s8t]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P1", "P2"]'

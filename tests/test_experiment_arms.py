@@ -30,6 +30,8 @@ from src.federated.client_variants import (  # noqa: E402
     EFLClient,
     FocalClient,
     NTDClient,
+    TeacherKDClient,
+    TeacherKDRhoClient,
     FedNovaClient,
     LossPreservationClient,
     PreservationClient,
@@ -45,7 +47,44 @@ def _args(**kw) -> argparse.Namespace:
 
 # ── ablation presets ──────────────────────────────────────────────────────
 def test_every_plan_arm_has_a_preset():
-    assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c"}
+    assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c",
+                               "B1", "B2", "P1", "P2"}
+
+
+@pytest.mark.parametrize("arm,mech,client,rho,exp_id", [
+    ("B1", "none", YOLOFlowerClient, None, "B1"),
+    ("B2", "none", YOLOFlowerClient, None, "B2"),
+    ("P1", "kd_teacher", TeacherKDClient, None, "P1"),
+    ("P2", "kd_teacher_rho", TeacherKDRhoClient, 0.25, "P2_rho0.25"),
+])
+def test_server_sample_arms(arm, mech, client, rho, exp_id):
+    algo, m, r = _resolve_arms(_args(ablation=arm, rho=rho))
+    assert (algo, m) == ("FedAvg", mech)
+    assert _pick_client_class(algo, m) is client
+    assert exp_id_for_arm(arm, m, r) == exp_id
+    assert _ABLATIONS[arm]["teacher_init"] is True
+    assert bool(_ABLATIONS[arm].get("server_ft")) == (arm == "B2")
+
+
+def test_p2_requires_rho():
+    with pytest.raises(SystemExit):
+        _resolve_arms(_args(ablation="P2"))
+
+
+def test_teacher_kd_clients_pass_teacher_and_weights(tmp_path, monkeypatch):
+    import src.federated.client as base
+    monkeypatch.setattr(base, "build_model", lambda w: None)
+    cfg = {"local_epochs": 1, "batch_size": 16, "image_size": 640, "lr0": 0.01,
+           "teacher_params": str(tmp_path / "teacher.npz")}
+    p2 = TeacherKDRhoClient(client_id="C0", partition_id=0, data_yaml=tmp_path / "d.yaml", weights="w",
+                            train_config=cfg, run_dir=tmp_path, missing_classes=["bus"], rho=0.25)
+    spec = p2._train_kwargs()["cls_loss"]
+    assert spec["teacher_path"] == cfg["teacher_params"]
+    assert spec["class_weights"] == [1.0, 0.25, 1.0, 1.0]
+    p1 = TeacherKDClient(client_id="C2", partition_id=2, data_yaml=tmp_path / "d.yaml", weights="w",
+                         train_config={**cfg, "teacher_params": None}, run_dir=tmp_path)
+    with pytest.raises(ValueError, match="teacher_params"):
+        p1._train_kwargs()
 
 
 @pytest.mark.parametrize("arm,mech,client", [("A5", "ntd", NTDClient), ("A6", "efl", EFLClient),

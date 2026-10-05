@@ -214,6 +214,48 @@ def _build_centralized_evaluate_fn(
     return evaluate_fn
 
 
+def _wrap_server_finetune(strategy: Any, finetune: dict[str, Any], run_dir: Path, round_offset: int,
+                          weights: str) -> None:
+    """B2 (ADR-015): after every aggregation, train the global model on the server's labelled
+    sample for ``finetune["epochs"]`` epoch(s) before it is checkpointed, evaluated and sent out.
+
+    Same local-training settings as the clients (lr0, batch, no warm-up, no mosaic closing);
+    in-process data loading (``workers=0``) because this runs in the Ray driver, where forking
+    dataloader workers can deadlock (same reason as the server evaluation).
+    """
+    from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
+
+    from src.federated.client import derive_local_seed
+    from src.model.yolo_wrapper import build_model, get_parameters, set_parameters, train_one_round
+
+    holder: dict[str, Any] = {"model": None}
+    original = strategy.aggregate_fit
+
+    def aggregate_fit(server_round: int, results: Any, failures: Any) -> Any:
+        params, metrics = original(server_round, results, failures)
+        if params is None:
+            return params, metrics
+        abs_round = round_offset + server_round
+        if holder["model"] is None:
+            holder["model"] = build_model(weights)
+        model = holder["model"]
+        set_parameters(model, parameters_to_ndarrays(params))
+        logger.info("Round %d (absolute): server fine-tune on %s started", abs_round, finetune["data_yaml"])
+        train_one_round(
+            model=model, data_yaml=Path(finetune["data_yaml"]), epochs=int(finetune.get("epochs", 1)),
+            batch=int(finetune["batch_size"]), img_size=int(finetune["image_size"]), lr0=float(finetune["lr0"]),
+            device=finetune.get("device", 0), project=run_dir / "server_ft", name=f"round_{abs_round}",
+            seed=derive_local_seed(int(finetune.get("seed", 0)), abs_round, 99), workers=0,
+            nbs=finetune.get("nbs"),
+        )
+        logger.info("Round %d (absolute): server fine-tune done", abs_round)
+        metrics = dict(metrics or {})
+        metrics["server_finetune"] = 1
+        return ndarrays_to_parameters(get_parameters(model)), metrics
+
+    strategy.aggregate_fit = aggregate_fit
+
+
 def run_fl_server(
     algorithm: str,
     fl_config: dict[str, Any],
@@ -227,6 +269,8 @@ def run_fl_server(
     eval_config: dict[str, Any] | None = None,
     strategy_options: dict[str, Any] | None = None,
     resume: bool = False,
+    init_params_path: Path | None = None,
+    server_finetune: dict[str, Any] | None = None,
 ) -> None:
     from flwr.common import ndarrays_to_parameters
 
@@ -272,6 +316,10 @@ def run_fl_server(
             )
     elif resume:
         logger.info("--resume given but no checkpoint found; starting from round 1.")
+    if initial_params is None and init_params_path is not None:
+        # ADR-015: B1/B2/P1/P2 start from the teacher trained on the server's sample
+        initial_params = load_global_checkpoint(Path(init_params_path))
+        logger.info("Initial global parameters from %s", init_params_path)
 
     remaining_rounds = total_rounds - round_offset
 
@@ -323,6 +371,9 @@ def run_fl_server(
         )
 
     strategy = strategy_builder(**strategy_kwargs)
+    if server_finetune:
+        _wrap_server_finetune(strategy, server_finetune, run_dir, round_offset,
+                              weights=str((eval_config or {}).get("weights", "yolov8n.pt")))
 
     # Default num_gpus=1.0 serialises clients onto the GPU. The previous default
     # of 0.25 let Ray place 4 YOLOv8n trainings on one device concurrently:

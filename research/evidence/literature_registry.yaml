@@ -121,6 +121,8 @@ entries:
       Demonstrates that data heterogeneity (Non-IID) causes significant
       accuracy degradation in FedAvg. Introduces weight divergence as a
       quantification of Non-IID degree. Provides motivation baseline for H1.
+      Also (abstract, re-checked 2026-10-05): a globally shared 5 % data subset raises CIFAR-10
+      accuracy by 30 % — the evidence behind the server-sample setting of ADR-015.
     role: motivation
     notes: >
       Preprint only — not published at a peer-reviewed venue per arXiv record.
@@ -318,6 +320,34 @@ entries:
       Suppressing negative gradients of tail classes (mitigation) raises their false positives;
       a compensation factor restores the penalty on misclassified samples. Explains the A2b/A4b
       FP increase; softmax-based, not reused directly.
+    role: motivation
+
+  # ── SERVER-SIDE PROXY DATA (ADR-015, abstracts verified on arXiv 2026-10-05) ──
+
+  - id: nguyen2023where
+    title: "Where to Begin? On the Impact of Pre-Training and Initialization in Federated Learning"
+    authors: ["John Nguyen", "Jianyu Wang", "Kshitiz Malik", "Maziar Sanjabi", "Michael Rabbat"]
+    year: 2023
+    venue: "International Conference on Learning Representations (ICLR 2023)"
+    source_url: "https://arxiv.org/abs/2206.15387"
+    arxiv_id: "2206.15387"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      Starting FL from a model pre-trained on server proxy data reduces the effect of data and
+      system heterogeneity (abstract). Arm B1.
+    role: adaptation
+
+  - id: feddf2020
+    title: "Ensemble Distillation for Robust Model Fusion in Federated Learning"
+    authors: ["Tao Lin", "Lingjing Kong", "Sebastian U. Stich", "Martin Jaggi"]
+    year: 2020
+    venue: "Advances in Neural Information Processing Systems 33 (NeurIPS 2020)"
+    source_url: "https://arxiv.org/abs/2006.07242"
+    arxiv_id: "2006.07242"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: "Server-side distillation of client models on auxiliary data (motivation for using server data)."
     role: motivation
 
 # ── ENTRIES REQUIRING ADDITIONAL VERIFICATION ──────────────────────────────

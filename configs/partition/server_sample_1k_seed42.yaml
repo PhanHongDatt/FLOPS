@@ -1,0 +1,17 @@
+# Server-held labelled sample (ADR-015)
+#
+# 1,000 BDD100K train images drawn uniformly at random (seed 42) from the images that
+# NO client holds in S1b-2k, its matched control or the pooled re-split. Natural class
+# mix (not stratified toward bus); the draw must contain all four classes, otherwise
+# generation fails instead of redrawing. Writes data_S.yaml (one pseudo-client "S").
+#
+# PREREQUISITE: generate the three excluded partitions first (resolved under --output-dir).
+partition_id: server_sample_1k_seed42
+scenario: Server-Sample
+seed: 42
+n_images: 1000
+min_boxes_per_class: 1
+exclude_manifests:
+  - s1b_bus_2k_seed42/manifest.yaml
+  - s1_control_matched_2k_seed42/manifest.yaml
+  - s1b_pooled_iid_2k_seed42/manifest.yaml

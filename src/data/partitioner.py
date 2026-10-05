@@ -664,3 +664,44 @@ def partition_pooled_iid(
         class_counts=counts,
         missing_classes=missing,
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Server-held labelled sample (ADR-015)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def partition_server_sample(
+    image_names: list[str],
+    label_dir: Path,
+    exclude: set[str],
+    n_images: int,
+    seed: int,
+    partition_id: str,
+    min_boxes_per_class: int = 1,
+) -> PartitionManifest:
+    """A seeded uniform random sample of train images that NO client holds.
+
+    Uniform (not stratified) on purpose: the server sample keeps BDD100K's natural class
+    mix, so nothing is cherry-picked toward bus. It must contain every target class
+    (``min_boxes_per_class``); a draw that does not is rejected loudly, never redrawn.
+    The single pseudo-client is ``S``.
+    """
+    candidates = sorted(set(image_names) - set(exclude))
+    if len(candidates) < n_images:
+        raise ValueError(f"only {len(candidates)} images outside the clients, need {n_images}")
+    rng = random.Random(seed)
+    chosen = sorted(rng.sample(candidates, n_images))
+    index = load_label_index(chosen, label_dir)
+    counts = _sum_counts(chosen, index)
+    short = [c for c in TARGET_CLASSES if counts[c] < min_boxes_per_class]
+    if short:
+        raise ValueError(f"server sample {partition_id} lacks classes {short} (counts {counts})")
+    return PartitionManifest(
+        partition_id=partition_id,
+        seed=seed,
+        scenario="Server-Sample",
+        num_clients=1,
+        client_assignments={"S": chosen},
+        class_counts={"S": counts},
+        missing_classes={"S": []},
+    )

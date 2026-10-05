@@ -66,3 +66,30 @@ def find_g2_weights(
                 z.extract(members[-1], dest)
                 return dest / members[-1]
     return None
+
+
+def find_output_file(
+    pattern: str,
+    input_root: Path = Path("/kaggle/input"),
+    extract_to: Path = Path("/kaggle/tmp/inputs"),
+) -> Path | None:
+    """A file from an earlier session's output (``kernel_sources``), loose or inside
+    ``flops_results.zip``. ``pattern`` is an fnmatch pattern on the path relative to the
+    output root, e.g. ``artifacts/runs/T-teacher_*/checkpoint/teacher.npz``. Newest name wins.
+    """
+    import fnmatch
+    import zipfile
+
+    if not Path(input_root).exists():
+        return None
+    loose = sorted(Path(input_root).glob(f"**/{pattern}"))
+    if loose:
+        return loose[-1]
+    for k, archive in enumerate(sorted(Path(input_root).glob("**/flops_results.zip"))):
+        with zipfile.ZipFile(archive) as z:
+            members = sorted(n for n in z.namelist() if fnmatch.fnmatch(n, pattern))
+            if members:
+                dest = Path(extract_to) / f"out{k}"
+                z.extract(members[-1], dest)
+                return dest / members[-1]
+    return None
