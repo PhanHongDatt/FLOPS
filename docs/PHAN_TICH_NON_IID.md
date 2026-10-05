@@ -20,7 +20,9 @@
 | Phương pháp đề xuất làm gì? | A3: gộp hàng tham số của lớp *c* chỉ từ client có lớp *c*; A2b: nhân BCE của lớp vắng với ρ = 0,25 (giảm 4× áp lực đẩy xuống); A4b = A2b + A3 | §4 |
 | Missing-Class có gây hại không? | **Có, ở cả 3 seed**: FedAvg trên S1b mất **−0,046 ± 0,008** AP50 bus so với đối chứng matched, chủ yếu do bỏ sót bus (FN +487 ± 63) | `[ĐO]` §5.6 |
 | Phương pháp đề xuất có khắc phục được không? | **Không** ở dạng hiện tại: A4b **−0,014 ± 0,002** AP50 bus so với FedAvg ở cả 3 seed (FP bus +696, FN −72); A3 −0,024, A2b −0,010 (1 seed) | `[ĐO]` §5.5–5.6 |
-| Hướng tiếp theo? | Chẩn đoán D1/D3 + A5 (FedNTD) + A6 (EFL, đối chứng A6c), chạy song song | §7 |
+| Thiệt hại do phân bố hay do ít dữ liệu? | **Cả hai**: cùng dữ liệu chia đều (D3) tốt hơn S1b **+0,029** AP50 bus; phần còn lại (+0,018) do ít box bus (seed 42) | `[ĐO]` §5.7 |
+| Bus bị bỏ sót đi đâu? | Phần lớn bị **nhầm thành truck/car** (+204 / +202 so với control), +193 không phát hiện | `[ĐO]` D1 §5.7 |
+| Hướng mới A5 (FedNTD), A6 (EFL)? | **Bác bỏ** theo quy tắc khai báo trước: −0,024 và −0,075 AP50 bus so với FedAvg | `[ĐO]` §5.7 |
 | Độ tin cậy? | 3 seed cho A0, A0@control, A4b (std A0 = 0,003 AP50 bus); các arm khác 1 seed. Thăm dò: G4/G5 chưa pass | §5.6 |
 
 ---
@@ -406,6 +408,52 @@ Quy tắc khai báo trước: trung bình các lần eval ở round 20/25/30; hi
   ±0,023 từ cặp A3 ≡ A1 là quá rộng).
 - Giới hạn còn nguyên: đối chứng có 2,03× box bus (H1 là hiệu ứng gộp), G4/G5 chưa pass; FedProx, A1,
   A3, A2b vẫn 1 seed.
+
+### 5.7 Đợt s7: chẩn đoán D1/D3 và hai hướng mới A5, A6 (seed 42, thăm dò) `[ĐO]`
+
+Cùng giao thức ADR-011 (commit `e62a870`, phiên s7a/s7b). Quy tắc đọc kết quả khai báo trước
+trong ADR-012/013/014. So sánh với A0 seed 42 (AP50 bus 0,231; std của A0 qua 3 seed là 0,003).
+
+| Arm | mAP50 | AP50 bus | Δ AP50 bus vs A0 | FP bus | FN bus | Theo quy tắc |
+|---|---:|---:|---:|---:|---:|---|
+| A0 FedAvg (S1b) | 0,288 | 0,231 | — | 298 | 1.394 | mốc |
+| **D3: A0@pooled** (cùng 8.000 ảnh, chia đều) | 0,299 | 0,261 | **+0,029** | 1.138 | 1.251 | ≥ +0,010 → **phân bố thiếu lớp tự nó gây hại** |
+| A0@control (2,03× box bus) | 0,301 | 0,278 | +0,047 | 2.705 | 975 | — |
+| A5 chưng cất not-true | 0,282 | 0,207 | −0,024 | 1.744 | 1.317 | **bác bỏ** (AP giảm, FP +486 %) |
+| A6 Equalized Focal Loss | 0,245 | 0,156 | −0,075 | 3.189 | 1.359 | **bác bỏ** |
+| A6c focal loss (đối chứng) | 0,244 | 0,134 | −0,098 | 1.149 | 1.429 | — |
+
+**D3 tách được hai thành phần của H1** (seed 42, H1 = −0,047): khoảng **0,029 (≈ 60 %) do phân bố**
+(cùng dữ liệu, chỉ khác client nào giữ bus) và khoảng **0,018 (≈ 40 %) do ít dữ liệu bus hơn**
+(control − pooled). Vậy một phương pháp FL tốt nhất cũng chỉ lấy lại được tối đa khoảng 0,029 AP50 bus.
+
+**D1: bus bị bỏ sót đi đâu** (checkpoint round 30, trung bình 3 seed, conf 0,25, IoU 0,5; 1.597 bus GT):
+
+| | TP | → nhầm thành truck | → nhầm thành car | điểm bus thấp | không phát hiện | FP bus |
+|---|---:|---:|---:|---:|---:|---:|
+| A0@control | 769 | 18 | 229 | 223 | 358 | 3.379 |
+| A0 (S1b) | 223 | **222** | **431** | 171 | **551** | 199 |
+| A4b | 266 | 312 | 335 | 175 | 509 | 408 |
+
+- So với control, S1b bỏ sót thêm khoảng 546 bus: **+204 bị gán thành truck, +202 thành car, +193
+  không phát hiện**; nhóm "điểm bus thấp" còn giảm (−52). Tức là phần lớn bus **vẫn được định vị**
+  nhưng bị **phân loại nhầm sang lớp xe lân cận**: tri thức *phân biệt bus với truck/car* bị mất, chứ
+  không phải điểm bus chỉ bị đè thấp `[SUY LUẬN]`.
+- A4b chuyển một phần nhầm-car thành nhầm-truck và tăng FP nền; không sửa được nhầm lẫn.
+
+**Diễn giải các hướng mới**
+- **A5** (chưng cất từ mô hình toàn cục): FN giảm 76 nhưng FP gấp ~6 lần, AP giảm. Với head sigmoid,
+  KD dày đặc trên 8.400 anchor giữ lại cả các điểm bus sai của mô hình toàn cục `[SUY LUẬN]`.
+- **A6 vs A6c**: phần cân bằng có giúp so với focal thường (+0,022 AP50 bus), nhưng **bản thân focal
+  loss** làm mọi lớp giảm (mAP50 −0,044) trong cấu hình này, nên A6 vẫn kém A0 xa. Không thể kết luận
+  "focal tốt/xấu" từ A6c vs A0 vì còn lẫn hiệu ứng thu nhỏ hạng mục phân loại (ADR-013).
+- Lưu ý: A0@pooled và control cũng có FP bus cao hơn A0 nhiều trong khi AP cao hơn. FP tăng **tự nó**
+  không phải dấu hiệu thất bại; tiêu chí "FP ≤ +50 %" trong ADR-012/013 vẫn được giữ vì đã khai báo
+  trước (§20), và A5/A6 đều thất bại cả theo AP.
+
+> **Kết luận đợt s7:** thiệt hại thiếu lớp là thật và có thể tách riêng (~0,029 AP50 bus), biểu hiện
+> chủ yếu là **nhầm bus thành truck/car**. Cả bốn cách can thiệp vào loss phía client đã thử
+> (A2b, A4b, A5, A6) đều **không** vượt FedAvg. Đây là các kết quả âm hợp lệ (§22).
 
 ## 6. Hạn chế và mức độ tin cậy
 

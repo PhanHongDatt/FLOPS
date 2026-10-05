@@ -28,8 +28,11 @@ def rule_value(rows: list[dict[str, Any]], metric: str) -> float | None:
 
 
 def _arm(env: dict[str, Any]) -> str:
-    arm = str(env.get("exp_id"))
-    return arm + ("@control" if "control" in str(env.get("partition_id")) else "")
+    arm, pid = str(env.get("exp_id")), str(env.get("partition_id"))
+    for tag in ("control", "pooled"):          # same exp_id on another partition is another arm
+        if tag in pid:
+            return f"{arm}@{tag}"
+    return arm
 
 
 def summarise(roots: list[Path], metric: str) -> dict[str, dict[str, Any]]:

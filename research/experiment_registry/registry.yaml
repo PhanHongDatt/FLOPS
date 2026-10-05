@@ -4,408 +4,434 @@
 # Never delete negative results.
 
 experiments:
-  - id: EXP-2026-10-03-S2v2-G2-centralized
-    gate: G2
-    scenario: centralized
-    method: YOLOv8n-centralized
-    run_class: feasibility
-    status: failed-technical
-    seed: 42
-    git_commit: 501ef507
-    kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v2
-    notes: 'Trained 10 epochs (~2 h 10 min) then crashed in mlflow.log_metrics on ''metrics/precision(B)'';
-      Kaggle saved no output (>500 files). Fixed: logger sanitises names; results zipped
-      (commit df0de53a). Excluded for a logged technical reason (CLAUDE.md §20).'
-  - id: EXP-2026-10-03-S2v3-G2-centralized
-    gate: G2
-    scenario: centralized
-    method: YOLOv8n-centralized
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: centralized
-    git_commit: df0de53a
-    kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v3
-    results:
-      mAP50: 0.4883
-      mAP50-95: 0.3232
-      AP50_car: 0.7199
-      AP50_bus: 0.494
-      AP50_truck: 0.5248
-      AP50_motorcycle: 0.2145
-    report: research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md
-    notes: Single seed, feasibility scale — sanity comparison, not reportable (§14).
-      10 epochs, batch 16, warmup 3, close_mosaic 10 (ADR-009); ~143 min.
-  - id: EXP-2026-10-03-S2v3-G3-FedAvg-S0
-    gate: G3
-    scenario: S0
-    method: FedAvg
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: s0_iid_seed42
-    git_commit: df0de53a
-    kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v3
-    results:
-      mAP50: 0.3769
-      mAP50-95: 0.2438
-      AP50_car: 0.6764
-      AP50_bus: 0.3318
-      AP50_truck: 0.4122
-      AP50_motorcycle: 0.0871
-    report: research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md
-    notes: Single seed, feasibility scale — sanity comparison, not reportable (§14).
-      5 rounds x 1 local epoch, 4 clients; ~103 min; mAP50 still rising at round 5 (+0.030/round).
-  - id: EXP-2026-10-03-S2v3-G3-FedProx-S0
-    gate: G3
-    scenario: S0
-    method: FedProx
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: s0_iid_seed42
-    git_commit: df0de53a
-    kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v3
-    results:
-      mAP50: 0.3756
-      mAP50-95: 0.2436
-      AP50_car: 0.6784
-      AP50_bus: 0.3316
-      AP50_truck: 0.4094
-      AP50_motorcycle: 0.083
-    report: research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md
-    notes: Single seed, feasibility scale — sanity comparison, not reportable (§14).
-      mu=0.01 (ADR-010); ~118 min; indistinguishable from FedAvg on IID S0 at one seed.
-
-# Example entry:
-# - id: EXP-001
-#   name: "S1 Missing-Class FedAvg Baseline"
-#   gate: G3
-#   scenario: S1
-#   method: FedAvg
-#   run_class: smoke | feasibility | main
-#   status: planned
-#   seed: 42
-#   partition_id: ""
-#   git_commit: ""
-#   config: ""
-#   environment: ""
-#   notes: ""
-  - id: EXP-2026-10-04-S5-A0
-    gate: G4
-    scenario: S1b-2k
-    method: A0
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 7ca44af7
-    kaggle_kernel: phdatt/flops-s5a-s1b-baselines v1
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2879
-        AP50_bus: 0.2314
-      final_r30:
-        mAP50: 0.286
-        AP50_bus: 0.2247
-        FP_bus: 318.0
-        FN_bus: 1386.0
-    report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
-    notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed),
-      single seed (ADR-011).
-  - id: EXP-2026-10-04-S5-A1
-    gate: G6/G7 (exploratory)
-    scenario: S1b-2k
-    method: A1
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 7ca44af7
-    kaggle_kernel: phdatt/flops-s5a-s1b-baselines v1
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2837
-        AP50_bus: 0.2108
-      final_r30:
-        mAP50: 0.2701
-        AP50_bus: 0.1676
-        FP_bus: 400.0
-        FN_bus: 1454.0
-    report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
-    notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed),
-      single seed (ADR-011).
-  - id: EXP-2026-10-04-S5-A3
-    gate: G6/G7 (exploratory)
-    scenario: S1b-2k
-    method: A3
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 7ca44af7
-    kaggle_kernel: phdatt/flops-s5a-s1b-baselines v1
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2841
-        AP50_bus: 0.2075
-      final_r30:
-        mAP50: 0.2755
-        AP50_bus: 0.1809
-        FP_bus: 575.0
-        FN_bus: 1420.0
-    report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
-    notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed),
-      single seed (ADR-011).
-  - id: EXP-2026-10-04-S5-FedProx
-    gate: G6/G7 (exploratory)
-    scenario: S1b-2k
-    method: FedProx
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 7ca44af7
-    kaggle_kernel: phdatt/flops-s5a-s1b-baselines v1
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2903
-        AP50_bus: 0.2341
-      final_r30:
-        mAP50: 0.2859
-        AP50_bus: 0.2252
-        FP_bus: 285.0
-        FN_bus: 1416.0
-    report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
-    notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed),
-      single seed (ADR-011).
-  - id: EXP-2026-10-04-S5-A0at-control
-    gate: G4
-    scenario: S1-Control-Matched-2k
-    method: A0 @control
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: s1_control_matched_2k_seed42
-    git_commit: 7ca44af7
-    kaggle_kernel: phdatt/flops-s5b-s1b-method v1
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.3012
-        AP50_bus: 0.2783
-      final_r30:
-        mAP50: 0.2911
-        AP50_bus: 0.2556
-        FP_bus: 3035.0
-        FN_bus: 942.0
-    report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
-    notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed),
-      single seed (ADR-011).
-  - id: EXP-2026-10-04-S5-A2b_rho0.25
-    gate: G6/G7 (exploratory)
-    scenario: S1b-2k
-    method: A2b_rho0.25
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 7ca44af7
-    kaggle_kernel: phdatt/flops-s5b-s1b-method v1
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2855
-        AP50_bus: 0.2217
-      final_r30:
-        mAP50: 0.2839
-        AP50_bus: 0.2219
-        FP_bus: 546.0
-        FN_bus: 1376.0
-    report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
-    notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed),
-      single seed (ADR-011).
-  - id: EXP-2026-10-04-S5-A4b_rho0.25
-    gate: G6/G7 (exploratory)
-    scenario: S1b-2k
-    method: A4b_rho0.25
-    run_class: feasibility
-    status: completed
-    seed: 42
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 7ca44af7
-    kaggle_kernel: phdatt/flops-s5b-s1b-method v1
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2838
-        AP50_bus: 0.2156
-      final_r30:
-        mAP50: 0.2846
-        AP50_bus: 0.216
-        FP_bus: 777.0
-        FN_bus: 1371.0
-    report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
-    notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed),
-      single seed (ADR-011).
-  - id: EXP-2026-10-04-S6-A0at-control-seed123
-    gate: G4 (H1 control)
-    scenario: S1-Control-Matched-2k
-    method: A0@control
-    run_class: feasibility
-    status: completed
-    seed: 123
-    partition_id: s1_control_matched_2k_seed42
-    git_commit: 42d9d2d
-    kaggle_kernel: phdatt/flops-s6a-seed123 v2
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2923
-        AP50_bus: 0.2624
-        FP_bus: 3094.0
-        FN_bus: 887.6667
-    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
-    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
-      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
-  - id: EXP-2026-10-04-S6-A0-seed123
-    gate: G4 (H1 control)
-    scenario: S1b-2k
-    method: A0
-    run_class: feasibility
-    status: completed
-    seed: 123
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 42d9d2d
-    kaggle_kernel: phdatt/flops-s6a-seed123 v2
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2873
-        AP50_bus: 0.2253
-        FP_bus: 244.0
-        FN_bus: 1430.6667
-    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
-    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
-      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
-  - id: EXP-2026-10-04-S6-A4b_rho0.25-seed123
-    gate: G6/G7 (exploratory)
-    scenario: S1b-2k
-    method: A4b_rho0.25
-    run_class: feasibility
-    status: completed
-    seed: 123
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 42d9d2d
-    kaggle_kernel: phdatt/flops-s6a-seed123 v2
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2828
-        AP50_bus: 0.2099
-        FP_bus: 1022.3333
-        FN_bus: 1332.0
-    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
-    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
-      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
-  - id: EXP-2026-10-04-S6-A0at-control-seed2024
-    gate: G4 (H1 control)
-    scenario: S1-Control-Matched-2k
-    method: A0@control
-    run_class: feasibility
-    status: completed
-    seed: 2024
-    partition_id: s1_control_matched_2k_seed42
-    git_commit: 42d9d2d
-    kaggle_kernel: phdatt/flops-s6b-seed2024 v2
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.3007
-        AP50_bus: 0.2793
-        FP_bus: 3467.3333
-        FN_bus: 892.6667
-    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
-    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
-      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
-  - id: EXP-2026-10-04-S6-A0-seed2024
-    gate: G4 (H1 control)
-    scenario: S1b-2k
-    method: A0
-    run_class: feasibility
-    status: completed
-    seed: 2024
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 42d9d2d
-    kaggle_kernel: phdatt/flops-s6b-seed2024 v2
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2873
-        AP50_bus: 0.2267
-        FP_bus: 409.0
-        FN_bus: 1393.3333
-    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
-    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
-      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
-  - id: EXP-2026-10-04-S6-A4b_rho0.25-seed2024
-    gate: G6/G7 (exploratory)
-    scenario: S1b-2k
-    method: A4b_rho0.25
-    run_class: feasibility
-    status: completed
-    seed: 2024
-    partition_id: s1b_bus_2k_seed42
-    git_commit: 42d9d2d
-    kaggle_kernel: phdatt/flops-s6b-seed2024 v2
-    results:
-      rule_mean_r20_30:
-        mAP50: 0.2814
-        AP50_bus: 0.2146
-        FP_bus: 1115.3333
-        FN_bus: 1328.3333
-    report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
-    notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188
-      rewritten to e7c9142 while queued); v2 ran at 42d9d2d.
-  - id: EXP-2026-10-05-S7-D1-errors
-    gate: G4 (diagnostic)
-    scenario: S1b-2k / control
-    method: D1 error decomposition (ADR-014)
-    run_class: feasibility
-    status: planned
-    seed: 42
-    kaggle_kernel: phdatt/flops-s7a-diagnostics
-    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
-    notes: Round-30 checkpoints of s5a/s5b/s6a/s6b; no training.
-  - id: EXP-2026-10-05-S7-A0at-pooled
-    gate: G4 (diagnostic)
-    scenario: S1b-pooled-IID-2k
-    method: A0@pooled (D3, ADR-014)
-    run_class: feasibility
-    status: planned
-    seed: 42
-    kaggle_kernel: phdatt/flops-s7a-diagnostics
-    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
-    notes: Same 8,000 images as S1b re-dealt evenly; isolates distribution from data quantity.
-  - id: EXP-2026-10-05-S7-A6c
-    gate: G6 (exploratory control)
-    scenario: S1b-2k
-    method: A6c focal loss (ADR-013)
-    run_class: feasibility
-    status: planned
-    seed: 42
-    kaggle_kernel: phdatt/flops-s7a-diagnostics
-    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
-    notes: 'Control for A6: focal loss without equalisation.'
-  - id: EXP-2026-10-05-S7-A5
-    gate: G6 (exploratory)
-    scenario: S1b-2k
-    method: A5 not-true distillation (ADR-012)
-    run_class: feasibility
-    status: planned
-    seed: 42
-    kaggle_kernel: phdatt/flops-s7b-directions
-    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
-    notes: FedNTD adapted to the sigmoid head; tau = beta = 1 (official defaults).
-  - id: EXP-2026-10-05-S7-A6
-    gate: G6 (exploratory)
-    scenario: S1b-2k
-    method: A6 Equalized Focal Loss (ADR-013)
-    run_class: feasibility
-    status: planned
-    seed: 42
-    kaggle_kernel: phdatt/flops-s7b-directions
-    decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
-    notes: EFL gamma_b 2, alpha 0.25, s 4; per-client statistics.
+- id: EXP-2026-10-03-S2v2-G2-centralized
+  gate: G2
+  scenario: centralized
+  method: YOLOv8n-centralized
+  run_class: feasibility
+  status: failed-technical
+  seed: 42
+  git_commit: 501ef507
+  kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v2
+  notes: 'Trained 10 epochs (~2 h 10 min) then crashed in mlflow.log_metrics on ''metrics/precision(B)''; Kaggle
+    saved no output (>500 files). Fixed: logger sanitises names; results zipped (commit df0de53a). Excluded for
+    a logged technical reason (CLAUDE.md §20).'
+- id: EXP-2026-10-03-S2v3-G2-centralized
+  gate: G2
+  scenario: centralized
+  method: YOLOv8n-centralized
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: centralized
+  git_commit: df0de53a
+  kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v3
+  results:
+    mAP50: 0.4883
+    mAP50-95: 0.3232
+    AP50_car: 0.7199
+    AP50_bus: 0.494
+    AP50_truck: 0.5248
+    AP50_motorcycle: 0.2145
+  report: research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md
+  notes: Single seed, feasibility scale — sanity comparison, not reportable (§14). 10 epochs, batch 16, warmup 3,
+    close_mosaic 10 (ADR-009); ~143 min.
+- id: EXP-2026-10-03-S2v3-G3-FedAvg-S0
+  gate: G3
+  scenario: S0
+  method: FedAvg
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: s0_iid_seed42
+  git_commit: df0de53a
+  kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v3
+  results:
+    mAP50: 0.3769
+    mAP50-95: 0.2438
+    AP50_car: 0.6764
+    AP50_bus: 0.3318
+    AP50_truck: 0.4122
+    AP50_motorcycle: 0.0871
+  report: research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md
+  notes: Single seed, feasibility scale — sanity comparison, not reportable (§14). 5 rounds x 1 local epoch, 4 clients;
+    ~103 min; mAP50 still rising at round 5 (+0.030/round).
+- id: EXP-2026-10-03-S2v3-G3-FedProx-S0
+  gate: G3
+  scenario: S0
+  method: FedProx
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: s0_iid_seed42
+  git_commit: df0de53a
+  kaggle_kernel: phdatt/flops-s2-baseline-g2-g3 v3
+  results:
+    mAP50: 0.3756
+    mAP50-95: 0.2436
+    AP50_car: 0.6784
+    AP50_bus: 0.3316
+    AP50_truck: 0.4094
+    AP50_motorcycle: 0.083
+  report: research/experiment_registry/reports/2026-10-03_s2_baselines_feasibility.md
+  notes: Single seed, feasibility scale — sanity comparison, not reportable (§14). mu=0.01 (ADR-010); ~118 min;
+    indistinguishable from FedAvg on IID S0 at one seed.
+- id: EXP-2026-10-04-S5-A0
+  gate: G4
+  scenario: S1b-2k
+  method: A0
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 7ca44af7
+  kaggle_kernel: phdatt/flops-s5a-s1b-baselines v1
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2879
+      AP50_bus: 0.2314
+    final_r30:
+      mAP50: 0.286
+      AP50_bus: 0.2247
+      FP_bus: 318.0
+      FN_bus: 1386.0
+  report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
+  notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed), single seed (ADR-011).
+- id: EXP-2026-10-04-S5-A1
+  gate: G6/G7 (exploratory)
+  scenario: S1b-2k
+  method: A1
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 7ca44af7
+  kaggle_kernel: phdatt/flops-s5a-s1b-baselines v1
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2837
+      AP50_bus: 0.2108
+    final_r30:
+      mAP50: 0.2701
+      AP50_bus: 0.1676
+      FP_bus: 400.0
+      FN_bus: 1454.0
+  report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
+  notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed), single seed (ADR-011).
+- id: EXP-2026-10-04-S5-A3
+  gate: G6/G7 (exploratory)
+  scenario: S1b-2k
+  method: A3
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 7ca44af7
+  kaggle_kernel: phdatt/flops-s5a-s1b-baselines v1
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2841
+      AP50_bus: 0.2075
+    final_r30:
+      mAP50: 0.2755
+      AP50_bus: 0.1809
+      FP_bus: 575.0
+      FN_bus: 1420.0
+  report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
+  notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed), single seed (ADR-011).
+- id: EXP-2026-10-04-S5-FedProx
+  gate: G6/G7 (exploratory)
+  scenario: S1b-2k
+  method: FedProx
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 7ca44af7
+  kaggle_kernel: phdatt/flops-s5a-s1b-baselines v1
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2903
+      AP50_bus: 0.2341
+    final_r30:
+      mAP50: 0.2859
+      AP50_bus: 0.2252
+      FP_bus: 285.0
+      FN_bus: 1416.0
+  report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
+  notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed), single seed (ADR-011).
+- id: EXP-2026-10-04-S5-A0at-control
+  gate: G4
+  scenario: S1-Control-Matched-2k
+  method: A0 @control
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: s1_control_matched_2k_seed42
+  git_commit: 7ca44af7
+  kaggle_kernel: phdatt/flops-s5b-s1b-method v1
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.3012
+      AP50_bus: 0.2783
+    final_r30:
+      mAP50: 0.2911
+      AP50_bus: 0.2556
+      FP_bus: 3035.0
+      FN_bus: 942.0
+  report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
+  notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed), single seed (ADR-011).
+- id: EXP-2026-10-04-S5-A2b_rho0.25
+  gate: G6/G7 (exploratory)
+  scenario: S1b-2k
+  method: A2b_rho0.25
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 7ca44af7
+  kaggle_kernel: phdatt/flops-s5b-s1b-method v1
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2855
+      AP50_bus: 0.2217
+    final_r30:
+      mAP50: 0.2839
+      AP50_bus: 0.2219
+      FP_bus: 546.0
+      FN_bus: 1376.0
+  report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
+  notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed), single seed (ADR-011).
+- id: EXP-2026-10-04-S5-A4b_rho0.25
+  gate: G6/G7 (exploratory)
+  scenario: S1b-2k
+  method: A4b_rho0.25
+  run_class: feasibility
+  status: completed
+  seed: 42
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 7ca44af7
+  kaggle_kernel: phdatt/flops-s5b-s1b-method v1
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2838
+      AP50_bus: 0.2156
+    final_r30:
+      mAP50: 0.2846
+      AP50_bus: 0.216
+      FP_bus: 777.0
+      FN_bus: 1371.0
+  report: docs/PHAN_TICH_NON_IID.md §5.4-5.5
+  notes: 30 rounds, 4x2000 images, eval every 5 rounds; exploratory (G4/G5 not passed), single seed (ADR-011).
+- id: EXP-2026-10-04-S6-A0at-control-seed123
+  gate: G4 (H1 control)
+  scenario: S1-Control-Matched-2k
+  method: A0@control
+  run_class: feasibility
+  status: completed
+  seed: 123
+  partition_id: s1_control_matched_2k_seed42
+  git_commit: 42d9d2d
+  kaggle_kernel: phdatt/flops-s6a-seed123 v2
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2923
+      AP50_bus: 0.2624
+      FP_bus: 3094.0
+      FN_bus: 887.6667
+  report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+  notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188 rewritten
+    to e7c9142 while queued); v2 ran at 42d9d2d.
+- id: EXP-2026-10-04-S6-A0-seed123
+  gate: G4 (H1 control)
+  scenario: S1b-2k
+  method: A0
+  run_class: feasibility
+  status: completed
+  seed: 123
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 42d9d2d
+  kaggle_kernel: phdatt/flops-s6a-seed123 v2
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2873
+      AP50_bus: 0.2253
+      FP_bus: 244.0
+      FN_bus: 1430.6667
+  report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+  notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188 rewritten
+    to e7c9142 while queued); v2 ran at 42d9d2d.
+- id: EXP-2026-10-04-S6-A4b_rho0.25-seed123
+  gate: G6/G7 (exploratory)
+  scenario: S1b-2k
+  method: A4b_rho0.25
+  run_class: feasibility
+  status: completed
+  seed: 123
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 42d9d2d
+  kaggle_kernel: phdatt/flops-s6a-seed123 v2
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2828
+      AP50_bus: 0.2099
+      FP_bus: 1022.3333
+      FN_bus: 1332.0
+  report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+  notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188 rewritten
+    to e7c9142 while queued); v2 ran at 42d9d2d.
+- id: EXP-2026-10-04-S6-A0at-control-seed2024
+  gate: G4 (H1 control)
+  scenario: S1-Control-Matched-2k
+  method: A0@control
+  run_class: feasibility
+  status: completed
+  seed: 2024
+  partition_id: s1_control_matched_2k_seed42
+  git_commit: 42d9d2d
+  kaggle_kernel: phdatt/flops-s6b-seed2024 v2
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.3007
+      AP50_bus: 0.2793
+      FP_bus: 3467.3333
+      FN_bus: 892.6667
+  report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+  notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188 rewritten
+    to e7c9142 while queued); v2 ran at 42d9d2d.
+- id: EXP-2026-10-04-S6-A0-seed2024
+  gate: G4 (H1 control)
+  scenario: S1b-2k
+  method: A0
+  run_class: feasibility
+  status: completed
+  seed: 2024
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 42d9d2d
+  kaggle_kernel: phdatt/flops-s6b-seed2024 v2
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2873
+      AP50_bus: 0.2267
+      FP_bus: 409.0
+      FN_bus: 1393.3333
+  report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+  notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188 rewritten
+    to e7c9142 while queued); v2 ran at 42d9d2d.
+- id: EXP-2026-10-04-S6-A4b_rho0.25-seed2024
+  gate: G6/G7 (exploratory)
+  scenario: S1b-2k
+  method: A4b_rho0.25
+  run_class: feasibility
+  status: completed
+  seed: 2024
+  partition_id: s1b_bus_2k_seed42
+  git_commit: 42d9d2d
+  kaggle_kernel: phdatt/flops-s6b-seed2024 v2
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2814
+      AP50_bus: 0.2146
+      FP_bus: 1115.3333
+      FN_bus: 1328.3333
+  report: docs/PHAN_TICH_NON_IID.md §5.6 (3-seed summary)
+  notes: Seed confirmation of s5 (ADR-011). v1 of both sessions failed-technical at checkout (commit 9194188 rewritten
+    to e7c9142 while queued); v2 ran at 42d9d2d.
+- id: EXP-2026-10-05-S7-D1-errors
+  gate: G4 (diagnostic)
+  scenario: S1b-2k / control
+  method: D1 error decomposition (ADR-014)
+  run_class: feasibility
+  status: completed
+  seed: 42
+  kaggle_kernel: phdatt/flops-s7a-diagnostics v1
+  decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+  notes: Round-30 checkpoints of s5a/s5b/s6a/s6b; no training.
+  git_commit: e62a870
+  results:
+    artifact: kaggle/output/s7a/flops_export/d1_errors.csv (13 runs, round 30)
+  interpretation: 'S1b''s extra missed buses vs control (3-seed mean, round 30): ~+204 predicted as truck, ~+202
+    as car, ~+193 not detected, low-score −52 → mostly class confusion, not score suppression.'
+  report: docs/PHAN_TICH_NON_IID.md §5.7
+- id: EXP-2026-10-05-S7-A0at-pooled
+  gate: G4 (diagnostic)
+  scenario: S1b-pooled-IID-2k
+  method: A0@pooled (D3, ADR-014)
+  run_class: feasibility
+  status: completed
+  seed: 42
+  kaggle_kernel: phdatt/flops-s7a-diagnostics v1
+  decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+  notes: Same 8,000 images as S1b re-dealt evenly; isolates distribution from data quantity.
+  partition_id: s1b_pooled_iid_2k_seed42
+  git_commit: e62a870
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2988
+      AP50_bus: 0.2606
+      FP_bus: 1138.3333
+      FN_bus: 1251.0
+  interpretation: 'D3 rule met: pooled − S1b = +0.029 AP50 bus (≥ +0.010) → the Missing-Class distribution costs
+    AP by itself; control − pooled = +0.018 is the bus-data-quantity part (seed 42).'
+  report: docs/PHAN_TICH_NON_IID.md §5.7
+- id: EXP-2026-10-05-S7-A6c
+  gate: G6 (exploratory control)
+  scenario: S1b-2k
+  method: A6c focal loss (ADR-013)
+  run_class: feasibility
+  status: completed
+  seed: 42
+  kaggle_kernel: phdatt/flops-s7a-diagnostics v1
+  decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+  notes: 'Control for A6: focal loss without equalisation.'
+  partition_id: s1b_bus_2k_seed42
+  git_commit: e62a870
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.244
+      AP50_bus: 0.1338
+      FP_bus: 1148.6667
+      FN_bus: 1429.0
+  interpretation: 'Control: focal loss −0.098 AP50 bus, −0.044 mAP50 vs A0 (all classes drop).'
+  report: docs/PHAN_TICH_NON_IID.md §5.7
+- id: EXP-2026-10-05-S7-A5
+  gate: G6 (exploratory)
+  scenario: S1b-2k
+  method: A5 not-true distillation (ADR-012)
+  run_class: feasibility
+  status: completed
+  seed: 42
+  kaggle_kernel: phdatt/flops-s7b-directions v1
+  decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+  notes: FedNTD adapted to the sigmoid head; tau = beta = 1 (official defaults).
+  partition_id: s1b_bus_2k_seed42
+  git_commit: e62a870
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2818
+      AP50_bus: 0.2073
+      FP_bus: 1744.3333
+      FN_bus: 1317.3333
+  interpretation: 'Rejected by ADR-012 rule: AP50 bus −0.024 vs A0 and FP bus +486 %.'
+  report: docs/PHAN_TICH_NON_IID.md §5.7
+- id: EXP-2026-10-05-S7-A6
+  gate: G6 (exploratory)
+  scenario: S1b-2k
+  method: A6 Equalized Focal Loss (ADR-013)
+  run_class: feasibility
+  status: completed
+  seed: 42
+  kaggle_kernel: phdatt/flops-s7b-directions v1
+  decision_rule: pre-declared in the ADR; mean of rounds 20/25/30 (ADR-011)
+  notes: EFL gamma_b 2, alpha 0.25, s 4; per-client statistics.
+  partition_id: s1b_bus_2k_seed42
+  git_commit: e62a870
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.2448
+      AP50_bus: 0.1561
+      FP_bus: 3188.6667
+      FN_bus: 1358.6667
+  interpretation: 'Rejected by ADR-013 rule: AP50 bus −0.075 vs A0 (A6 − A6c = +0.022: equalisation helps relative
+    to focal, but the focal form costs more).'
+  report: docs/PHAN_TICH_NON_IID.md §5.7
