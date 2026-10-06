@@ -570,3 +570,33 @@ experiments:
   checks: 30/30 rounds with 4/4 clients, 30 server fine-tunes; round 0 = teacher (AP50 bus 0.289, mAP50 0.321)
   interpretation: 'B2 − B1 = −0.004 AP50 bus: per-round server fine-tuning adds nothing over pre-training. P1 −
     B2 = +0.029 → ADR-015 condition 2 met: distillation beats the strongest direct use of the sample.'
+- id: EXP-2026-10-07-EVAL-COCO-teacher
+  gate: G6 (exploratory, teacher screening)
+  scenario: BDD100K val (9,905 images), evaluation only
+  method: original COCO YOLOv8n, classes car=2 bus=5 truck=7 motorcycle=3
+  run_class: feasibility
+  status: completed
+  seed: null
+  device: local CPU (torch 2.11 cpu, ultralytics 8.3.253)
+  pipeline_check:
+    T_local:
+      mAP50: 0.321
+      AP50_bus: 0.2888
+      AP50_truck: 0.3344
+      AP50_car: 0.6475
+      FP_bus: 684.0
+      FN_bus: 1257.0
+    note: identical to the Kaggle evaluation of T (AP50 bus 0.2888, mAP50 0.321, FP 684, FN 1257)
+  results:
+    mAP50_4cls: 0.2922
+    AP50_car: 0.4982
+    AP50_bus: 0.2935
+    AP50_truck: 0.2392
+    AP50_motorcycle: 0.1378
+    TP_bus: 413.0
+    FP_bus: 817.0
+    FN_bus: 1184.0
+  decision_rule: 'declared before the result: AP50 bus < 0.15 stop; 0.15-0.23 weak; >= 0.23 worth a KD run'
+  interpretation: AP50 bus 0.2935 >= 0.23 → worth trying as a data-free fixed teacher. With no BDD training it matches
+    T (0.289) and beats every FL arm but P1 on bus; motorcycle 0.138 vs <= 0.047 for every FL arm. Cars are worse
+    (0.498, domain shift). Suggests re-initialising the class head (ADR-009 item 5) discards useful COCO knowledge.
