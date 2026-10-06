@@ -1,0 +1,40 @@
+# Experiment configuration
+experiment:
+  name: "FL Object Detection"
+  task: "detection"
+  model: "YOLOv8n"
+  dataset: "BDD100K"
+  n_clients: 10
+  n_rounds: 100
+  aggregation: "FedAvg"
+  scenario: "non-iid-label-skew"
+
+methods:
+  - FLOPS
+  - FedAvg
+  - FedProx
+  - FedNova
+  - SCAFFOLD
+
+metrics:
+  primary: "global_acc"        # or mAP50 etc
+  primary_label: "Accuracy"    # display name
+  secondary: "global_loss"
+  secondary_label: "Loss"
+  higher_is_better: true
+
+targets:
+  # For rounds_to_target chart
+  - 0.50
+  - 0.60
+  - 0.70
+
+eval_split: "test"
+
+min_seeds: 3
+confidence: 0.95   # for CI bands
+
+smoothing:
+  enabled: false
+  method: "ema"
+  alpha: 0.1

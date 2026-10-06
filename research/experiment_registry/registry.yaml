@@ -513,8 +513,8 @@ experiments:
       AP50_truck: 0.3574
       FP_bus: 764.3333
       FN_bus: 1310.6667
-  interpretation: P1 − B1 = +0.025 AP50 bus, +0.020 mAP50 (KD condition 1 met); condition 2 (vs B2) pending the
-    B2 re-run. P1 ends above T (0.300 vs 0.289).
+  interpretation: 'P1 − B1 = +0.025 and P1 − B2 = +0.029 AP50 bus (mAP50 +0.020 / +0.022): both ADR-015 conditions
+    met at one seed — KD from the fixed teacher is the contribution, not the server data alone. Needs seeds 123/2024.'
 - id: EXP-2026-10-05-S8-P2
   gate: G6 (exploratory, server-sample setting)
   scenario: S1b-2k + server sample 1k
@@ -554,8 +554,19 @@ experiments:
   scenario: S1b-2k + server sample 1k
   method: B2 FedAvg from T + server fine-tune (re-run v2)
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   git_commit: d01e466
   kaggle_kernel: goshihayashi/flops-s8c-b2-rerun v2
   notes: Public mirror solesensei/solesensei_bdd100k (verified complete and box-identical); teacher sha256 0aa06f52.
+  partition_id: s1b_bus_2k_seed42
+  results:
+    rule_mean_r20_30:
+      mAP50: 0.3161
+      AP50_bus: 0.2706
+      AP50_truck: 0.316
+      FP_bus: 810.3333
+      FN_bus: 1243.3333
+  checks: 30/30 rounds with 4/4 clients, 30 server fine-tunes; round 0 = teacher (AP50 bus 0.289, mAP50 0.321)
+  interpretation: 'B2 − B1 = −0.004 AP50 bus: per-round server fine-tuning adds nothing over pre-training. P1 −
+    B2 = +0.029 → ADR-015 condition 2 met: distillation beats the strongest direct use of the sample.'

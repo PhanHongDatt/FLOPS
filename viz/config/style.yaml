@@ -1,0 +1,66 @@
+# FL Visualization Style Configuration
+font:
+  family: sans-serif
+  title_size: 12
+  label_size: 10
+  tick_size: 9
+  legend_size: 9
+
+figure:
+  single: [7.5, 4.2]
+  wide: [12.0, 4.0]
+  matrix: [5.0, 4.5]
+  dual: [11.0, 4.5]
+  dpi: 200
+  formats: [png, pdf]
+
+spines:
+  top: false
+  right: false
+
+grid:
+  enabled: true
+  alpha: 0.3
+  linestyle: "--"
+
+# Semantic palette: method colors (colorblind-friendly)
+palette:
+  method:
+    FLOPS: "#D55E00"      # vermillion – proposed, stands out
+    FedAvg: "#0072B2"     # blue
+    FedProx: "#56B4E9"    # sky blue
+    FedNova: "#009E73"    # bluish green
+    SCAFFOLD: "#CC79A7"   # reddish purple
+    FedBN: "#999999"      # grey
+    Centralized: "#000000" # black
+    Local: "#E69F00"      # orange
+  class_cmap: "Set3"       # distinct from method palette
+  client_cmap: "Greys"     # neutral
+  diverging_cmap: "RdYlGn" # for heatmaps
+
+markers:
+  FLOPS: "o"
+  FedAvg: "s"
+  FedProx: "^"
+  FedNova: "D"
+  SCAFFOLD: "v"
+  FedBN: "X"
+  Centralized: "*"
+  Local: "P"
+
+linestyles:
+  FLOPS: "-"
+  FedAvg: "--"
+  FedProx: "-."
+  FedNova: ":"
+  SCAFFOLD: "-"
+  FedBN: "--"
+  Centralized: "-"
+  Local: ":"
+
+demo_watermark:
+  text: "DEMO DATA"
+  fontsize: 40
+  alpha: 0.15
+  color: "red"
+  rotation: 30
