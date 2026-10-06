@@ -58,3 +58,20 @@ baseline identically; none is tuned for the proposed method.
 
 ## Related ADRs
 ADR-001 · ADR-002-A2 · ADR-007 · ADR-008
+
+## Addendum 2026-10-06 — three operating points in one validation pass
+
+Checked against ultralytics 8.3.253 source after a reviewer noted that TP/FP/FN do not reproduce
+the exported precision/recall:
+
+- AP50 / mAP50: threshold-free (PR curve over predictions with conf ≥ 0.001), IoU 0.5 — **the metric
+  every conclusion uses**.
+- TP / FP / FN per class: `ConfusionMatrix.process_batch`, conf 0.25 (the val conf 0.001 is mapped to
+  0.25), IoU 0.45, one-to-one matching.
+- precision / recall per class: `ap_per_class`, at the single confidence that maximises the smoothed
+  mean F1 over all classes, IoU 0.5.
+
+P/R recomputed from TP/FP/FN therefore differ from the exported P/R by design (B2 v2, bus, round 30:
+0.316/0.240 vs 0.467/0.276). Consistency checks that do hold on every evaluation: TP + FN = val GT
+(car 102,506 · bus 1,597 · truck 4,245 · motorcycle 452) and mAP50 = mean of the four AP50.
+Compare FN across classes only as FN/GT. Documented in docs/PHAN_TICH_NON_IID.md §2.6.

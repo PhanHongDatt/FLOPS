@@ -138,8 +138,23 @@ Sau mỗi round, server lưu checkpoint và, theo `eval_every`, đánh giá mô 
 
 ### 2.6 Đánh giá
 
-- AP/mAP ở conf 0,001; FP/FN ở 0,25 (một lượt validate duy nhất nhờ cơ chế có sẵn của Ultralytics,
-  `utils/metrics.py: conf = 0.25 if conf in {None, 0.001}`) `[YOLO-DOC]`.
+Mọi run dùng **cùng một bộ đánh giá** trên toàn bộ tập val BDD100K (10.000 ảnh; GT: car 102.506, bus 1.597,
+truck 4.245, motorcycle 452). Một lượt validate sinh ra **ba nhóm số ở ba điểm vận hành khác nhau**
+(đã đối chiếu mã nguồn ultralytics 8.3.253) `[YOLO-DOC]`:
+
+| Nhóm số | Ngưỡng confidence | IoU | Nguồn |
+|---|---|---|---|
+| **AP50 / mAP50** (thước đo chính) | không ngưỡng (đường PR, dự đoán conf ≥ 0,001) | 0,5 | `ap_per_class` |
+| TP / FP / FN theo lớp | 0,25 (conf 0,001 truyền vào được tự đổi thành 0,25) | 0,45, ghép 1–1 | `ConfusionMatrix.process_batch` |
+| precision / recall theo lớp | ngưỡng làm **F1 trung bình mọi lớp** lớn nhất, dùng chung cho 4 lớp | 0,5 | `ap_per_class`: `smooth(f1.mean(0)).argmax()` |
+
+Hệ quả: P/R tính lại từ TP/FP/FN **không bằng** cột precision/recall (ví dụ B2 v2, bus, vòng 30:
+TP/FP/FN cho P 0,316 · R 0,240; cột export P 0,467 · R 0,276). Cả hai đều đúng ở điểm vận hành của mình.
+**Quy ước của đồ án:** kết luận dựa trên AP50 (không phụ thuộc ngưỡng); TP/FP/FN @0,25 và P/R @max-F1
+chỉ là thông tin phụ và không được trộn khi so sánh. FN phải so bằng **tỉ lệ** FN/GT, không bằng số tuyệt đối,
+vì số GT giữa các lớp chênh nhau tới 227 lần. Kiểm tra nhất quán đã chạy: TP + FN = GT ở mọi lần eval;
+mAP50 = trung bình AP50 của 4 lớp.
+
 - Thống kê confidence theo lớp ở ngưỡng 0,25 (F2/F3).
 
 ### 2.7 Hạ tầng (không phải đóng góp khoa học nhưng quyết định tính đúng)
@@ -245,6 +260,64 @@ S1b (bus có ở C2 và C3; truck có ở C0, C1, C3). Hệ quả:
 ---
 
 ## 5. Thực nghiệm và kết quả
+
+### 5.0 Danh mục kịch bản thực nghiệm đã chạy `[ĐO]`
+
+**Các kịch bản dữ liệu** (4 client, YOLOv8n, ảnh 640, batch 16, đánh giá trên cùng tập val):
+
+| Mã | Kịch bản | Mô tả | Mục |
+|---|---|---|---|
+| S0 | IID toàn bộ dữ liệu | 4 client × ~17,3k ảnh chia ngẫu nhiên; 5 vòng | §5.2 |
+| G2 | Tập trung | Toàn bộ 69,9k ảnh train, 10 epoch (mốc trên của S0) | §5.2 |
+| **S1b-2k** | Thiếu lớp (kịch bản chính) | 4 × 2.000 ảnh; **C0, C1 không có bus**, C2 không có truck, C3 đủ; 30 vòng × 1 epoch | §5.3–5.8 |
+| Control | Đối chứng matched | Cùng số ảnh với S1b nhưng mọi client có bus (2,03× box bus) | §5.4, §5.6 |
+| D3 pooled | Gộp rồi chia đều | **Đúng 8.000 ảnh của S1b** chia đều cho 4 client (tách "phân bố" khỏi "lượng dữ liệu") | §5.7 |
+| Server 1k | Server giữ dữ liệu | 1.000 ảnh có nhãn ở server, tách khỏi mọi client (ADR-015) | §5.8 |
+
+**Các nhóm phương pháp:** baseline (FedAvg, FedProx); phương pháp đề xuất ban đầu (A1, A3, A2b, A4b);
+hướng mới không dùng dữ liệu server (A5 FedNTD, A6 EFL, A6c focal); có dữ liệu server (T, B1, B2, P1, P2).
+Chẩn đoán D1 (phân tích lỗi trên checkpoint, không huấn luyện) nằm ở §5.7.
+
+**Bảng tổng hợp mọi run** — sinh tự động từ `round_metrics.csv` bằng
+`python scripts/build_run_catalog.py --insert docs/PHAN_TICH_NON_IID.md` (không chép tay). Run 30 vòng:
+trung bình eval vòng 20/25/30 (ADR-011); run ngắn hơn và T, G2: lần đánh giá cuối. Run lỗi hoặc không hợp lệ
+vẫn được liệt kê (§20). FP/FN ở conf 0,25 (§2.6).
+
+<!-- RUN-CATALOG:BEGIN -->
+| Phiên | Kịch bản (partition) | Arm | Seed | Số vòng | Cách lấy số | mAP50 | AP50 bus | AP50 truck | AP50 car | AP50 moto | FP bus | FN bus | Trạng thái |
+|---|---|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|
+| s2 | S0 IID (toàn bộ dữ liệu) | FedAvg | 42 | 5 | vòng 5 | 0,377 | 0,332 | 0,412 | 0,676 | 0,087 | 818 | 1.290 | hoàn thành |
+| s2 | S0 IID (toàn bộ dữ liệu) | FedProx (μ 0,01) | 42 | 5 | vòng 5 | 0,376 | 0,332 | 0,409 | 0,678 | 0,083 | 714 | 1.339 | hoàn thành |
+| s2 | Tập trung (toàn bộ dữ liệu) | G2 train tập trung (10 epoch) | 42 | 0 | 1 lần đánh giá | 0,488 | 0,494 | 0,525 | 0,720 | 0,215 | 529 | 1.010 | hoàn thành |
+| s5a | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | FedAvg | 42 | 30 | TB vòng 20/25/30 | 0,288 | 0,231 | 0,291 | 0,626 | 0,004 | 298 | 1.394 | hoàn thành |
+| s5a | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | A1 gộp theo số box lớp | 42 | 30 | TB vòng 20/25/30 | 0,284 | 0,211 | 0,293 | 0,626 | 0,005 | 448 | 1.398 | hoàn thành |
+| s5a | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | A3 gộp nhận biết lớp (server) | 42 | 30 | TB vòng 20/25/30 | 0,284 | 0,207 | 0,294 | 0,629 | 0,006 | 541 | 1.396 | hoàn thành |
+| s5a | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | FedProx (μ 0,01) | 42 | 30 | TB vòng 20/25/30 | 0,290 | 0,234 | 0,296 | 0,628 | 0,004 | 307 | 1.409 | hoàn thành |
+| s5b | Control matched (đủ bus, 2,03× box bus) | FedAvg | 42 | 30 | TB vòng 20/25/30 | 0,301 | 0,278 | 0,298 | 0,624 | 0,004 | 2.705 | 975 | hoàn thành |
+| s5b | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | A2b ρ 0,25 (client) | 42 | 30 | TB vòng 20/25/30 | 0,286 | 0,222 | 0,290 | 0,626 | 0,004 | 617 | 1.383 | hoàn thành |
+| s5b | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | A4b = A2b + A3 (phương pháp đầy đủ) | 42 | 30 | TB vòng 20/25/30 | 0,284 | 0,216 | 0,289 | 0,627 | 0,004 | 900 | 1.341 | hoàn thành |
+| s6a | Control matched (đủ bus, 2,03× box bus) | FedAvg | 123 | 30 | TB vòng 20/25/30 | 0,292 | 0,262 | 0,275 | 0,625 | 0,006 | 3.094 | 888 | hoàn thành |
+| s6a | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | FedAvg | 123 | 30 | TB vòng 20/25/30 | 0,287 | 0,225 | 0,291 | 0,629 | 0,003 | 244 | 1.431 | hoàn thành |
+| s6a | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | A4b = A2b + A3 (phương pháp đầy đủ) | 123 | 30 | TB vòng 20/25/30 | 0,283 | 0,210 | 0,289 | 0,625 | 0,008 | 1.022 | 1.332 | hoàn thành |
+| s6b | Control matched (đủ bus, 2,03× box bus) | FedAvg | 2024 | 30 | TB vòng 20/25/30 | 0,301 | 0,279 | 0,292 | 0,627 | 0,005 | 3.467 | 893 | hoàn thành |
+| s6b | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | FedAvg | 2024 | 30 | TB vòng 20/25/30 | 0,287 | 0,227 | 0,290 | 0,629 | 0,004 | 409 | 1.393 | hoàn thành |
+| s6b | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | A4b = A2b + A3 (phương pháp đầy đủ) | 2024 | 30 | TB vòng 20/25/30 | 0,281 | 0,215 | 0,284 | 0,622 | 0,005 | 1.115 | 1.328 | hoàn thành |
+| s7a | S1b gộp-chia đều (D3) | FedAvg | 42 | 30 | TB vòng 20/25/30 | 0,299 | 0,261 | 0,297 | 0,627 | 0,010 | 1.138 | 1.251 | hoàn thành |
+| s7a | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | A6c focal loss (đối chứng) | 42 | 30 | TB vòng 20/25/30 | 0,244 | 0,134 | 0,237 | 0,605 | 0,000 | 1.149 | 1.429 | hoàn thành |
+| s7b | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | A5 chưng cất not-true (FedNTD) | 42 | 30 | TB vòng 20/25/30 | 0,282 | 0,207 | 0,287 | 0,630 | 0,003 | 1.744 | 1.317 | hoàn thành |
+| s7b | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | A6 Equalized Focal Loss | 42 | 30 | TB vòng 20/25/30 | 0,245 | 0,156 | 0,225 | 0,598 | 0,000 | 3.189 | 1.359 | hoàn thành |
+| s8t | 1.000 ảnh của server | T teacher (train tập trung) | 42 | 0 | 1 lần đánh giá | 0,321 | 0,289 | 0,334 | 0,647 | 0,013 | 684 | 1.257 | hoàn thành |
+| s8a | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | B1 FedAvg từ T | 42 | 30 | TB vòng 20/25/30 | 0,318 | 0,275 | 0,313 | 0,646 | 0,037 | 468 | 1.265 | hoàn thành |
+| s8a | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | B2 = B1 + fine-tune ở server | 42 | 0 | 1 lần đánh giá | — | — | — | — | — | — | — | lỗi kỹ thuật: dừng ở vòng 2 (YOLO.train gọi 2 lần) |
+| s8b | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | P1 chưng cất từ T cố định | 42 | 30 | TB vòng 20/25/30 | 0,338 | 0,300 | 0,357 | 0,657 | 0,037 | 764 | 1.311 | hoàn thành |
+| s8b | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | P2 = P1 + ρ 0,25 | 42 | 30 | TB vòng 20/25/30 | 0,332 | 0,293 | 0,344 | 0,656 | 0,034 | 1.130 | 1.275 | hoàn thành |
+| s8c_g | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | B2 = B1 + fine-tune ở server | 42 | 30 | TB vòng 20/25/30 | 0,316 | 0,271 | 0,316 | 0,631 | 0,047 | 810 | 1.243 | hoàn thành |
+| s8c_g_v1_invalid | S1b-2k (C0, C1 thiếu bus; C2 thiếu truck) | B2 = B1 + fine-tune ở server | 42 | 30 | TB vòng 20/25/30 | — | — | — | — | — | — | — | không hợp lệ: chỉ train vòng 1 (cache nhãn hỏng) |
+<!-- RUN-CATALOG:END -->
+
+Tổng: 27 run (25 hợp lệ, 2 lỗi/không hợp lệ). Seed 42 cho mọi arm; thêm seed 123 và 2024 cho A0,
+A0@control, A4b. Lưu ý so sánh S0/G2 (toàn bộ dữ liệu) với S1b-2k (2.000 ảnh/client) là **không cùng điều
+kiện**; chỉ so các run trong cùng kịch bản.
 
 ### 5.1 Ngân sách đo được (Kaggle T4 ×2) `[ĐO]`
 
