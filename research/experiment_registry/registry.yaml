@@ -600,3 +600,55 @@ experiments:
   interpretation: AP50 bus 0.2935 >= 0.23 → worth trying as a data-free fixed teacher. With no BDD training it matches
     T (0.289) and beats every FL arm but P1 on bus; motorcycle 0.138 vs <= 0.047 for every FL arm. Cars are worse
     (0.498, domain shift). Suggests re-initialising the class head (ADR-009 item 5) discards useful COCO knowledge.
+- id: EXP-2026-10-08-EVAL-model-zoo
+  gate: design (model selection)
+  scenario: BDD100K val 9,905 images, evaluation only
+  method: COCO-pretrained YOLOv8n / YOLO11n / YOLOv8s / YOLO11s, classes car=2 bus=5 truck=7 motorcycle=3
+  run_class: feasibility
+  status: completed
+  device: local CPU
+  results:
+    yolov8n:
+      AP50_car: 0.4982
+      AP50_motorcycle: 0.1378
+      AP50_bus: 0.2935
+      AP_bus: 0.2279
+      AP50_truck: 0.2392
+      FN_bus: 1184.0
+      FP_bus: 817.0
+      mAP50_4cls: 0.2922
+      params_M: 3.1519
+    yolo11n:
+      AP50_car: 0.5031
+      AP50_motorcycle: 0.1402
+      AP50_bus: 0.2861
+      AP_bus: 0.2274
+      AP50_truck: 0.2363
+      FN_bus: 1136.0
+      FP_bus: 970.0
+      mAP50_4cls: 0.2914
+      params_M: 2.6162
+    yolov8s:
+      AP50_car: 0.5786
+      AP50_motorcycle: 0.2386
+      AP50_bus: 0.3692
+      AP_bus: 0.2898
+      AP50_truck: 0.3251
+      FN_bus: 1017.0
+      FP_bus: 1064.0
+      mAP50_4cls: 0.3779
+      params_M: 11.1565
+    yolo11s:
+      AP50_car: 0.5836
+      AP50_motorcycle: 0.2726
+      AP50_bus: 0.3791
+      AP_bus: 0.2976
+      AP50_truck: 0.3354
+      FN_bus: 1051.0
+      FP_bus: 776.0
+      mAP50_4cls: 0.3927
+      params_M: 9.4438
+  interpretation: 'n-tier: YOLO11n = YOLOv8n on BDD (mAP50 0.291 vs 0.292) despite +2.2 COCO mAP. s-tier: +0.086/+0.101
+    mAP50 and +0.076/+0.086 AP50 bus over YOLOv8n with no BDD training — above every trained FL arm (best P1: 0.300).
+    YOLO11s > YOLOv8s on all four classes with 16 % fewer parameters and 25 % fewer FLOPs.'
+  report: research/decisions/ADR-016-model-selection.md
