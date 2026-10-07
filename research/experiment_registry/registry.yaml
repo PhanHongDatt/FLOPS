@@ -657,16 +657,19 @@ experiments:
   scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
   method: A0 FedAvg on S1b5-3k
   run_class: feasibility
-  status: planned
+  status: rejected
   seed: 42
-  kaggle_kernel: phdatt/flops-s9a-s1b5-fedavg
+  kaggle_kernel: goshihayashi/flops-s9a-s1b5-fedavg (deleted)
   decision_rule: pre-declared in ADR-017
+  notes: Cancelled by the author minutes after launch to save GPU quota (kernel deleted — the Kaggle CLI has no
+    cancel). Without this arm the ADR-017 gap (pooled − S1b5) cannot be computed yet.
 - id: EXP-2026-10-08-S9-A0at-s5pooled
   gate: G4 (scenario extension)
   scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
   method: A0 FedAvg on pooled S1b5-3k
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
-  kaggle_kernel: phdatt/flops-s9b-s1b5-pooled
+  kaggle_kernel: goshihayashi/flops-s9b-s1b5-pooled v1
   decision_rule: pre-declared in ADR-017
+  git_commit: e955221
