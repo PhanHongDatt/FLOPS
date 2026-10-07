@@ -136,7 +136,8 @@ def _git(*args: str) -> str:
 
 def _pushed_head() -> str:
     """HEAD sha, failing unless the tree is clean and HEAD is on origin."""
-    if _git("status", "--porcelain", "--untracked-files=no")  # untracked files never reach Kaggle:
+    # untracked files never reach Kaggle (it clones the pushed commit)
+    if _git("status", "--porcelain", "--untracked-files=no"):
         sys.exit("Working tree has uncommitted changes — commit and push first "
                  "(Kaggle clones the repo from GitHub).")
     _git("fetch", "--quiet", "origin")
