@@ -391,6 +391,9 @@ def main() -> None:
         yaml.dump(manifest.to_dict(), f, default_flow_style=False, allow_unicode=True)
 
     fed = config["federated"]
+    if int(fed["num_clients"]) != manifest.num_clients:
+        raise SystemExit(f"config federated.num_clients={fed['num_clients']} but partition "
+                         f"{manifest.partition_id} has {manifest.num_clients} clients — use a matching exp config")
     train_config = build_local_train_config(config)
     if mechanism in ("kd_teacher", "kd_teacher_rho"):
         if args.teacher_params is None:

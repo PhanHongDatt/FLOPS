@@ -1,0 +1,9 @@
+# D3 for S1b5-3k (ADR-014, ADR-017): exactly the 15,000 images of s1b5_bus_3k_moto_seed42 re-dealt
+# evenly over the same 5 clients. Only who holds the images changes.
+partition_id: s1b5_pooled_3k_moto_seed42
+scenario: S1-Pooled-IID
+seed: 42
+num_clients: 5
+reference_manifest: s1b5_bus_3k_moto_seed42/manifest.yaml
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50

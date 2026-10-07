@@ -68,6 +68,7 @@ ARTIFACTS_DIR = REPO_ROOT / "artifacts"
 MLFLOW_URI = f"file://{WORK / 'mlruns'}"
 LOGS = WORK / "flops_export" / "logs"
 EXP_CFG = REPO_ROOT / "configs" / "experiments" / "convergence.yaml"
+EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)
 
 if not (YOLO_ROOT / "data.yaml").exists():
     subprocess.check_call([
@@ -77,7 +78,8 @@ if not (YOLO_ROOT / "data.yaml").exists():
 DATA_YAML = YOLO_ROOT / "data.yaml"
 
 for cfg in ("s1b_bus_2k_seed42", "s1_control_matched_2k_seed42",   # matched + pooled are built from S1b
-            "s1b_pooled_iid_2k_seed42", "server_sample_1k_seed42"):  # server sample excludes all three
+            "s1b_pooled_iid_2k_seed42", "server_sample_1k_seed42",   # server sample excludes all three
+            "s1b5_bus_3k_moto_seed42", "s1b5_pooled_3k_moto_seed42"):  # 5-client scenario (ADR-017)
     subprocess.check_call([
         sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
         "--partition-config", str(REPO_ROOT / "configs" / "partition" / f"{cfg}.yaml"),
@@ -89,6 +91,8 @@ S1B = PARTITIONS_DIR / "s1b_bus_2k_seed42"
 CTRL = PARTITIONS_DIR / "s1_control_matched_2k_seed42"
 POOLED = PARTITIONS_DIR / "s1b_pooled_iid_2k_seed42"
 SERVER = PARTITIONS_DIR / "server_sample_1k_seed42"
+S1B5 = PARTITIONS_DIR / "s1b5_bus_3k_moto_seed42"
+POOLED5 = PARTITIONS_DIR / "s1b5_pooled_3k_moto_seed42"
 s1b = yaml.safe_load((S1B / "manifest.yaml").read_text())
 for cid, cls in (("C0", "bus"), ("C1", "bus"), ("C2", "truck")):
     assert s1b["class_counts"][cid][cls] == 0, f"S1b-2k {cid} {cls} must be 0"
@@ -101,6 +105,11 @@ print("pooled re-split class counts:", pooled["class_counts"])
 server = yaml.safe_load((SERVER / "manifest.yaml").read_text())
 assert not set(server["client_assignments"]["S"]) & set(pooled_imgs), "server sample overlaps the clients"
 print("server sample (ADR-015):", len(server["client_assignments"]["S"]), "images,", server["class_counts"]["S"])
+s1b5 = yaml.safe_load((S1B5 / "manifest.yaml").read_text())
+for cid in ("C0", "C1", "C2"):
+    assert s1b5["class_counts"][cid]["bus"] == 0, f"S1b5 {cid} must have zero bus"
+assert s1b5["class_counts"]["C3"]["truck"] == 0
+print("S1b5-3k (ADR-017):", {c: len(v) for c, v in s1b5["client_assignments"].items()}, s1b5["class_counts"])
 
 # %% [markdown]
 # ## Cell 2b — D1: error decomposition of finished runs (ADR-014)
@@ -164,7 +173,7 @@ ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions ov
 SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)
 RHO = "0.25"
 
-PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED}
+PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5}
 
 def arm_command(arm: str) -> tuple[list[str], Path]:
     name, _, where = arm.partition("@")
@@ -173,7 +182,7 @@ def arm_command(arm: str) -> tuple[list[str], Path]:
         sys.executable, str(REPO_ROOT / "scripts" / "run_fl_experiment.py"),
         "--partition", str(partition / "manifest.yaml"),
         "--data-yaml-dir", str(partition),
-        "--run-class", "feasibility", "--exp-config", str(EXP_CFG),
+        "--run-class", "feasibility", "--exp-config", str(EXP_CFG_5C if where.startswith("s5") else EXP_CFG),
         "--seed", str(SEED), "--mlflow-uri", MLFLOW_URI,
         "--mlflow-experiment", "S1b-2k-convergence",
         "--global-data-yaml", str(DATA_YAML), "--resume",
@@ -212,7 +221,7 @@ print(outcomes)
 import pandas as pd
 from src.evaluation.compare import check_comparable, discover_runs
 
-records = [r for r in discover_runs(ARTIFACTS_DIR / "runs") if "_2k_" in r.partition_id]
+records = [r for r in discover_runs(ARTIFACTS_DIR / "runs") if "_2k_" in r.partition_id or "_3k_" in r.partition_id]
 keys = ["mAP50", "mAP50-95"] + [f"AP50_{c}" for c in ("car", "bus", "truck", "motorcycle")] \
        + [f"FP_{c}" for c in ("bus", "truck")] + [f"FN_{c}" for c in ("bus", "truck")]
 table = pd.DataFrame({f"{r.arm} [{r.partition_id}]": {k: r.final_metrics.get(k) for k in keys}

@@ -208,3 +208,15 @@ def test_server_sample_gets_its_own_label_folder(tmp_path):
     labels = sorted((srv_root / "labels" / "train").iterdir())
     assert len(labels) == 5 and not any(l.is_symlink() for l in labels)   # real files: own folder, own cache
     assert (srv_root / "images" / "val").exists()
+
+
+def test_class_quota_reaches_the_partitioner_from_config(tmp_path):
+    imgs = [f"p_{i:03d}.jpg" for i in range(60)] + [f"m_{i:03d}.jpg" for i in range(12)]
+    cmap = {n: [0] for n in imgs[:60]} | {n: [0, 3] for n in imgs[60:]}
+    root = _make_yolo_root(tmp_path, imgs, cmap)
+    cfg = _write_config(tmp_path, {"partition_id": "q", "scenario": "S1", "seed": 3, "num_clients": 3,
+                                   "per_client": 20, "missing_map": {"C0": [], "C1": [], "C2": []},
+                                   "class_quota": {"motorcycle": 4}})
+    manifest_path, _ = generate_partition_artifacts(cfg, root, tmp_path / "out")
+    m = load_partition_manifest(manifest_path)
+    assert all(m.class_counts[c]["motorcycle"] >= 4 for c in ("C0", "C1", "C2"))

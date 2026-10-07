@@ -91,6 +91,7 @@ def _dispatch_partition(
             partition_id=partition_id,
             scenario=scenario,
             per_client=config.get("per_client"),
+            class_quota=config.get("class_quota"),
         )
 
     raise ValueError(

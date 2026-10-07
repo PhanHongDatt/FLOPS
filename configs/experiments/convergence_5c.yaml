@@ -1,0 +1,12 @@
+# Same protocol as convergence.yaml (ADR-011) for the 5-client scenarios (ADR-017):
+# 30 rounds x 1 local epoch, full-val eval every 5 rounds, checkpoint every round.
+run_class: feasibility
+train:
+  batch_size: 16
+federated:
+  num_clients: 5
+  num_rounds: 30
+  eval_every: 5
+  fraction_evaluate: 0.0
+notes: >
+  5 clients x 3,000 images; exploratory before G4/G5 (single seed unless stated).

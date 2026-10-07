@@ -151,6 +151,7 @@ def partition_missing_class(
     scenario: str = "S1",
     per_client: int | None = None,
     label_index: dict[str, dict[str, int]] | None = None,
+    class_quota: dict[str, int] | None = None,
 ) -> PartitionManifest:
     """Create a Missing-Class Non-IID partition (S1 or S1-Control).
 
@@ -172,6 +173,11 @@ def partition_missing_class(
             image is dropped (and counted).
         label_index: optional precomputed output of ``load_label_index`` to avoid
             re-reading ~70k label files.
+        class_quota: optional ``{class: n_images}`` — before the ordinary stream, every
+            client that may hold the class receives up to ``n_images`` images containing it
+            (rare-class oversampling, ADR-017). Eligibility is unchanged: an image holding a
+            class a client excludes never goes to that client, so the missing-class contract
+            still holds. The rest of the client is then filled by the ordinary stream.
 
     Side effect to report, not hide: because images holding a rare class can only
     go to clients that do not exclude it, those clients receive that class at a
@@ -190,7 +196,33 @@ def partition_missing_class(
 
     dropped_ineligible = 0
     dropped_full = 0
+    quota_assigned: set[str] = set()
+    for q_cls, q_n in (class_quota or {}).items():
+        if q_cls not in TARGET_CLASSES:
+            raise ValueError(f"class_quota class {q_cls!r} not in {TARGET_CLASSES}")
+        takers = [cid for cid in client_ids if q_cls not in excluded_by_client[cid]]
+        got = {cid: 0 for cid in takers}
+        for img in shuffled:
+            if img in quota_assigned or q_cls not in _present_classes(img, index):
+                continue
+            img_classes = _present_classes(img, index)
+            open_ = [cid for cid in takers if got[cid] < q_n and not (img_classes & excluded_by_client[cid])
+                     and (per_client is None or len(splits[cid]) < per_client)]
+            if not open_:
+                if all(got[c] >= q_n for c in takers):
+                    break
+                continue
+            target = min(open_, key=lambda cid: (got[cid], client_ids.index(cid)))
+            splits[target].append(img)
+            got[target] += 1
+            quota_assigned.add(img)
+        short = {c: n for c, n in got.items() if n < q_n}
+        if short:
+            logger.warning("partition_missing_class(%s): class_quota %s=%d not reached for %s",
+                           partition_id, q_cls, q_n, short)
     for img in shuffled:
+        if img in quota_assigned:
+            continue
         img_classes = _present_classes(img, index)
         eligible = [
             cid for cid in client_ids

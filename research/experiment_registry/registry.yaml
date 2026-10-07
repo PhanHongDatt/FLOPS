@@ -652,3 +652,21 @@ experiments:
     mAP50 and +0.076/+0.086 AP50 bus over YOLOv8n with no BDD training — above every trained FL arm (best P1: 0.300).
     YOLO11s > YOLOv8s on all four classes with 16 % fewer parameters and 25 % fewer FLOPs.'
   report: research/decisions/ADR-016-model-selection.md
+- id: EXP-2026-10-08-S9-A0at-s5
+  gate: G4 (scenario extension)
+  scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
+  method: A0 FedAvg on S1b5-3k
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s9a-s1b5-fedavg
+  decision_rule: pre-declared in ADR-017
+- id: EXP-2026-10-08-S9-A0at-s5pooled
+  gate: G4 (scenario extension)
+  scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
+  method: A0 FedAvg on pooled S1b5-3k
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s9b-s1b5-pooled
+  decision_rule: pre-declared in ADR-017

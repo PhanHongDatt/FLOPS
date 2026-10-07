@@ -1,0 +1,22 @@
+# S1b5-3k — 5-client Missing-Class scenario with motorcycle oversampling (ADR-017)
+#
+# 5 x 3,000 images; bus absent on 3/5 clients (60 %, vs 2/4 in S1b-2k), truck absent on C3,
+# C4 holds all four classes. class_quota gives each client that may hold motorcycle 300
+# images containing it before the ordinary stream (natural rate would give ~660 motorcycle
+# boxes in 15,000 images; the quota gives ~1,960). Eligibility is unchanged, so the
+# missing-class contract still holds. Report the ACTUAL distribution from the manifest.
+partition_id: s1b5_bus_3k_moto_seed42
+scenario: S1
+seed: 42
+num_clients: 5
+per_client: 3000
+missing_map:
+  C0: [bus]
+  C1: [bus]
+  C2: [bus]
+  C3: [truck]
+  C4: []
+class_quota:
+  motorcycle: 300
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50

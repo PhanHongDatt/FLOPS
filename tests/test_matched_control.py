@@ -323,3 +323,28 @@ def test_build_attribute_index_reads_frame_attributes(tmp_path):
     idx = build_attribute_index(ann, key="timeofday")
     assert idx == {"a.jpg": "night", "b.jpg": "daytime"}
     assert build_attribute_index(ann, key="weather") == {"a.jpg": "rainy"}
+
+
+# ── rare-class quota (ADR-017) ──────────────────────────────────────────
+def test_class_quota_oversamples_without_breaking_missing_classes(tmp_path):
+    spec = {}
+    for i in range(600):
+        spec[f"plain_{i:04d}.jpg"] = {CAR: 3}
+    for i in range(80):
+        spec[f"bus_{i:04d}.jpg"] = {CAR: 2, BUS: 1}
+    for i in range(60):
+        spec[f"moto_{i:04d}.jpg"] = {CAR: 1, MOTO: 1}
+    for i in range(20):
+        spec[f"motobus_{i:04d}.jpg"] = {BUS: 1, MOTO: 1}
+    names, label_dir = _write_dataset(tmp_path, spec)
+    mm = {"C0": [BUS], "C1": [BUS], "C2": []}
+    plain = partition_missing_class(names, label_dir, 3, mm, seed=1, partition_id="p", per_client=100)
+    boosted = partition_missing_class(names, label_dir, 3, mm, seed=1, partition_id="p", per_client=100,
+                                      class_quota={MOTO: 20})
+    for cid in ("C0", "C1"):
+        assert boosted.class_counts[cid][BUS] == 0                     # contract still holds
+        assert boosted.class_counts[cid][MOTO] >= 20
+    assert all(len(v) == 100 for v in boosted.client_assignments.values())
+    assert sum(c[MOTO] for c in boosted.class_counts.values()) > sum(c[MOTO] for c in plain.class_counts.values())
+    with pytest.raises(ValueError):
+        partition_missing_class(names, label_dir, 3, mm, seed=1, partition_id="p", class_quota={"person": 5})

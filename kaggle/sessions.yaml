@@ -128,3 +128,15 @@ sessions:
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["B1", "P1"]'
       'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 123'
+
+  s9a:  # ADR-017: FedAvg on S1b5-3k (5 clients x 3,000, bus absent on 3/5, motorcycle quota). ~1.8 h
+    slug: flops-s9a-s1b5-fedavg
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0@s5"]'
+
+  s9b:  # ADR-017: FedAvg on the pooled re-split of the same 15,000 images (D3 for 5 clients). ~1.8 h
+    slug: flops-s9b-s1b5-pooled
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0@s5pooled"]'
