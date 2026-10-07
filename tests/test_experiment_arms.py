@@ -48,7 +48,15 @@ def _args(**kw) -> argparse.Namespace:
 # ── ablation presets ──────────────────────────────────────────────────────
 def test_every_plan_arm_has_a_preset():
     assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c",
-                               "B1", "B2", "P1", "P2"}
+                               "B1", "B2", "P1", "P2", "A0c", "P3"}
+
+
+def test_coco_head_arms():
+    assert _ABLATIONS["A0c"] == {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True}
+    assert _ABLATIONS["P3"]["mechanism"] == "kd_teacher" and _ABLATIONS["P3"]["teacher_from_init"]
+    algo, m, rho = _resolve_arms(_args(ablation="P3"))
+    assert (algo, m, rho) == ("FedAvg", "kd_teacher", 1.0)
+    assert exp_id_for_arm("P3", m, rho) == "P3"
 
 
 @pytest.mark.parametrize("arm,mech,client,rho,exp_id", [

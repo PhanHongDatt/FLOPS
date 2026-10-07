@@ -668,8 +668,18 @@ experiments:
   scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
   method: A0 FedAvg on pooled S1b5-3k
   run_class: feasibility
-  status: running
+  status: rejected
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s9b-s1b5-pooled v1
+  kaggle_kernel: goshihayashi/flops-s9b-s1b5-pooled (deleted)
   decision_rule: pre-declared in ADR-017
   git_commit: e955221
+  notes: 'Cancelled by the author to save GPU: the S1b5-3k scenario is to be run with the new method (P3) first.'
+- id: EXP-2026-10-08-S10-P3at-s5
+  gate: G6 (exploratory)
+  scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
+  method: 'P3: COCO head kept + not-true KD from the frozen COCO YOLOv8n'
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s10-p3-s1b5
+  decision_rule: 'pre-declared in ADR-018 (control A0c not run yet: descriptive until then)'

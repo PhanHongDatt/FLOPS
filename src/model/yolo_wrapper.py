@@ -26,6 +26,20 @@ def _disable_ultralytics_mlflow() -> None:
         SETTINGS.update({"mlflow": False})
 
 
+# P3 / A0c (ADR-018): "coco:<weights>" keeps the pretrained 80-class COCO head; the four targets are
+# then the COCO classes below and the label files use these ids (src/data/coco_view.py).
+COCO_PREFIX = "coco:"
+COCO_IDS: dict[str, int] = {"car": 2, "motorcycle": 3, "bus": 5, "truck": 7}
+
+
+def target_class_ids(model: "YOLO") -> dict[str, int]:
+    """Index of each target class in ``model``'s head: 0..3, or the COCO ids for an 80-class head."""
+    names = getattr(model, "names", None) or getattr(model.model, "names", {})
+    if len(names) == 80:
+        return {c: COCO_IDS[c] for c in TARGET_CLASSES}
+    return {c: i for i, c in enumerate(TARGET_CLASSES)}
+
+
 def build_model(weights: str = "yolov8n.pt", init_seed: int = 0) -> "YOLO":
     """Return a YOLO detector with exactly ``len(TARGET_CLASSES)`` classes.
 
@@ -54,6 +68,11 @@ def build_model(weights: str = "yolov8n.pt", init_seed: int = 0) -> "YOLO":
     from ultralytics.nn.tasks import DetectionModel
 
     _disable_ultralytics_mlflow()
+    if weights.startswith(COCO_PREFIX):          # keep the pretrained COCO head untouched
+        model = YOLO(weights[len(COCO_PREFIX):])
+        if model.model.model[-1].nc != 80:
+            raise ValueError(f"{weights}: the coco: prefix needs an 80-class COCO checkpoint")
+        return model
     nc = len(TARGET_CLASSES)
     with torch.random.fork_rng():
         torch.manual_seed(init_seed)
@@ -327,7 +346,7 @@ def _load_fp32_ema(model: "YOLO", snapshot: dict[str, Any]) -> None:
     model.model.load_state_dict(snapshot, strict=True)
 
 
-def _per_class_fp_fn(results: Any) -> dict[str, float]:
+def _per_class_fp_fn(results: Any, class_ids: dict[str, int] | None = None) -> dict[str, float]:
     """Per-class FP/FN from the Ultralytics confusion matrix.
 
     CLAUDE.md §13 and ``configs/base_config.yaml`` both require FP_per_class and
@@ -353,9 +372,10 @@ def _per_class_fp_fn(results: Any) -> dict[str, float]:
     if matrix is None:
         return out
     m = np.asarray(matrix, dtype=float)
-    if m.ndim != 2 or m.shape[0] != m.shape[1] or m.shape[0] < len(TARGET_CLASSES):
+    ids = class_ids or {c: i for i, c in enumerate(TARGET_CLASSES)}
+    if m.ndim != 2 or m.shape[0] != m.shape[1] or m.shape[0] <= max(ids.values()):
         return out
-    for cls_idx, cls_name in enumerate(TARGET_CLASSES):
+    for cls_name, cls_idx in ids.items():
         if cls_idx >= m.shape[0]:
             break
         tp = float(m[cls_idx, cls_idx])
@@ -380,8 +400,9 @@ def confidence_stats(
     AutoBackend fuses that model in place; predicting on a fresh copy with the
     cache cleared keeps the stats tied to the current weights.
     """
-    nc = len(TARGET_CLASSES)
-    confs: list[list[float]] = [[] for _ in range(nc)]
+    ids = target_class_ids(model)
+    back = {i: c for c, i in ids.items()}
+    confs: dict[str, list[float]] = {c: [] for c in TARGET_CLASSES}
     original = model.model
     model.model = copy.deepcopy(original)
     model.predictor = None
@@ -391,15 +412,15 @@ def confidence_stats(
             if r.boxes is None:
                 continue
             for c, cf in zip(r.boxes.cls.cpu().numpy().astype(int), r.boxes.conf.cpu().numpy()):
-                if 0 <= c < nc:
-                    confs[c].append(float(cf))
+                if int(c) in back:
+                    confs[back[int(c)]].append(float(cf))
     finally:
         model.model = original
         model.predictor = None
     out: dict[str, float] = {}
-    for c, name in enumerate(TARGET_CLASSES):
-        out[f"n_pred_{name}"] = float(len(confs[c]))
-        out[f"mean_conf_{name}"] = float(np.mean(confs[c])) if confs[c] else float("nan")
+    for name in TARGET_CLASSES:
+        out[f"n_pred_{name}"] = float(len(confs[name]))
+        out[f"mean_conf_{name}"] = float(np.mean(confs[name])) if confs[name] else float("nan")
     return out
 
 
@@ -418,6 +439,8 @@ def evaluate(
     # val() fuses Conv+BN of model.model IN PLACE (355 → 127 state_dict entries
     # for yolov8n), after which set_parameters on the same object fails. The
     # server reuses one evaluate model across rounds, so validate a copy.
+    ids = target_class_ids(model)
+    back = {i: c for c, i in ids.items()}
     original = model.model
     model.model = copy.deepcopy(original)
     try:
@@ -449,12 +472,18 @@ def evaluate(
     ap_class_index = list(results.box.ap_class_index)
     for i, cls_idx in enumerate(ap_class_index):
         idx = int(cls_idx)
-        if 0 <= idx < len(TARGET_CLASSES):
-            cls_name = TARGET_CLASSES[idx]
+        if idx in back:
+            cls_name = back[idx]
             metrics[f"AP50_{cls_name}"] = float(results.box.ap50[i])
             metrics[f"AP_{cls_name}"] = float(results.box.ap[i])
             metrics[f"precision_{cls_name}"] = float(results.box.p[i])
             metrics[f"recall_{cls_name}"] = float(results.box.r[i])
 
-    metrics.update(_per_class_fp_fn(results))
+    metrics.update(_per_class_fp_fn(results, ids))
+    if len(ids) and max(ids.values()) >= len(TARGET_CLASSES):
+        # 80-class head (ADR-018): report the mean over the four targets explicitly
+        for key, prefix in (("mAP50", "AP50_"), ("mAP50-95", "AP_")):
+            vals = [metrics[f"{prefix}{c}"] for c in TARGET_CLASSES if f"{prefix}{c}" in metrics]
+            if len(vals) == len(TARGET_CLASSES):
+                metrics[key] = float(sum(vals) / len(vals))
     return metrics

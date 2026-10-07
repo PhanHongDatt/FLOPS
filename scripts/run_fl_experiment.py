@@ -117,6 +117,10 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     "B2":  {"algorithm": "FedAvg", "mechanism": "none",           "teacher_init": True, "server_ft": True},
     "P1":  {"algorithm": "FedAvg", "mechanism": "kd_teacher",     "teacher_init": True},
     "P2":  {"algorithm": "FedAvg", "mechanism": "kd_teacher_rho", "teacher_init": True},
+    # Keep the pretrained 80-class COCO head (ADR-018). A0c = FedAvg control; P3 = not-true
+    # distillation from the frozen COCO model itself — no server data, no BDD pre-training.
+    "A0c": {"algorithm": "FedAvg", "mechanism": "none",       "coco_head": True},
+    "P3":  {"algorithm": "FedAvg", "mechanism": "kd_teacher", "coco_head": True, "teacher_from_init": True},
 }
 
 # Algorithms recognised by argparse but blocked at runtime with a scientific
@@ -395,6 +399,23 @@ def main() -> None:
         raise SystemExit(f"config federated.num_clients={fed['num_clients']} but partition "
                          f"{manifest.partition_id} has {manifest.num_clients} clients — use a matching exp config")
     train_config = build_local_train_config(config)
+    if preset.get("coco_head"):
+        # ADR-018: same images through the COCO-id label view; model keeps the COCO head
+        from src.data.coco_view import coco_data_yaml
+        view_dir = run_dir / "coco_view"
+        data_yaml_map = {cid: coco_data_yaml(p, view_dir) for cid, p in data_yaml_map.items()}
+        if args.global_data_yaml is not None:
+            args.global_data_yaml = coco_data_yaml(args.global_data_yaml, view_dir)
+        if not str(config["model"]["weights"]).startswith("coco:"):
+            config["model"]["weights"] = "coco:" + str(config["model"]["weights"])
+    if preset.get("teacher_from_init"):
+        # P3: the frozen teacher is the initial (COCO) model itself
+        import numpy as np
+        from src.model.yolo_wrapper import build_model, get_parameters
+        teacher_npz = run_dir / "teacher_init.npz"
+        if not teacher_npz.exists():
+            np.savez(teacher_npz, *get_parameters(build_model(config["model"]["weights"])))
+        args.teacher_params = teacher_npz
     if mechanism in ("kd_teacher", "kd_teacher_rho"):
         if args.teacher_params is None:
             raise SystemExit(f"--client-mechanism {mechanism} needs --teacher-params")
