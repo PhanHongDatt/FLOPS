@@ -745,3 +745,13 @@ experiments:
   interpretation: 'AP50 bus 0.333-0.335 from round 20 to 50 (+0.04 over the COCO start), mAP50 0.385 -> 0.392, motorcycle
     0.138 -> 0.204; no late decline. Descriptive only: no FedAvg or A0c on S1b5-3k yet, so KD, head retention and
     the larger data cannot be separated.'
+- id: EXP-2026-10-09-S11-P3-y11s-s5
+  gate: G6 (exploratory, model trial)
+  scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
+  method: P3 on YOLO11s (COCO head kept, not-true KD from the frozen COCO YOLO11s), 20 rounds, eval 0/10/20
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s11-p3-y11s-s1b5
+  checks_expected: round 0 must reproduce the local zero-shot YOLO11s (AP50 bus 0.379, car 0.584)
+  notes: YOLO11 family approved by the author for this trial (ADR-016). Never mixed with YOLOv8n numbers.

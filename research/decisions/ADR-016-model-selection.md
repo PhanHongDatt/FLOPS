@@ -1,8 +1,10 @@
 # ADR-016: Detector for the main experiments — YOLOv8n → s-tier (YOLO11s, or YOLOv8s)
 
 **Date:** 2026-10-08
-**Status:** proposed — needs the author's approval (project rules §1 name "YOLOv8"; §2 lists a new
-YOLO architecture as out of scope without approval). Exploratory runs so far (s2–s8) stay valid for YOLOv8n.
+**Status:** accepted for a trial on 2026-10-09 — the author approved moving to the YOLO11 family
+("tiến hành thử đổi sang họ yolo11"), a scope change against project rules §1 ("YOLOv8"). First run: P3 on
+YOLO11s (session s11_g). Exploratory runs so far (s2–s10) stay valid for YOLOv8n and are never mixed with
+YOLO11s numbers.
 **Scope:** model of the main experiments (G10), before 3-seed main runs are spent
 
 ## Evidence
@@ -60,3 +62,12 @@ timeout and a week's quota for a 3-seed comparison) — excluded. Update size pe
 
 ## Related
 ADR-009 · ADR-011 · ADR-015 · registry EXP-2026-10-07-EVAL-COCO-teacher, EXP-2026-10-08-EVAL-model-zoo
+
+## Update 2026-10-09 (before the YOLO11s run)
+
+- P3 on YOLOv8n, S1b5-3k (EXP-2026-10-08-S10b-P3at-s5-50r) plateaus from round 20 (AP50 bus 0.333 → 0.334 at
+  round 50), so the YOLO11s trial runs 20 rounds.
+- Measured YOLOv8n P3 cost: 4 h 29 min for 50 rounds → ~4.4 min/round. FLOPs-scaled upper bound for YOLO11s:
+  ~11 min/round → ~4.5 h for 20 rounds with evaluations; per-arm timeout raised to 8 h for this session.
+- CPU smoke of the full P3 path on `coco:yolo11s.pt` passed (COCO head kept, teacher called, KD active,
+  per-class metrics read at the COCO ids).

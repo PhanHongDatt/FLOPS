@@ -1,0 +1,15 @@
+# P3 on YOLO11s (ADR-016, ADR-018): 5 clients, 20 rounds x 1 local epoch — P3 on YOLOv8n plateaued
+# from round 20 (AP50 bus 0.333 at 20, 0.334 at 50). Evaluated at rounds 10 and 20 (+ round 0).
+run_class: feasibility
+model:
+  name: yolo11s
+  weights: yolo11s.pt
+train:
+  batch_size: 16
+federated:
+  num_clients: 5
+  num_rounds: 20
+  eval_rounds: [10, 20]
+  fraction_evaluate: 0.0
+notes: >
+  Exploratory, single seed; YOLO11 family approved by the author for this trial (scope change, ADR-016).

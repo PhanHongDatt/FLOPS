@@ -172,6 +172,7 @@ from src.utils.proc import run_logged
 ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this
 SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)
 RHO = "0.25"
+ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)
 
 PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5}
 
@@ -204,7 +205,7 @@ for arm in ARMS:
     print(f"\n=== {arm} ===")
     try:
         run_logged(cmd, LOGS / f"{arm.replace('@', '_')}.log", env={"YOLO_VERBOSE": "False"},
-                   timeout=5 * 3600, stall_timeout=3600, watch_dir=ARTIFACTS_DIR / "runs")
+                   timeout=ARM_TIMEOUT_H * 3600, stall_timeout=3600, watch_dir=ARTIFACTS_DIR / "runs")
         outcomes[arm] = "completed"
     except Exception as exc:   # keep going: one arm must not cost the others
         outcomes[arm] = f"failed: {type(exc).__name__}"

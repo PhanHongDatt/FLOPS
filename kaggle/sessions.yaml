@@ -173,3 +173,13 @@ sessions:
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P3@s5"]'
       'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_50r.yaml"'
+
+  s11_g:  # ADR-016/018: P3 on YOLO11s, S1b5-3k, 20 rounds, eval 0/10/20. Upper-bound estimate ~4.5 h
+    slug: flops-s11-p3-y11s-s1b5
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P3@s5"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 8'
