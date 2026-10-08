@@ -164,3 +164,12 @@ sessions:
     dataset_sources: [solesensei/solesensei_bdd100k]
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P3@s5"]'
+
+  s10b_g:  # ADR-018 P3 re-run with the fixed COCO evaluation, 50 rounds, eval at 20/30/40/50. ~3.6 h
+    slug: flops-s10b-p3-s1b5-50r
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P3@s5"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_50r.yaml"'

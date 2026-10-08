@@ -71,7 +71,8 @@ def load_global_checkpoint(path: Path) -> list[np.ndarray]:
         return [data[k] for k in keys]
 
 
-def prune_checkpoints(ckpt_dir: Path, keep_last: int, keep_every: int = 0) -> list[Path]:
+def prune_checkpoints(ckpt_dir: Path, keep_last: int, keep_every: int = 0,
+                      keep_rounds: set[int] | None = None) -> list[Path]:
     """Delete all but the ``keep_last`` most recent round checkpoints.
 
     ``keep_every`` > 0 also keeps every round that is a multiple of it — the evaluated rounds
@@ -84,7 +85,7 @@ def prune_checkpoints(ckpt_dir: Path, keep_last: int, keep_every: int = 0) -> li
     found = list_checkpoints(ckpt_dir)
     removed: list[Path] = []
     for rnd, path in found[:-keep_last] if len(found) > keep_last else []:
-        if keep_every and rnd % keep_every == 0:
+        if (keep_every and rnd % keep_every == 0) or (keep_rounds and rnd in keep_rounds):
             continue
         path.unlink(missing_ok=True)
         removed.append(path)

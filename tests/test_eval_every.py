@@ -35,3 +35,20 @@ def test_round_zero_and_default_cadence(tmp_path, monkeypatch):
     params = [np.zeros(2)]
     assert fn(0, params, {}) is not None and fn(3, params, {}) is not None
     assert len(calls) == 2
+
+
+def test_explicit_eval_rounds(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(yw, "build_model", lambda weights: object())
+    monkeypatch.setattr(yw, "set_parameters", lambda m, p: None)
+    monkeypatch.setattr(yw, "evaluate", lambda **kw: calls.append(1) or {"mAP50": 0.1})
+    fn = _build_centralized_evaluate_fn(
+        global_data_yaml=tmp_path / "data.yaml",
+        eval_config={"image_size": 64, "conf": 0.001, "iou": 0.7, "device": "cpu", "eval_every": 5,
+                     "eval_rounds": [20, 30, 40, 50]},
+        run_dir=tmp_path, num_rounds=50, prune_client_weights=False)
+    p = [np.zeros(2)]
+    evaluated = [r for r in range(0, 51) if fn(r, p, {}) is not None]
+    assert evaluated == [0, 20, 30, 40, 50]                 # round 0 = starting model; eval_every ignored
+    kept = sorted(int(f.stem.split("_")[-1]) for f in (tmp_path / "checkpoint").glob("global_round_*.npz"))
+    assert {20, 30, 40, 49, 50} <= set(kept) and 25 not in kept

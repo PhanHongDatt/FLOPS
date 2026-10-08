@@ -690,3 +690,12 @@ experiments:
     at round 0 instead of 0.498; bus/truck absent). Training read an image list and was correct. Re-evaluated locally
     (CPU) on rounds 29 and 30 — the only checkpoints kept — so the 20/25/30 rule cannot be applied to this run.
     Fixed: coco_view never passes a directory; evaluated rounds'' checkpoints are now kept.'
+- id: EXP-2026-10-08-S10b-P3at-s5-50r
+  gate: G6 (exploratory)
+  scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
+  method: 'P3 re-run with the fixed COCO evaluation: 50 rounds, evaluated at rounds 0/20/30/40/50 (author''s choice)'
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s10b-p3-s1b5-50r
+  notes: Replaces the invalid evaluation of EXP-2026-10-08-S10-P3at-s5. Control A0c still not run.

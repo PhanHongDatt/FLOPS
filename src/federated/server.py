@@ -116,6 +116,8 @@ def _build_centralized_evaluate_fn(
 
     # Lazy-init to avoid loading YOLO in server process before first round
     _holder: dict[str, Any] = {"model": None}
+    # Explicit evaluation rounds (overrides eval_every); the final round is always evaluated.
+    eval_rounds = {int(r) for r in (eval_config.get("eval_rounds") or [])}
 
     def evaluate_fn(
         server_round: int,
@@ -142,14 +144,19 @@ def _build_centralized_evaluate_fn(
             ckpt_dir = run_dir / "checkpoint"
             save_global_checkpoint(ckpt_dir, abs_round, list(parameters))
             prune_checkpoints(ckpt_dir, keep_last_checkpoints,
-                              keep_every=int(eval_config.get("eval_every", 1)) if eval_config.get("eval_every", 1) > 1 else 0)
+                              keep_every=(int(eval_config.get("eval_every", 1))
+                                          if eval_config.get("eval_every", 1) > 1 and not eval_rounds else 0),
+                              keep_rounds=eval_rounds)
             if prune_client_weights:
                 prune_client_round_weights(run_dir, abs_round)
 
         # Eval cadence (ADR-011): long runs evaluate every k rounds plus the final
         # round; the checkpoint above is still written every round (resume).
         eval_every = int(eval_config.get("eval_every", 1))
-        if (not is_initial_eval and eval_every > 1 and abs_round < num_rounds
+        if eval_rounds and not is_initial_eval and abs_round not in eval_rounds and abs_round < num_rounds:
+            logger.info("Round %d (absolute): eval skipped (eval_rounds=%s)", abs_round, sorted(eval_rounds))
+            return None
+        if (not eval_rounds and not is_initial_eval and eval_every > 1 and abs_round < num_rounds
                 and abs_round % eval_every != 0):
             logger.info("Round %d (absolute): eval skipped (eval_every=%d)", abs_round, eval_every)
             return None

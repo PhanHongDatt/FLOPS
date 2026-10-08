@@ -1,0 +1,12 @@
+# P3 re-run (ADR-018): 5 clients, 50 rounds x 1 local epoch; evaluated at rounds 20, 30, 40, 50
+# (+ round 0 = the starting COCO model) as requested by the author. Checkpoints of those rounds kept.
+run_class: feasibility
+train:
+  batch_size: 16
+federated:
+  num_clients: 5
+  num_rounds: 50
+  eval_rounds: [20, 30, 40, 50]
+  fraction_evaluate: 0.0
+notes: >
+  Exploratory, single seed. Not the ADR-011 20/25/30 rule: rounds chosen by the author for this run.

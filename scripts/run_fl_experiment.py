@@ -465,6 +465,7 @@ def main() -> None:
         "weights": config["model"]["weights"],
         "workers": config["evaluation"].get("workers", 0),
         "eval_every": fed.get("eval_every", 1),   # ADR-011
+        "eval_rounds": fed.get("eval_rounds"),    # explicit rounds, overrides eval_every
     }
 
     param_names: list[str] | None = None
