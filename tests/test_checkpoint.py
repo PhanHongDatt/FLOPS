@@ -118,3 +118,13 @@ def test_default_run_id_is_deterministic_and_has_no_timestamp():
 def test_default_run_id_sanitises_path_separators():
     rid = default_run_id("A3", "main", 42, "scen/a\\b")
     assert "/" not in rid and "\\" not in rid
+
+
+def test_prune_keeps_evaluated_rounds(tmp_path):
+    import numpy as np
+
+    from src.experiments.checkpoint import list_checkpoints, prune_checkpoints, save_global_checkpoint
+    for r in range(1, 31):
+        save_global_checkpoint(tmp_path, r, [np.zeros(1)])
+        prune_checkpoints(tmp_path, keep_last=2, keep_every=5)
+    assert [r for r, _ in list_checkpoints(tmp_path)] == [5, 10, 15, 20, 25, 29, 30]

@@ -47,6 +47,12 @@ def test_data_yaml_rewrite_points_lists_at_the_view(tmp_path):
     out = yaml.safe_load(coco_data_yaml(dy, tmp_path / "view", names=names).read_text())
     assert out["nc"] == 80 and out["names"] == names
     assert Path(out["path"]).name == "bdd100k_yolo_coco"
-    assert out["val"] == "images/val"
-    line = Path(out["train"]).read_text().strip()
-    assert "bdd100k_yolo_coco" in line and line.endswith("train1.jpg")
+    # s10_g P3 v1: a directory val entry was .resolve()d by Ultralytics back to the original labels
+    for split, name in (("train", "train1.jpg"), ("val", "val1.jpg")):
+        lst = Path(out[split])
+        assert lst.is_file(), f"{split} must be an image list, never a directory"
+        line = lst.read_text().strip()
+        assert "bdd100k_yolo_coco" in line and line.endswith(name)
+        label = Path(line.replace(f"{__import__('os').sep}images{__import__('os').sep}",
+                                  f"{__import__('os').sep}labels{__import__('os').sep}")).with_suffix(".txt")
+        assert int(label.read_text().split()[0]) == 2          # car remapped to the COCO id

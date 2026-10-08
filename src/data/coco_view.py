@@ -71,8 +71,9 @@ def ensure_coco_root(yolo_root: Path) -> Path:
 def coco_data_yaml(data_yaml: Path, out_dir: Path, names: list[str] | None = None) -> Path:
     """Copy of ``data_yaml`` that reads the same images through the COCO-id view.
 
-    ``train``/``val`` entries that are image-list files are rewritten line by line (paths under
-    ``<root>/images`` → ``<root>_coco/images``); directory entries stay relative to the new root.
+    ``train``/``val`` entries become image-list files whose paths go through ``<root>_coco/images``:
+    list files are rewritten line by line, directory entries are expanded into a list. A directory is
+    never passed on, because Ultralytics resolves it (and with it the link back to the original labels).
     """
     data_yaml = Path(data_yaml)
     data: dict[str, Any] = yaml.safe_load(data_yaml.read_text(encoding="utf-8"))
@@ -87,8 +88,19 @@ def coco_data_yaml(data_yaml: Path, out_dir: Path, names: list[str] | None = Non
             continue
         p = Path(entry)
         p = p if p.is_absolute() else root / p
-        if p.is_file():
-            old_prefix, new_prefix = str(root / "images"), str(coco_root / "images")
+        old_prefix, new_prefix = str(root / "images"), str(coco_root / "images")
+        if p.is_dir():
+            # Never hand Ultralytics a directory here: check_det_dataset() calls .resolve() on it,
+            # which follows the images/<split> link back to the ORIGINAL tree and so reads the
+            # original 0..3 labels (s10_g P3 v1: every val metric except motorcycle was wrong).
+            # An image list is not resolved line by line, so labels come from the COCO view.
+            rel = p.relative_to(root / "images")
+            lines = [str(coco_root / "images" / rel / f.name) for f in sorted(p.iterdir())
+                     if f.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp", ".webp"}]
+            lst = out_dir / f"{data_yaml.stem}_{split}_coco.txt"
+            lst.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            new[split] = str(lst)
+        elif p.is_file():
             lines = [ln.strip() for ln in p.read_text(encoding="utf-8").splitlines() if ln.strip()]
             lst = out_dir / f"{data_yaml.stem}_{split}_coco.txt"
             lst.write_text("\n".join(ln.replace(old_prefix, new_prefix, 1) for ln in lines) + "\n", encoding="utf-8")

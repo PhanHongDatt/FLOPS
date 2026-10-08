@@ -679,7 +679,14 @@ experiments:
   scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
   method: 'P3: COCO head kept + not-true KD from the frozen COCO YOLOv8n'
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s10-p3-s1b5
+  kaggle_kernel: goshihayashi/flops-s10-p3-s1b5 v1
   decision_rule: 'pre-declared in ADR-018 (control A0c not run yet: descriptive until then)'
+  git_commit: 66d62e3
+  checks: 30/30 rounds with 5/5 clients; partition identical to the local simulation (ADR-017 table)
+  deviation: 'On-Kaggle val metrics INVALID except motorcycle: Ultralytics check_det_dataset .resolve()d the val
+    directory through the coco view''s link back to the original tree, so val used the 0..3 labels (car AP50 0.007
+    at round 0 instead of 0.498; bus/truck absent). Training read an image list and was correct. Re-evaluated locally
+    (CPU) on rounds 29 and 30 — the only checkpoints kept — so the 20/25/30 rule cannot be applied to this run.
+    Fixed: coco_view never passes a directory; evaluated rounds'' checkpoints are now kept.'

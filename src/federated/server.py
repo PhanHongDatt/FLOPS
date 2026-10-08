@@ -141,7 +141,8 @@ def _build_centralized_evaluate_fn(
             # already on disk and the run resumes from here instead of redoing it.
             ckpt_dir = run_dir / "checkpoint"
             save_global_checkpoint(ckpt_dir, abs_round, list(parameters))
-            prune_checkpoints(ckpt_dir, keep_last_checkpoints)
+            prune_checkpoints(ckpt_dir, keep_last_checkpoints,
+                              keep_every=int(eval_config.get("eval_every", 1)) if eval_config.get("eval_every", 1) > 1 else 0)
             if prune_client_weights:
                 prune_client_round_weights(run_dir, abs_round)
 
