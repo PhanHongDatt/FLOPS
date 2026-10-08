@@ -695,7 +695,53 @@ experiments:
   scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
   method: 'P3 re-run with the fixed COCO evaluation: 50 rounds, evaluated at rounds 0/20/30/40/50 (author''s choice)'
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s10b-p3-s1b5-50r
+  kaggle_kernel: goshihayashi/flops-s10b-p3-s1b5-50r v1
   notes: Replaces the invalid evaluation of EXP-2026-10-08-S10-P3at-s5. Control A0c still not run.
+  git_commit: 3d90d5c
+  checks: 50/50 rounds with 5/5 clients; round 0 = verified COCO zero-shot (car 0.4982, bus 0.2935)
+  results:
+    round_0:
+      mAP50: 0.2922
+      AP50_bus: 0.2935
+      AP50_car: 0.4982
+      AP50_truck: 0.2392
+      AP50_motorcycle: 0.1378
+      FP_bus: 817.0
+      FN_bus: 1184.0
+    round_20:
+      mAP50: 0.3852
+      AP50_bus: 0.3325
+      AP50_car: 0.6554
+      AP50_truck: 0.3674
+      AP50_motorcycle: 0.1853
+      FP_bus: 637.0
+      FN_bus: 1297.0
+    round_30:
+      mAP50: 0.3871
+      AP50_bus: 0.3352
+      AP50_car: 0.6554
+      AP50_truck: 0.3665
+      AP50_motorcycle: 0.1911
+      FP_bus: 597.0
+      FN_bus: 1300.0
+    round_40:
+      mAP50: 0.3912
+      AP50_bus: 0.3319
+      AP50_car: 0.6579
+      AP50_truck: 0.3755
+      AP50_motorcycle: 0.1994
+      FP_bus: 631.0
+      FN_bus: 1268.0
+    round_50:
+      mAP50: 0.3916
+      AP50_bus: 0.3335
+      AP50_car: 0.6554
+      AP50_truck: 0.3738
+      AP50_motorcycle: 0.2037
+      FP_bus: 782.0
+      FN_bus: 1250.0
+  interpretation: 'AP50 bus 0.333-0.335 from round 20 to 50 (+0.04 over the COCO start), mAP50 0.385 -> 0.392, motorcycle
+    0.138 -> 0.204; no late decline. Descriptive only: no FedAvg or A0c on S1b5-3k yet, so KD, head retention and
+    the larger data cannot be separated.'
