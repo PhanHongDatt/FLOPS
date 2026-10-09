@@ -811,7 +811,46 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: 'P4: P3 + cosine round lr + client RFS t=0.5'
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s12b-p4-y11s
+  kaggle_kernel: goshihayashi/flops-s12b-p4-y11s v1
   decision_rule: pre-declared in ADR-019
+  git_commit: 5f1ca84
+  checks: '20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; RFS active (C0 round 20: 3,596 lines
+    for 3,000 images, +20 % as predicted); lr 0.01 -> 0.00564 (r10) -> 0.0005 (r20)'
+  measured_time: arm 3 h 08 min (05:06-08:15 UTC) + setup
+  results:
+    round_0:
+      mAP50: 0.3927
+      AP50_bus: 0.3791
+      AP50_car: 0.5836
+      AP50_truck: 0.3354
+      AP50_motorcycle: 0.2726
+      FP_bus: 776.0
+      FN_bus: 1051.0
+    round_10:
+      mAP50: 0.5155
+      AP50_bus: 0.4752
+      AP50_car: 0.7207
+      AP50_truck: 0.5038
+      AP50_motorcycle: 0.3624
+      FP_bus: 655.0
+      FN_bus: 1113.0
+    round_20:
+      mAP50: 0.5495
+      AP50_bus: 0.5164
+      AP50_car: 0.7356
+      AP50_truck: 0.5227
+      AP50_motorcycle: 0.4232
+      FP_bus: 560.0
+      FN_bus: 1069.0
+    rule_mean_r10_20:
+      mAP50: 0.5325
+      AP50_bus: 0.4958
+      AP50_car: 0.7281
+      AP50_truck: 0.5132
+      AP50_motorcycle: 0.3928
+      FP_bus: 607.5
+      FN_bus: 1091.0
+  interpretation: 'vs P3 (rule 10/20): AP50 bus +0.068, motorcycle +0.117, truck +0.052, mAP50 +0.066; FN bus @0.25
+    1,204 -> 1,069 at round 20. ② and ③ not separable until P3LR finishes (ADR-019 rule for ③ is P4 vs P3LR).'
