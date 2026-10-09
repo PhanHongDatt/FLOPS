@@ -121,7 +121,15 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     # distillation from the frozen COCO model itself — no server data, no BDD pre-training.
     "A0c": {"algorithm": "FedAvg", "mechanism": "none",       "coco_head": True},
     "P3":  {"algorithm": "FedAvg", "mechanism": "kd_teacher", "coco_head": True, "teacher_from_init": True},
+    # ADR-019: P3 + cosine round learning rate (②), then + client-side repeat-factor sampling (③).
+    "P3LR": {"algorithm": "FedAvg", "mechanism": "kd_teacher", "coco_head": True, "teacher_from_init": True,
+             "lr_cosine": True},
+    "P4":   {"algorithm": "FedAvg", "mechanism": "kd_teacher", "coco_head": True, "teacher_from_init": True,
+             "lr_cosine": True, "rfs_t": 0.5},
 }
+
+# ADR-019, fixed before any run: cosine from lr0 to LR_MIN_FACTOR * lr0 over the run.
+LR_MIN_FACTOR = 0.05
 
 # Algorithms recognised by argparse but blocked at runtime with a scientific
 # reason. Prevents silently producing results that violate CLAUDE.md §22
@@ -408,6 +416,11 @@ def main() -> None:
             args.global_data_yaml = coco_data_yaml(args.global_data_yaml, view_dir)
         if not str(config["model"]["weights"]).startswith("coco:"):
             config["model"]["weights"] = "coco:" + str(config["model"]["weights"])
+    if preset.get("lr_cosine"):
+        train_config["lr_schedule"] = {"rounds": int(fed["num_rounds"]),
+                                       "lr_min": float(train_config["lr0"]) * LR_MIN_FACTOR}
+    if preset.get("rfs_t"):
+        train_config["rfs_t"] = float(preset["rfs_t"])
     if preset.get("teacher_from_init"):
         # P3: the frozen teacher is the initial (COCO) model itself
         import numpy as np

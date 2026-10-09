@@ -788,3 +788,30 @@ experiments:
     and +0.092 AP50 bus over P3 on YOLOv8n at round 20 (same scenario). FN bus @0.25 rises from 1,051 (round 0)
     to 1,204 while AP rises: scores become more conservative — operating threshold, not ranking. Descriptive (no
     A0c on YOLO11s yet).'
+- id: EXP-2026-10-09-S12-A0c-y11s
+  gate: G6 (exploratory)
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: 'A0c: YOLO11s, COCO head kept, FedAvg (control)'
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s12a-a0c-p3lr-y11s
+  decision_rule: pre-declared in ADR-019
+- id: EXP-2026-10-09-S12-P3LR-y11s
+  gate: G6 (exploratory)
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: 'P3LR: P3 + cosine round lr'
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s12a-a0c-p3lr-y11s
+  decision_rule: pre-declared in ADR-019
+- id: EXP-2026-10-09-S12-P4-y11s
+  gate: G6 (exploratory)
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: 'P4: P3 + cosine round lr + client RFS t=0.5'
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s12b-p4-y11s
+  decision_rule: pre-declared in ADR-019

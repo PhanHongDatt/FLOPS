@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +33,17 @@ def derive_local_seed(base_seed: int, server_round: int, partition_id: int) -> i
     The mapping is injective for base_seed < 2^20, round < 1000, client < 100.
     """
     return ((int(base_seed) * 1000) + int(server_round)) * 100 + int(partition_id)
+
+
+def cosine_round_lr(server_round: int, num_rounds: int, lr0: float, lr_min: float) -> float:
+    """Learning rate of round ``server_round`` (1-based): cosine from ``lr0`` (round 1) to ``lr_min``
+    (last round). [LITERATURE] Li et al., "On the Convergence of FedAvg on Non-IID Data"
+    (arXiv:1907.02189): on non-IID data FedAvg needs a decaying learning rate. The cosine shape is
+    [ENGINEERING] (ADR-019)."""
+    if num_rounds <= 1:
+        return lr0
+    x = min(max(server_round - 1, 0), num_rounds - 1) / (num_rounds - 1)
+    return lr_min + 0.5 * (lr0 - lr_min) * (1.0 + math.cos(math.pi * x))
 
 
 class YOLOFlowerClient(fl.client.NumPyClient):
@@ -76,16 +88,26 @@ class YOLOFlowerClient(fl.client.NumPyClient):
     # ── shared helpers for subclasses ─────────────────────────────────────
     def _train_kwargs(self) -> dict[str, Any]:
         cfg = self.train_config
+        seed = derive_local_seed(self.base_seed, self._round, self.partition_id)
+        lr0 = float(cfg["lr0"])
+        sched = cfg.get("lr_schedule")
+        if sched:                                          # ADR-019 component ②
+            lr0 = cosine_round_lr(self._round, int(sched["rounds"]), lr0, float(sched["lr_min"]))
+        data_yaml = self.data_yaml
+        if cfg.get("rfs_t"):                               # ADR-019 component ③
+            from src.preservation.rfs import rfs_data_yaml
+            data_yaml = rfs_data_yaml(data_yaml, self.run_dir / "clients" / self.client_id / f"rfs_round_{self._round}",
+                                      float(cfg["rfs_t"]), seed)
         return dict(
-            data_yaml=self.data_yaml,
+            data_yaml=data_yaml,
             epochs=cfg["local_epochs"],
             batch=cfg["batch_size"],
             img_size=cfg["image_size"],
-            lr0=cfg["lr0"],
+            lr0=lr0,
             device=cfg.get("device", 0),
             project=self.run_dir / "clients" / self.client_id,
             name=f"round_{self._round}",
-            seed=derive_local_seed(self.base_seed, self._round, self.partition_id),
+            seed=seed,
             workers=int(cfg.get("workers", 2)),
             warmup_epochs=float(cfg.get("warmup_epochs", 0.0)),
             close_mosaic=int(cfg.get("close_mosaic", 0)),

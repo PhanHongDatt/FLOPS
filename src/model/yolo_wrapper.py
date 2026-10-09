@@ -40,6 +40,32 @@ def target_class_ids(model: "YOLO") -> dict[str, int]:
     return {c: i for i, c in enumerate(TARGET_CLASSES)}
 
 
+def _harden_label_cache() -> None:
+    """Treat a corrupt Ultralytics label cache as missing, so it is rebuilt instead of crashing.
+
+    Clients share a label folder and therefore one ``labels/<split>.cache``; concurrent rewrites
+    occasionally leave a half-written file (s8a B1 round 11: EOFError; s8c_g B2 v1: UnpicklingError),
+    and ultralytics 8.3.253 ``get_labels`` only catches FileNotFoundError/AssertionError/... when
+    loading it. Re-raising read errors as FileNotFoundError takes the existing rebuild path.
+    """
+    import ultralytics.data.dataset as ds
+
+    if getattr(ds.load_dataset_cache_file, "_flops_hardened", False):
+        return
+    original = ds.load_dataset_cache_file
+
+    def safe_load(path):
+        try:
+            return original(path)
+        except FileNotFoundError:
+            raise
+        except Exception as exc:                     # EOFError, UnpicklingError, ValueError, ...
+            raise FileNotFoundError(f"unreadable label cache {path}: {exc!r}") from exc
+
+    safe_load._flops_hardened = True
+    ds.load_dataset_cache_file = safe_load
+
+
 def build_model(weights: str = "yolov8n.pt", init_seed: int = 0) -> "YOLO":
     """Return a YOLO detector with exactly ``len(TARGET_CLASSES)`` classes.
 
@@ -165,6 +191,7 @@ def train_one_round(
     ``batch`` can keep the canonical effective batch on a low-VRAM GPU.
     """
     _disable_ultralytics_mlflow()
+    _harden_label_cache()
     if not run_val:
         data_yaml = val_stub_data_yaml(data_yaml, Path(project) / name, n_images=val_stub_images)
     overrides: dict[str, Any] = dict(
