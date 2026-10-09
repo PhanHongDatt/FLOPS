@@ -750,8 +750,41 @@ experiments:
   scenario: S1b5-3k (5 clients x 3,000, bus absent on 3/5, moto quota 300)
   method: P3 on YOLO11s (COCO head kept, not-true KD from the frozen COCO YOLO11s), 20 rounds, eval 0/10/20
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s11-p3-y11s-s1b5
+  kaggle_kernel: goshihayashi/flops-s11-p3-y11s-s1b5 v1
   checks_expected: round 0 must reproduce the local zero-shot YOLO11s (AP50 bus 0.379, car 0.584)
   notes: YOLO11 family approved by the author for this trial (ADR-016). Never mixed with YOLOv8n numbers.
+  git_commit: c16473d
+  checks: 20/20 rounds with 5/5 clients; round 0 identical to the local zero-shot YOLO11s (bus 0.3791, car 0.5836,
+    FP 776, FN 1051)
+  measured_time: arm 2 h 28 min (18:36-21:04 UTC) + ~25 min setup; ~6.8 min/round incl. KD teacher
+  results:
+    round_0:
+      mAP50: 0.3927
+      AP50_bus: 0.3791
+      AP50_car: 0.5836
+      AP50_truck: 0.3354
+      AP50_motorcycle: 0.2726
+      FP_bus: 776.0
+      FN_bus: 1051.0
+    round_10:
+      mAP50: 0.4612
+      AP50_bus: 0.4304
+      AP50_car: 0.6989
+      AP50_truck: 0.4599
+      AP50_motorcycle: 0.2557
+      FP_bus: 521.0
+      FN_bus: 1191.0
+    round_20:
+      mAP50: 0.4717
+      AP50_bus: 0.4253
+      AP50_car: 0.7025
+      AP50_truck: 0.4619
+      AP50_motorcycle: 0.2969
+      FP_bus: 718.0
+      FN_bus: 1204.0
+  interpretation: 'Round 20: mAP50 0.472, AP50 bus 0.425, car 0.703, truck 0.462, motorcycle 0.297 — +0.087 mAP50
+    and +0.092 AP50 bus over P3 on YOLOv8n at round 20 (same scenario). FN bus @0.25 rises from 1,051 (round 0)
+    to 1,204 while AP rises: scores become more conservative — operating threshold, not ranking. Descriptive (no
+    A0c on YOLO11s yet).'
