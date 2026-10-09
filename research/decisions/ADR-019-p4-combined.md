@@ -35,3 +35,8 @@ A0c (COCO head, FedAvg) · P3 (have) · P3LR (+②) · P4 (+② +③). Same part
 
 ## Cost (YOLO11s P3 measured: 2 h 28 min per 20-round arm + ~25 min setup)
 A0c ≈ 2.3 h, P3LR ≈ 2.9 h, P4 ≈ 3.4 h → ≈ 8.6 GPU-h on goshihayashi (≈ 15 h left).
+
+## Addendum 2026-10-09 — P4noKD (declared before A0c/P3LR results)
+`P4noKD` = A0c + ② + ③ (no distillation). Reading: if P4 − P4noKD < 0.010 AP50 bus (mean of rounds 10/20),
+distillation is not needed once ② and ③ are present, and the simpler P4noKD is preferred (no teacher forward,
+~20 % cheaper). Launched while P3LR was still running, because it is needed whatever the other results are.

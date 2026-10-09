@@ -48,7 +48,7 @@ def _args(**kw) -> argparse.Namespace:
 # ── ablation presets ──────────────────────────────────────────────────────
 def test_every_plan_arm_has_a_preset():
     assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c",
-                               "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4"}
+                               "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD"}
 
 
 def test_coco_head_arms():

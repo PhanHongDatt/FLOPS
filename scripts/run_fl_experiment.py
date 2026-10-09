@@ -126,6 +126,8 @@ _ABLATIONS: dict[str, dict[str, object]] = {
              "lr_cosine": True},
     "P4":   {"algorithm": "FedAvg", "mechanism": "kd_teacher", "coco_head": True, "teacher_from_init": True,
              "lr_cosine": True, "rfs_t": 0.5},
+    # P4 without distillation: is KD still needed once ② and ③ are in? (ADR-019 addendum)
+    "P4noKD": {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr_cosine": True, "rfs_t": 0.5},
 }
 
 # ADR-019, fixed before any run: cosine from lr0 to LR_MIN_FACTOR * lr0 over the run.

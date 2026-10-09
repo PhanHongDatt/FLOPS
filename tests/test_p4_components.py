@@ -84,3 +84,15 @@ def test_p4_presets():
     assert _ABLATIONS["P3LR"]["lr_cosine"] and "rfs_t" not in _ABLATIONS["P3LR"]
     assert _ABLATIONS["P4"]["rfs_t"] == 0.5 and _ABLATIONS["P4"]["lr_cosine"]
     assert LR_MIN_FACTOR == 0.05
+
+
+def test_p4_without_kd_preset():
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts.run_fl_experiment import _ABLATIONS, _resolve_arms
+    import argparse
+    p = _ABLATIONS["P4noKD"]
+    assert p["mechanism"] == "none" and p["coco_head"] and p["lr_cosine"] and p["rfs_t"] == 0.5
+    assert "teacher_from_init" not in p
+    algo, mech, rho = _resolve_arms(argparse.Namespace(algorithm=None, ablation="P4noKD", client_mechanism=None, rho=None))
+    assert (algo, mech) == ("FedAvg", "none")

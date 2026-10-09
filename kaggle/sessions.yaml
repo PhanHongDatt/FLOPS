@@ -203,3 +203,12 @@ sessions:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4@s5"]'
       'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 6'
+
+  s12c_g:  # ADR-019 addendum: P4noKD (A0c + cosine lr + RFS) on YOLO11s, S1b5-3k, 20 rounds. ~3 h
+    slug: flops-s12c-p4nokd-y11s
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4noKD@s5"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'

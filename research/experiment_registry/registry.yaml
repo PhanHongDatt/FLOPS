@@ -854,3 +854,12 @@ experiments:
       FN_bus: 1091.0
   interpretation: 'vs P3 (rule 10/20): AP50 bus +0.068, motorcycle +0.117, truck +0.052, mAP50 +0.066; FN bus @0.25
     1,204 -> 1,069 at round 20. ② and ③ not separable until P3LR finishes (ADR-019 rule for ③ is P4 vs P3LR).'
+- id: EXP-2026-10-09-S12-P4noKD-y11s
+  gate: G6 (exploratory)
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: 'P4noKD: COCO head + cosine round lr + client RFS t=0.5, no distillation'
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s12c-p4nokd-y11s
+  decision_rule: ADR-019 addendum
