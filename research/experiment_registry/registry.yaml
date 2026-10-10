@@ -793,19 +793,93 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: 'A0c: YOLO11s, COCO head kept, FedAvg (control)'
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s12a-a0c-p3lr-y11s
+  kaggle_kernel: goshihayashi/flops-s12a-a0c-p3lr-y11s v1
   decision_rule: pre-declared in ADR-019
+  git_commit: 5f1ca84
+  results:
+    round_0:
+      mAP50: 0.3927
+      AP50_bus: 0.3791
+      AP50_car: 0.5836
+      AP50_truck: 0.3354
+      AP50_motorcycle: 0.2726
+      FP_bus: 776.0
+      FN_bus: 1051.0
+    round_10:
+      mAP50: 0.4365
+      AP50_bus: 0.3676
+      AP50_car: 0.6897
+      AP50_truck: 0.4379
+      AP50_motorcycle: 0.2507
+      FP_bus: 66.0
+      FN_bus: 1473.0
+    round_20:
+      mAP50: 0.4318
+      AP50_bus: 0.3969
+      AP50_car: 0.698
+      AP50_truck: 0.4362
+      AP50_motorcycle: 0.1962
+      FP_bus: 105.0
+      FN_bus: 1300.0
+    rule_mean_r10_20:
+      mAP50: 0.4341
+      AP50_bus: 0.3822
+      AP50_car: 0.6938
+      AP50_truck: 0.437
+      AP50_motorcycle: 0.2235
+      FP_bus: 85.5
+      FN_bus: 1386.5
+  interpretation: 'Control. Very conservative: FP bus 85, FN bus 1,387 (rule mean).'
+  checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
+    args
 - id: EXP-2026-10-09-S12-P3LR-y11s
   gate: G6 (exploratory)
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: 'P3LR: P3 + cosine round lr'
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s12a-a0c-p3lr-y11s
+  kaggle_kernel: goshihayashi/flops-s12a-a0c-p3lr-y11s v1
   decision_rule: pre-declared in ADR-019
+  git_commit: 5f1ca84
+  results:
+    round_0:
+      mAP50: 0.3927
+      AP50_bus: 0.3791
+      AP50_car: 0.5836
+      AP50_truck: 0.3354
+      AP50_motorcycle: 0.2726
+      FP_bus: 776.0
+      FN_bus: 1051.0
+    round_10:
+      mAP50: 0.4903
+      AP50_bus: 0.4468
+      AP50_car: 0.7044
+      AP50_truck: 0.4755
+      AP50_motorcycle: 0.3343
+      FP_bus: 545.0
+      FN_bus: 1166.0
+    round_20:
+      mAP50: 0.4958
+      AP50_bus: 0.4605
+      AP50_car: 0.7074
+      AP50_truck: 0.4662
+      AP50_motorcycle: 0.3493
+      FP_bus: 607.0
+      FN_bus: 1103.0
+    rule_mean_r10_20:
+      mAP50: 0.493
+      AP50_bus: 0.4537
+      AP50_car: 0.7059
+      AP50_truck: 0.4708
+      AP50_motorcycle: 0.3418
+      FP_bus: 576.0
+      FN_bus: 1134.5
+  interpretation: '② kept: P3LR - P3 = +0.026 AP50 bus, +0.027 mAP50.'
+  checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
+    args
 - id: EXP-2026-10-09-S12-P4-y11s
   gate: G6 (exploratory)
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -859,7 +933,45 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: 'P4noKD: COCO head + cosine round lr + client RFS t=0.5, no distillation'
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s12c-p4nokd-y11s
+  kaggle_kernel: goshihayashi/flops-s12c-p4nokd-y11s v1
   decision_rule: ADR-019 addendum
+  git_commit: 736e76d
+  results:
+    round_0:
+      mAP50: 0.3927
+      AP50_bus: 0.3791
+      AP50_car: 0.5836
+      AP50_truck: 0.3354
+      AP50_motorcycle: 0.2726
+      FP_bus: 776.0
+      FN_bus: 1051.0
+    round_10:
+      mAP50: 0.5014
+      AP50_bus: 0.4445
+      AP50_car: 0.7233
+      AP50_truck: 0.5076
+      AP50_motorcycle: 0.3301
+      FP_bus: 67.0
+      FN_bus: 1307.0
+    round_20:
+      mAP50: 0.5574
+      AP50_bus: 0.5303
+      AP50_car: 0.7458
+      AP50_truck: 0.5544
+      AP50_motorcycle: 0.3992
+      FP_bus: 205.0
+      FN_bus: 1088.0
+    rule_mean_r10_20:
+      mAP50: 0.5294
+      AP50_bus: 0.4874
+      AP50_car: 0.7345
+      AP50_truck: 0.531
+      AP50_motorcycle: 0.3647
+      FP_bus: 136.0
+      FN_bus: 1197.5
+  interpretation: 'Selected by the ADR-019 addendum: P4 - P4noKD = +0.008 AP50 bus (< 0.010) -> KD not needed once
+    ② and ③ are present. P4noKD - A0c = +0.105 AP50 bus, +0.095 mAP50; FP bus 136 vs 608 for P4.'
+  checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
+    args

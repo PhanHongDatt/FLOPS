@@ -40,3 +40,19 @@ A0c ≈ 2.3 h, P3LR ≈ 2.9 h, P4 ≈ 3.4 h → ≈ 8.6 GPU-h on goshihayashi (�
 `P4noKD` = A0c + ② + ③ (no distillation). Reading: if P4 − P4noKD < 0.010 AP50 bus (mean of rounds 10/20),
 distillation is not needed once ② and ③ are present, and the simpler P4noKD is preferred (no teacher forward,
 ~20 % cheaper). Launched while P3LR was still running, because it is needed whatever the other results are.
+
+## Results 2026-10-10 (seed 42, mean of rounds 10/20, AP50)
+
+| Arm | mAP50 | bus | truck | car | motorcycle | FP bus | FN bus |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| A0c | 0.434 | 0.382 | 0.437 | 0.694 | 0.224 | 86 | 1,387 |
+| P3 | 0.466 | 0.428 | 0.461 | 0.701 | 0.276 | 620 | 1,198 |
+| P3LR | 0.493 | 0.454 | 0.471 | 0.706 | 0.342 | 576 | 1,135 |
+| P4noKD | 0.529 | 0.487 | 0.531 | 0.735 | 0.365 | 136 | 1,198 |
+| P4 | 0.533 | 0.496 | 0.513 | 0.728 | 0.393 | 608 | 1,091 |
+
+Readings by the pre-declared rules: KD (P3 − A0c) +0.046 bus → kept in that setting; ② (P3LR − P3) +0.026 bus →
+kept; ③ (P4 − P3LR) motorcycle +0.051, bus +0.042, truck +0.042 → kept; KD once ② and ③ are in (P4 − P4noKD)
++0.008 bus < 0.010 → **not needed: P4noKD (COCO head + cosine round lr + client RFS) is the selected
+configuration**. Notes: KD still adds motorcycle (+0.028) and recall (FN 1,091 vs 1,198) at the cost of FP bus
+(608 vs 136); truck −0.018. Single seed — candidate for the 3-seed runs, not a result.
