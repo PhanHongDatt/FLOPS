@@ -1034,16 +1034,90 @@ experiments:
   scenario: pooled re-split of S1b5-3k, YOLO11s, 20 rounds
   method: A0c
   run_class: feasibility
-  status: planned
+  status: completed
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s13c-y11s-pooled
+  kaggle_kernel: goshihayashi/flops-s13c-y11s-pooled v1
   decision_rule: gap (pooled - S1b5) must shrink with P4noKD; pooled mAP50 not below A0c - 0.005
+  git_commit: cf69f71
+  results:
+    round_0:
+      mAP50: 0.3927
+      AP50_bus: 0.3791
+      AP50_car: 0.5836
+      AP50_truck: 0.3354
+      AP50_motorcycle: 0.2726
+      FP_bus: 776.0
+      FN_bus: 1051.0
+    round_10:
+      mAP50: 0.4445
+      AP50_bus: 0.4171
+      AP50_car: 0.6931
+      AP50_truck: 0.426
+      AP50_motorcycle: 0.2416
+      FP_bus: 757.0
+      FN_bus: 1078.0
+    round_20:
+      mAP50: 0.4334
+      AP50_bus: 0.41
+      AP50_car: 0.6978
+      AP50_truck: 0.4103
+      AP50_motorcycle: 0.2154
+      FP_bus: 851.0
+      FN_bus: 1017.0
+    rule_mean_r10_20:
+      mAP50: 0.4389
+      AP50_bus: 0.4136
+      AP50_car: 0.6955
+      AP50_truck: 0.4182
+      AP50_motorcycle: 0.2285
+      FP_bus: 804.0
+      FN_bus: 1047.5
+  interpretation: 'Missing-class gap of A0c (pooled - S1b5): +0.031 AP50 bus (cf. YOLOv8n D3 +0.029).'
+  checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; pooled bus 499-550 boxes per client
 - id: EXP-2026-10-11-S13-P4noKD-y11s-pooled
   gate: 'G6 (phase 3: missing-class gap)'
   scenario: pooled re-split of S1b5-3k, YOLO11s, 20 rounds
   method: P4noKD
   run_class: feasibility
-  status: planned
+  status: completed
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s13c-y11s-pooled
+  kaggle_kernel: goshihayashi/flops-s13c-y11s-pooled v1
   decision_rule: gap (pooled - S1b5) must shrink with P4noKD; pooled mAP50 not below A0c - 0.005
+  git_commit: cf69f71
+  results:
+    round_0:
+      mAP50: 0.3927
+      AP50_bus: 0.3791
+      AP50_car: 0.5836
+      AP50_truck: 0.3354
+      AP50_motorcycle: 0.2726
+      FP_bus: 776.0
+      FN_bus: 1051.0
+    round_10:
+      mAP50: 0.5306
+      AP50_bus: 0.5234
+      AP50_car: 0.7224
+      AP50_truck: 0.5343
+      AP50_motorcycle: 0.3422
+      FP_bus: 795.0
+      FN_bus: 888.0
+    round_20:
+      mAP50: 0.5636
+      AP50_bus: 0.5631
+      AP50_car: 0.7483
+      AP50_truck: 0.5657
+      AP50_motorcycle: 0.3775
+      FP_bus: 739.0
+      FN_bus: 802.0
+    rule_mean_r10_20:
+      mAP50: 0.5471
+      AP50_bus: 0.5432
+      AP50_car: 0.7353
+      AP50_truck: 0.55
+      AP50_motorcycle: 0.3598
+      FP_bus: 767.0
+      FN_bus: 845.0
+  interpretation: 'Gap with P4noKD: +0.056 AP50 bus — the gap does NOT shrink (rule failed). P4noKD gains +0.130
+    bus on pooled vs +0.105 on S1b5: a general improvement, not missing-class specific. IID not harmed: pooled mAP50
+    +0.108 over A0c.'
+  checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; pooled bus 499-550 boxes per client
