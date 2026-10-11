@@ -975,3 +975,75 @@ experiments:
     ② and ③ are present. P4noKD - A0c = +0.105 AP50 bus, +0.095 mAP50; FP bus 136 vs 608 for P4.'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
     args
+- id: EXP-2026-10-11-S13-A0c-y11s-seed123
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: A0c
+  run_class: feasibility
+  status: running
+  seed: 123
+  kaggle_kernel: phdatt/flops-s13a-y11s-seed123
+  decision_rule: selected config must beat A0c in all 3 seeds (schedule 2026-10-10)
+- id: EXP-2026-10-11-S13-P4noKD-y11s-seed123
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: running
+  seed: 123
+  kaggle_kernel: phdatt/flops-s13a-y11s-seed123
+  decision_rule: selected config must beat A0c in all 3 seeds (schedule 2026-10-10)
+- id: EXP-2026-10-11-S13-P4-y11s-seed123
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: P4
+  run_class: feasibility
+  status: running
+  seed: 123
+  kaggle_kernel: phdatt/flops-s13a-y11s-seed123
+  decision_rule: selected config must beat A0c in all 3 seeds (schedule 2026-10-10)
+- id: EXP-2026-10-11-S13-A0c-y11s-seed2024
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: A0c
+  run_class: feasibility
+  status: running
+  seed: 2024
+  kaggle_kernel: phdatt/flops-s13b-y11s-seed2024
+  decision_rule: selected config must beat A0c in all 3 seeds (schedule 2026-10-10)
+- id: EXP-2026-10-11-S13-P4noKD-y11s-seed2024
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: running
+  seed: 2024
+  kaggle_kernel: phdatt/flops-s13b-y11s-seed2024
+  decision_rule: selected config must beat A0c in all 3 seeds (schedule 2026-10-10)
+- id: EXP-2026-10-11-S13-P4-y11s-seed2024
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: P4
+  run_class: feasibility
+  status: running
+  seed: 2024
+  kaggle_kernel: phdatt/flops-s13b-y11s-seed2024
+  decision_rule: selected config must beat A0c in all 3 seeds (schedule 2026-10-10)
+- id: EXP-2026-10-11-S13-A0c-y11s-pooled
+  gate: 'G6 (phase 3: missing-class gap)'
+  scenario: pooled re-split of S1b5-3k, YOLO11s, 20 rounds
+  method: A0c
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s13c-y11s-pooled
+  decision_rule: gap (pooled - S1b5) must shrink with P4noKD; pooled mAP50 not below A0c - 0.005
+- id: EXP-2026-10-11-S13-P4noKD-y11s-pooled
+  gate: 'G6 (phase 3: missing-class gap)'
+  scenario: pooled re-split of S1b5-3k, YOLO11s, 20 rounds
+  method: P4noKD
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s13c-y11s-pooled
+  decision_rule: gap (pooled - S1b5) must shrink with P4noKD; pooled mAP50 not below A0c - 0.005

@@ -212,3 +212,29 @@ sessions:
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4noKD@s5"]'
       'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+
+  # ── Phase 2/3 of the 2026-10-10 schedule (YOLO11s, S1b5-3k, 20 rounds, eval 10/20) ──
+  s13a:  # Phase 2: seed 123 — A0c, P4noKD, P4. ~8.5 h
+    slug: flops-s13a-y11s-seed123
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0c@s5", "P4noKD@s5", "P4@s5"]'
+      'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 123'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+
+  s13b:  # Phase 2: seed 2024 — A0c, P4noKD, P4. ~8.5 h
+    slug: flops-s13b-y11s-seed2024
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0c@s5", "P4noKD@s5", "P4@s5"]'
+      'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 2024'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+
+  s13c_g:  # Phase 3: seed 42 on the pooled re-split of the same 15,000 images — A0c, P4noKD. ~5 h
+    slug: flops-s13c-y11s-pooled
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0c@s5pooled", "P4noKD@s5pooled"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
