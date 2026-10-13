@@ -24,6 +24,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+import numpy as np  # noqa: E402
 import yaml  # noqa: E402
 
 from src.data.bdd100k import TARGET_CLASSES  # noqa: E402
@@ -59,8 +60,23 @@ def find_runs(roots: list[Path], rnd: int, extract_to: Path) -> list[tuple[dict,
                                                  int(x[0].get("seed", 0))))
 
 
+def coco_to_target_map() -> dict[int, int]:
+    """COCO class id -> index in TARGET_CLASSES (ADR-018 COCO head); other COCO ids are dropped."""
+    from src.model.yolo_wrapper import COCO_IDS
+    return {COCO_IDS[c]: i for i, c in enumerate(TARGET_CLASSES)}
+
+
+def remap_predictions(pb, pc, pf, pred_map: dict[int, int] | None):
+    """Keep only predictions of mapped classes and rename them to TARGET_CLASSES indices."""
+    if pred_map is None:
+        return pb, pc, pf
+    keep = [i for i, c in enumerate(pc) if int(c) in pred_map]
+    return pb[keep], np.array([pred_map[int(pc[i])] for i in keep], dtype=float), pf[keep]
+
+
 def analyze_run(model, val_dir: Path, label_dir: Path, targets: list[int], conf_thr: float,
-                iou_thr: float, imgsz: int, device, batch: int) -> dict[str, float]:
+                iou_thr: float, imgsz: int, device, batch: int,
+                pred_map: dict[int, int] | None = None) -> dict[str, float]:
     gt: dict[int, Counter] = {t: Counter() for t in targets}
     fp: dict[int, Counter] = {t: Counter() for t in targets}
     fn_scores: dict[int, list[float]] = {t: [] for t in targets}
@@ -71,7 +87,7 @@ def analyze_run(model, val_dir: Path, label_dir: Path, targets: list[int], conf_
         lines = lf.read_text(encoding="utf-8").splitlines() if lf.exists() else []
         gb, gc = yolo_labels_to_xyxy(lines, w, h)
         b = res.boxes
-        pb, pc, pf = b.xyxy.cpu().numpy(), b.cls.cpu().numpy(), b.conf.cpu().numpy()
+        pb, pc, pf = remap_predictions(b.xyxy.cpu().numpy(), b.cls.cpu().numpy(), b.conf.cpu().numpy(), pred_map)
         for t in targets:
             g, f, s = decompose_image(gb, gc, pb, pc, pf, t, TARGET_CLASSES, conf_thr, iou_thr)
             gt[t].update(g)
@@ -105,6 +121,8 @@ def main() -> None:
     ap.add_argument("--imgsz", type=int, default=640)
     ap.add_argument("--batch", type=int, default=32)
     ap.add_argument("--device", default=0)
+    ap.add_argument("--weights", default="yolov8n.pt",
+                    help="architecture to load the checkpoint into; 'coco:yolo11s.pt' = 80-class COCO head")
     ap.add_argument("--extract-to", type=Path, default=Path("/kaggle/tmp/d1_ckpts"))
     args = ap.parse_args()
 
@@ -117,18 +135,19 @@ def main() -> None:
     label_dir = root / str(data["val"]).replace("images", "labels", 1)   # YOLO layout
     targets = [TARGET_CLASSES.index(t) for t in args.targets]
 
+    pred_map = coco_to_target_map() if args.weights.startswith("coco:") else None
     runs = find_runs(args.roots, args.round, args.extract_to)
     if not runs:
         raise SystemExit(f"no run with {CKPT.format(r=args.round)} under {args.roots}")
     print(f"{len(runs)} runs; val {val_dir}")
     rows = []
     for env, ckpt in runs:
-        model = build_model("yolov8n.pt")
+        model = build_model(args.weights)
         set_parameters(model, load_global_checkpoint(ckpt))
         row = {"exp_id": env.get("exp_id"), "partition_id": env.get("partition_id"),
                "seed": env.get("seed"), "round": args.round}
         row.update(analyze_run(model, val_dir, label_dir, targets, args.conf_thr, args.iou_thr,
-                               args.imgsz, args.device, args.batch))
+                               args.imgsz, args.device, args.batch, pred_map))
         print(json.dumps(row))
         rows.append(row)
         args.out.parent.mkdir(parents=True, exist_ok=True)

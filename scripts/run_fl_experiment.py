@@ -128,6 +128,9 @@ _ABLATIONS: dict[str, dict[str, object]] = {
              "lr_cosine": True, "rfs_t": 0.5},
     # P4 without distillation: is KD still needed once ② and ③ are in? (ADR-019 addendum)
     "P4noKD": {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr_cosine": True, "rfs_t": 0.5},
+    # ADR-020 N2: P4noKD with the class conv of every Detect level frozen at COCO values (FedBABU-style)
+    "P5f": {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr_cosine": True, "rfs_t": 0.5,
+            "freeze_cls_head": True},
 }
 
 # ADR-019, fixed before any run: cosine from lr0 to LR_MIN_FACTOR * lr0 over the run.
@@ -423,6 +426,8 @@ def main() -> None:
                                        "lr_min": float(train_config["lr0"]) * LR_MIN_FACTOR}
     if preset.get("rfs_t"):
         train_config["rfs_t"] = float(preset["rfs_t"])
+    if preset.get("freeze_cls_head"):
+        train_config["freeze_cls_head"] = True
     if preset.get("teacher_from_init"):
         # P3: the frozen teacher is the initial (COCO) model itself
         import numpy as np

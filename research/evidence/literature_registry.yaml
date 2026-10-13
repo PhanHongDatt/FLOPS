@@ -350,6 +350,33 @@ entries:
     reused_concept: "Server-side distillation of client models on auxiliary data (motivation for using server data)."
     role: motivation
 
+  - id: ccvr2021
+    title: "No Fear of Heterogeneity: Classifier Calibration for Federated Learning with Non-IID Data"
+    authors: ["Mi Luo", "Fei Chen", "Dapeng Hu", "Yifan Zhang", "Jian Liang", "Jiashi Feng"]
+    year: 2021
+    venue: "Advances in Neural Information Processing Systems 34 (NeurIPS 2021)"
+    source_url: "https://arxiv.org/abs/2106.05001"
+    arxiv_id: "2106.05001"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: >
+      Classifier is the most biased layer under non-IID data; post-hoc calibration with virtual
+      representations sampled from per-class Gaussian feature statistics (abstract). N1 of ADR-020,
+      adapted to the YOLO Detect class conv (adaptation is a thesis hypothesis).
+    role: adaptation
+
+  - id: fedbabu2022
+    title: "FedBABU: Toward Enhanced Representation for Federated Image Classification"
+    authors: ["Jaehoon Oh", "Sangmook Kim", "Se-Young Yun"]
+    year: 2022
+    venue: "International Conference on Learning Representations (ICLR 2022)"
+    source_url: "https://arxiv.org/abs/2106.06042"
+    arxiv_id: "2106.06042"
+    tag: "[LITERATURE]"
+    verified: true
+    reused_concept: "Only the body is updated during federated training; the head is kept fixed (abstract). N2 / P5f of ADR-020."
+    role: adaptation
+
 # ── ENTRIES REQUIRING ADDITIONAL VERIFICATION ──────────────────────────────
 # Add here if a source cannot currently be accessed.
 # Format: id, claim, what_to_verify, priority

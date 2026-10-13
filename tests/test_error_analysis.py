@@ -90,3 +90,20 @@ def test_find_runs_reads_plain_dirs_and_session_zips(tmp_path):
     assert [env["seed"] for env, _ in runs] == [1, 2]
     assert all(p.exists() for _, p in runs)
     assert find_runs([tmp_path / "live"], 29, tmp_path / "x") == []
+
+
+def test_coco_predictions_are_mapped_to_target_indices():
+    import sys
+    from pathlib import Path
+
+    import numpy as np
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts.analyze_errors import coco_to_target_map, remap_predictions
+    from src.data.bdd100k import TARGET_CLASSES
+    mp = coco_to_target_map()
+    assert {TARGET_CLASSES[v]: k for k, v in mp.items()} == {"car": 2, "motorcycle": 3, "bus": 5, "truck": 7}
+    pb = np.arange(16, dtype=float).reshape(4, 4)
+    b, c, f = remap_predictions(pb, np.array([5.0, 0.0, 2.0, 7.0]), np.array([.9, .8, .7, .6]), mp)
+    assert b.tolist() == pb[[0, 2, 3]].tolist() and f.tolist() == [.9, .7, .6]
+    assert c.tolist() == [TARGET_CLASSES.index("bus"), TARGET_CLASSES.index("car"), TARGET_CLASSES.index("truck")]
+    assert remap_predictions(pb, np.array([1.0]), np.array([.5]), None)[1].tolist() == [1.0]

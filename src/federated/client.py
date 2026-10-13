@@ -98,6 +98,10 @@ class YOLOFlowerClient(fl.client.NumPyClient):
             from src.preservation.rfs import rfs_data_yaml
             data_yaml = rfs_data_yaml(data_yaml, self.run_dir / "clients" / self.client_id / f"rfs_round_{self._round}",
                                       float(cfg["rfs_t"]), seed)
+        extra = None
+        if cfg.get("freeze_cls_head"):                     # ADR-020 N2: classifier stays at its initial values
+            from src.model.yolo_wrapper import cls_head_freeze_list
+            extra = {"freeze": cls_head_freeze_list(self.model)}
         return dict(
             data_yaml=data_yaml,
             epochs=cfg["local_epochs"],
@@ -114,6 +118,7 @@ class YOLOFlowerClient(fl.client.NumPyClient):
             run_val=bool(cfg.get("client_run_val", False)),
             deterministic=bool(cfg.get("deterministic", True)),
             nbs=cfg.get("nbs"),
+            extra_overrides=extra,
         )
 
     def _fit_metrics(self, train_metrics: dict[str, float]) -> dict[str, Scalar]:

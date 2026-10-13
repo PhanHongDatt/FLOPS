@@ -101,7 +101,8 @@ def coco_data_yaml(data_yaml: Path, out_dir: Path, names: list[str] | None = Non
             lst.write_text("\n".join(lines) + "\n", encoding="utf-8")
             new[split] = str(lst)
         elif p.is_file():
-            lines = [ln.strip() for ln in p.read_text(encoding="utf-8").splitlines() if ln.strip()]
+            # str(Path(..)) normalises separators, so a '/'-written list matches a '\' root on Windows
+            lines = [str(Path(ln.strip())) for ln in p.read_text(encoding="utf-8").splitlines() if ln.strip()]
             lst = out_dir / f"{data_yaml.stem}_{split}_coco.txt"
             lst.write_text("\n".join(ln.replace(old_prefix, new_prefix, 1) for ln in lines) + "\n", encoding="utf-8")
             new[split] = str(lst)

@@ -143,6 +143,17 @@ def set_parameters(model: "YOLO", parameters: list[np.ndarray]) -> None:
     model.model.load_state_dict(new_state, strict=True)
 
 
+def cls_head_freeze_list(model: "YOLO") -> list[str]:
+    """Ultralytics ``freeze`` entries for the last class conv of every Detect level (ADR-020 N2).
+
+    The trainer freezes parameters whose name contains ``model.<entry>.``, e.g. ``model.23.cv3.0.2.``.
+    """
+    net = model.model
+    det_idx = len(net.model) - 1
+    det = net.model[det_idx]
+    return [f"{det_idx}.cv3.{lvl}.{len(det.cv3[lvl]) - 1}" for lvl in range(len(det.cv3))]
+
+
 def train_one_round(
     model: "YOLO",
     data_yaml: Path,
