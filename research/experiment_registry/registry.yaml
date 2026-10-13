@@ -1133,3 +1133,39 @@ experiments:
     bus on pooled vs +0.105 on S1b5: a general improvement, not missing-class specific. IID not harmed: pooled mAP50
     +0.108 over A0c.'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; pooled bus 499-550 boxes per client
+- id: EXP-2026-10-14-S14-D1-P4noKD
+  gate: 'G6 (ADR-020 step 0)'
+  scenario: S1b5-3k and pooled, YOLO11s, P4noKD round 20 (s12c_g, s13c_g checkpoints)
+  method: D1 error decomposition, COCO head (predictions remapped to the 4 targets)
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s14-n1-ccvr
+  decision_rule: ADR-020 step 0 — confused_* must be the largest excess of S1b5 over pooled
+- id: EXP-2026-10-14-S14-N1-CCVR
+  gate: 'G6 (ADR-020 N1)'
+  scenario: S1b5-3k and pooled, YOLO11s, P4noKD round 20, post-hoc (no FL retraining)
+  method: N1 CCVR calibration of cv3[l][2] target rows (2,000 pos / 8,000 bg per level, Adam 1e-3, 300 steps)
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s14-n1-ccvr
+  decision_rule: ADR-020 — vs P4noKD at round 20; gap shrinks >= 0.010, S1b5 bus >= +0.010, mAP50 >= -0.005, car >= -0.010
+- id: EXP-2026-10-14-S15-P5f-y11s-s5
+  gate: 'G6 (ADR-020 N2)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: P5f (P4noKD + cv3[l][2] frozen at COCO values)
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s15a-p5f-s5
+  decision_rule: ADR-020 — vs P4noKD, mean of rounds 10/20; same four conditions as N1
+- id: EXP-2026-10-14-S15-P5f-y11s-pooled
+  gate: 'G6 (ADR-020 N2)'
+  scenario: pooled re-split of S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: P5f
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s15b-p5f-pooled
+  decision_rule: gap reference for EXP-2026-10-14-S15-P5f-y11s-s5

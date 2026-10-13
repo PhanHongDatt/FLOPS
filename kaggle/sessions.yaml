@@ -238,3 +238,32 @@ sessions:
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0c@s5pooled", "P4noKD@s5pooled"]'
       'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+
+  # ── ADR-020 (2026-10-14): missing-class-specific components on top of P4noKD ──
+  s14_g:  # step 0 (COCO-aware D1) + N1 (CCVR calibration) on P4noKD round 20, S1b5 and pooled. No FL. ~1-1.5 h
+    slug: flops-s14-n1-ccvr
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    kernel_sources: [s12c_g, s13c_g]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = []'
+      'RUN_N1 = False   # session s14_g sets True': 'RUN_N1 = True'
+
+  s15a_g:  # N2: P5f (P4noKD + frozen class conv) on S1b5-3k, 20 rounds, eval 10/20. ~3-3.5 h
+    slug: flops-s15a-p5f-s5
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P5f@s5"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+
+  s15b_g:  # N2: P5f on the pooled re-split of the same images (gap reference). ~3-3.5 h
+    slug: flops-s15b-p5f-pooled
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P5f@s5pooled"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'

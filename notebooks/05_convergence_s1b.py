@@ -135,6 +135,66 @@ if RUN_D1:
         print(f"⚠️  D1 failed: {exc}")
 
 # %% [markdown]
+# ## Cell 2d — ADR-020: step 0 (COCO-aware D1) and N1 (CCVR calibration) on P4noKD round 20
+#
+# Needs the outputs of s12c_g (P4noKD @ S1b5) and s13c_g (A0c / P4noKD @ pooled) as kernel sources
+# (session s14_g). No federated training. Each step is isolated and packed as soon as it ends, so an
+# interruption keeps every finished step.
+
+# %%
+RUN_N1 = False   # session s14_g sets True
+if RUN_N1:
+    import zipfile
+    from src.utils.kaggle_finalize import finalize_outputs
+    from src.utils.proc import run_logged
+    N1_EXP_CFG = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"
+    N1_OUT = WORK / "flops_export" / "n1"
+    N1_OUT.mkdir(parents=True, exist_ok=True)
+
+    def n1_checkpoint(run_name: str, rnd: int = 20) -> Path:
+        rel = f"artifacts/runs/{run_name}/checkpoint/global_round_{rnd:03d}.npz"
+        hits = sorted(Path("/kaggle/input").glob(f"**/{rel}"))
+        if hits:
+            return hits[0]
+        for z in sorted(Path("/kaggle/input").glob("**/flops_results.zip")):
+            with zipfile.ZipFile(z) as zf:
+                if rel in zf.namelist():
+                    zf.extract(rel, DATA_TMP / "n1_ckpts")
+                    return DATA_TMP / "n1_ckpts" / rel
+        raise FileNotFoundError(rel)
+
+    steps = {"d1": None}
+    try:   # step 0: missed-bus decomposition with the COCO head (labels stay 0..3, predictions remapped)
+        run_logged([sys.executable, str(REPO_ROOT / "scripts" / "analyze_errors.py"),
+                    "--data-yaml", str(DATA_YAML), "--roots", "/kaggle/input", "--round", "20",
+                    "--weights", "coco:yolo11s.pt", "--targets", "bus", "truck",
+                    "--out", str(N1_OUT / "d1_errors_p4nokd.csv"), "--batch", "8",
+                    "--extract-to", str(DATA_TMP / "d1_ckpts")],
+                   LOGS / "d1_p4nokd.log", timeout=2 * 3600, stall_timeout=3600, watch_dir=N1_OUT)
+        steps["d1"] = "completed"
+    except Exception as exc:
+        steps["d1"] = f"failed: {exc}"
+        print(f"⚠️  D1 failed: {exc}")
+    print("packed:", finalize_outputs(WORK, drop=False))
+
+    for tag, part in (("s1b5", S1B5), ("s1b5pooled", POOLED5)):
+        try:
+            ckpt = n1_checkpoint(f"P4noKD_feasibility_seed42_{part.name}")
+            run_logged([sys.executable, str(REPO_ROOT / "scripts" / "calibrate_classifier.py"),
+                        "--checkpoint", str(ckpt), "--partition", str(part / "manifest.yaml"),
+                        "--data-yaml-dir", str(part), "--global-data-yaml", str(DATA_YAML),
+                        "--exp-config", str(N1_EXP_CFG), "--weights", "coco:yolo11s.pt",
+                        "--out", str(N1_OUT / tag), "--seed", "42"],
+                       LOGS / f"n1_{tag}.log", timeout=2 * 3600, stall_timeout=3600, watch_dir=N1_OUT)
+            steps[f"n1_{tag}"] = "completed"
+        except Exception as exc:
+            steps[f"n1_{tag}"] = f"failed: {exc}"
+            print(f"⚠️  N1 {tag} failed: {exc}")
+        print("packed:", finalize_outputs(WORK, drop=False))
+    yaml.safe_dump(steps, open(N1_OUT / "n1_steps.yaml", "w"))
+    print(steps)
+
+# %% [markdown]
 # ## Cell 2c — Teacher T on the server's 1,000-image sample (ADR-015)
 #
 # Session s8t trains it (50 epochs, G2 schedule); s8a/s8b load that same teacher from the
