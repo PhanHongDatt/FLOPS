@@ -22,7 +22,10 @@
 # %%
 import subprocess
 import sys
+import time
 from pathlib import Path
+
+SESSION_T0 = time.time()   # session start, for the budget guard in Cell 3
 
 REPO_ROOT = Path("/kaggle/working/FLOPS")
 if not REPO_ROOT.exists():
@@ -173,6 +176,12 @@ ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions ov
 SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)
 RHO = "0.25"
 ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)
+# Kaggle discards ALL output of a session it kills at its 12 h limit (s13a/s13b, 2026-10-12: 3 YOLO11s
+# arms, nothing saved). Keep the whole session under SESSION_BUDGET_H: an arm only starts if its
+# estimate fits, and a running arm is cut before the budget so the notebook still ends normally.
+import time as _time
+SESSION_BUDGET_H = 11.0
+ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override
 
 PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5}
 
@@ -202,10 +211,15 @@ def arm_command(arm: str) -> tuple[list[str], Path]:
 outcomes = {}
 for arm in ARMS:
     cmd, _ = arm_command(arm)
-    print(f"\n=== {arm} ===")
+    left_h = SESSION_BUDGET_H - (_time.time() - SESSION_T0) / 3600
+    print(f"\n=== {arm} === ({left_h:.1f} h left in the session budget)")
+    if left_h < ARM_ESTIMATE_H:
+        outcomes[arm] = f"skipped: {left_h:.1f} h left < estimate {ARM_ESTIMATE_H} h"
+        print(f"⚠️  {arm} skipped to stay under the Kaggle limit")
+        continue
     try:
         run_logged(cmd, LOGS / f"{arm.replace('@', '_')}.log", env={"YOLO_VERBOSE": "False"},
-                   timeout=ARM_TIMEOUT_H * 3600, stall_timeout=3600, watch_dir=ARTIFACTS_DIR / "runs")
+                   timeout=min(ARM_TIMEOUT_H, left_h) * 3600, stall_timeout=3600, watch_dir=ARTIFACTS_DIR / "runs")
         outcomes[arm] = "completed"
     except Exception as exc:   # keep going: one arm must not cost the others
         outcomes[arm] = f"failed: {type(exc).__name__}"
@@ -234,6 +248,6 @@ print("comparability issues (S1b arms):", check_comparable(s1b_runs) or "none")
 table.to_csv(WORK / "flops_export" / "s1b_2k_comparison.csv")
 yaml.safe_dump(outcomes, open(WORK / "flops_export" / "arm_outcomes.yaml", "w"))
 
-failed = {a: o for a, o in outcomes.items() if o != "completed"}
+failed = {a: o for a, o in outcomes.items() if o != "completed" and not o.startswith("skipped")}
 if failed:
     raise RuntimeError(f"arms failed (results of the others are kept): {failed}")
