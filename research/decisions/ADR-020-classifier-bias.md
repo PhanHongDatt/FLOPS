@@ -63,3 +63,23 @@ component is a candidate for the 3-seed runs.
 
 ## Related
 ADR-014 (D1) · ADR-018 (COCO head) · ADR-019 (P4noKD) · literature_registry: ccvr2021, fedbabu2022
+
+## Results — s14_g (2026-10-14; registry EXP-2026-10-14-S14-*)
+**Step 0 (D1, P4noKD round 20, 1,597 GT bus):** S1b5 − pooled excess: confused car + truck **+164**
+(264+179 vs 159+120), missed **+140** (435 vs 295), low score −34; S1b5 bus FP 131 vs 585. Confusion is the largest
+excess only with car and truck summed — the classifier-bias hypothesis is **weakly** supported; a nearly equal share
+of buses get no detection at all.
+
+**N1 (CCVR adaptation): rejected.**
+
+| AP50 (round 20) | S1b5 before | S1b5 after | pooled before | pooled after |
+|---|---:|---:|---:|---:|
+| mAP50 | 0.557 | 0.448 | 0.564 | 0.454 |
+| bus | 0.530 | 0.412 | 0.563 | 0.452 |
+| car | 0.746 | 0.592 | 0.748 | 0.605 |
+| FP bus | 205 | 364,302 | 739 | 292,793 |
+
+Gap 0.033 → 0.040 (wider); rules 2 and 3 fail. Cause: the virtual set (2,000 positives per class, 8,000 background
+per level) does not reflect the dense prior (~8,400 background cells per image for ~10 objects), so re-fitted biases
+over-score background. This rejects this detection adaptation, not CCVR. Not re-tuned post hoc; any variant (e.g.
+weights only, biases kept) needs a new pre-registration.

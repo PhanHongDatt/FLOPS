@@ -1138,19 +1138,33 @@ experiments:
   scenario: S1b5-3k and pooled, YOLO11s, P4noKD round 20 (s12c_g, s13c_g checkpoints)
   method: D1 error decomposition, COCO head (predictions remapped to the 4 targets)
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s14-n1-ccvr
   decision_rule: ADR-020 step 0 — confused_* must be the largest excess of S1b5 over pooled
+  results:
+    S1b5 (P4noKD r20, 1597 GT bus): {tp: 565, confused_car: 264, confused_truck: 179, missed: 435, low_score: 154, fp: 131}
+    pooled (P4noKD r20): {tp: 834, confused_car: 159, confused_truck: 120, missed: 295, low_score: 188, fp: 585}
+    pooled (A0c r20): {tp: 643, confused_car: 287, confused_truck: 161, missed: 409, low_score: 97, fp: 699}
+  interpretation: 'S1b5 - pooled excess: confused car+truck +164, missed +140, low_score -34. Confusion is the largest
+    excess only when car and truck are summed; missed (no detection at all) is almost as large. Classifier-bias hypothesis
+    weakly supported; S1b5 also predicts bus very conservatively (131 FP vs 585).'
 - id: EXP-2026-10-14-S14-N1-CCVR
   gate: 'G6 (ADR-020 N1)'
   scenario: S1b5-3k and pooled, YOLO11s, P4noKD round 20, post-hoc (no FL retraining)
   method: N1 CCVR calibration of cv3[l][2] target rows (2,000 pos / 8,000 bg per level, Adam 1e-3, 300 steps)
   run_class: feasibility
-  status: running
+  status: rejected
   seed: 42
   kaggle_kernel: goshihayashi/flops-s14-n1-ccvr
   decision_rule: ADR-020 — vs P4noKD at round 20; gap shrinks >= 0.010, S1b5 bus >= +0.010, mAP50 >= -0.005, car >= -0.010
+  results:
+    S1b5 before -> after: {mAP50: 0.5574 -> 0.4478, AP50_bus: 0.5303 -> 0.4121, AP50_car: 0.7458 -> 0.5921, AP50_truck: 0.5544 -> 0.4257, AP50_motorcycle: 0.3992 -> 0.3611, FP_bus: 205 -> 364302, FN_bus: 1088 -> 633}
+    pooled before -> after: {mAP50: 0.5636 -> 0.4544, AP50_bus: 0.5631 -> 0.4520, AP50_car: 0.7483 -> 0.6054, AP50_truck: 0.5657 -> 0.4316, AP50_motorcycle: 0.3775 -> 0.3287, FP_bus: 739 -> 292793, FN_bus: 802 -> 567}
+  interpretation: 'Rejected (rules 2 and 3 fail; gap 0.0328 -> 0.0399, wider). Every target loses ~0.11 AP50 on both
+    partitions: the virtual training set has 2,000 positives per class vs 8,000 background per level, while a real
+    640 image has ~8,400 background cells for ~10 objects, so the re-fitted biases score background far too high
+    (FP x1000, FN down). A failure of this detection adaptation, not evidence about CCVR itself. Not re-tuned.'
 - id: EXP-2026-10-14-S15-P5f-y11s-s5
   gate: 'G6 (ADR-020 N2)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
