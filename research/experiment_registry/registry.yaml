@@ -1170,16 +1170,26 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: P5f (P4noKD + cv3[l][2] frozen at COCO values)
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s15a-p5f-s5
   decision_rule: ADR-020 — vs P4noKD, mean of rounds 10/20; same four conditions as N1
+  results:
+    rule_mean_r10_20: {mAP50: 0.5285, AP50_bus: 0.4925, AP50_car: 0.7328, AP50_truck: 0.5297, AP50_motorcycle: 0.359, FP_bus: 233.5, FN_bus: 1169.5}
+    round_20: {mAP50: 0.5558, AP50_bus: 0.5296, AP50_car: 0.7451, AP50_truck: 0.5525, AP50_motorcycle: 0.3959}
+  interpretation: 'vs P4noKD (mean r10/20): bus +0.005 (rule 2 needs +0.010: FAIL), gap 0.056 -> 0.044 (shrinks 0.012:
+    pass, but 0.007 of it is pooled getting worse), mAP50 -0.001, car -0.002 (pass). Not a missing-class-specific
+    contribution. Round 20 identical to P4noKD (bus 0.530 vs 0.530). Single seed; differences within seed noise.'
 - id: EXP-2026-10-14-S15-P5f-y11s-pooled
   gate: 'G6 (ADR-020 N2)'
   scenario: pooled re-split of S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: P5f
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s15b-p5f-pooled
   decision_rule: gap reference for EXP-2026-10-14-S15-P5f-y11s-s5
+  results:
+    rule_mean_r10_20: {mAP50: 0.5442, AP50_bus: 0.536, AP50_car: 0.7373, AP50_truck: 0.5447, AP50_motorcycle: 0.3588}
+    round_20: {mAP50: 0.5646, AP50_bus: 0.5614, AP50_car: 0.7484}
+  interpretation: Pooled reference for P5f; within 0.008 of P4noKD pooled on every target.

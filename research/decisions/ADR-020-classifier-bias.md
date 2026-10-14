@@ -83,3 +83,23 @@ Gap 0.033 → 0.040 (wider); rules 2 and 3 fail. Cause: the virtual set (2,000 p
 per level) does not reflect the dense prior (~8,400 background cells per image for ~10 objects), so re-fitted biases
 over-score background. This rejects this detection adaptation, not CCVR. Not re-tuned post hoc; any variant (e.g.
 weights only, biases kept) needs a new pre-registration.
+
+## Results — s15a_g / s15b_g, N2 = P5f (2026-10-14)
+Mean of rounds 10/20, AP50, seed 42:
+
+| | S1b5 P4noKD | S1b5 P5f | pooled P4noKD | pooled P5f |
+|---|---:|---:|---:|---:|
+| mAP50 | 0.529 | 0.529 | 0.547 | 0.544 |
+| bus | 0.487 | 0.493 | 0.543 | 0.536 |
+| car | 0.735 | 0.733 | 0.735 | 0.737 |
+| gap (pooled − S1b5, bus) | 0.056 | 0.044 | | |
+
+Rule 1 passes (gap −0.012, of which 0.007 is pooled getting worse), rule 2 fails (bus +0.005 < 0.010), rule 3 passes.
+**N2 is not a missing-class-specific contribution.** At round 20 P5f equals P4noKD (bus 0.530 vs 0.530).
+
+## Conclusion of ADR-020
+Keeping the class conv exactly at COCO values for the whole run gives the same missing-class bus AP as training it;
+re-fitting it (N1) breaks the detector. Together with D1 (missed ≈ confused), the evidence places the missing-class
+degradation mainly in the **shared representation** (features / objectness) rather than in the final class conv —
+a valid negative outcome listed in CLAUDE.md §22 ("shared representations dominate degradation"). The class-conv
+path (N1/N2, and parameter masking of those rows) is closed for this setting.
