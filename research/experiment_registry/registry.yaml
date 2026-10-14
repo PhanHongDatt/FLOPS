@@ -1193,3 +1193,43 @@ experiments:
     rule_mean_r10_20: {mAP50: 0.5442, AP50_bus: 0.536, AP50_car: 0.7373, AP50_truck: 0.5447, AP50_motorcycle: 0.3588}
     round_20: {mAP50: 0.5646, AP50_bus: 0.5614, AP50_car: 0.7484}
   interpretation: Pooled reference for P5f; within 0.008 of P4noKD pooled on every target.
+- id: EXP-2026-10-14-S16-A0c-y11s-seed123
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: A0c
+  run_class: feasibility
+  status: running
+  seed: 123
+  kaggle_kernel: goshihayashi/flops-s16a-a0c-s123
+  decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
+  notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
+- id: EXP-2026-10-14-S16-P4noKD-y11s-seed123
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: running
+  seed: 123
+  kaggle_kernel: goshihayashi/flops-s16b-p4nokd-s123
+  decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
+  notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
+- id: EXP-2026-10-14-S16-A0c-y11s-seed2024
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: A0c
+  run_class: feasibility
+  status: running
+  seed: 2024
+  kaggle_kernel: goshihayashi/flops-s16c-a0c-s2024
+  decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
+  notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
+- id: EXP-2026-10-14-S16-P4noKD-y11s-seed2024
+  gate: 'G6 (phase 2: seeds)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: running
+  seed: 2024
+  kaggle_kernel: goshihayashi/flops-s16d-p4nokd-s2024
+  decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
+  notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
