@@ -1198,38 +1198,45 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: goshihayashi/flops-s16a-a0c-s123
   decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
+  results:
+    rule_mean_r10_20: {mAP50: 0.4289, AP50_bus: 0.3781, AP50_car: 0.6979, AP50_truck: 0.417, AP50_motorcycle: 0.2225, FN_bus: 1434.0}
 - id: EXP-2026-10-14-S16-P4noKD-y11s-seed123
   gate: 'G6 (phase 2: seeds)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: goshihayashi/flops-s16b-p4nokd-s123
   decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
+  results:
+    rule_mean_r10_20: {mAP50: 0.5337, AP50_bus: 0.5021, AP50_car: 0.7347, AP50_truck: 0.5309, AP50_motorcycle: 0.3671, FN_bus: 1262.0}
+  interpretation: 'Seed 123: P4noKD - A0c = mAP50 +0.105, bus +0.124, car +0.037, truck +0.114, motorcycle +0.145 (seed 42: +0.095 / +0.105). Rule holds for 2 of 3 seeds so far.'
 - id: EXP-2026-10-14-S16-A0c-y11s-seed2024
   gate: 'G6 (phase 2: seeds)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: running
+  status: planned
   seed: 2024
   kaggle_kernel: goshihayashi/flops-s16c-a0c-s2024
   decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
+  notes2: Not launched yet - Kaggle allows 2 concurrent GPU sessions and the auto-push did not run overnight.
 - id: EXP-2026-10-14-S16-P4noKD-y11s-seed2024
   gate: 'G6 (phase 2: seeds)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: planned
   seed: 2024
   kaggle_kernel: goshihayashi/flops-s16d-p4nokd-s2024
   decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
+  notes2: Not launched yet - Kaggle allows 2 concurrent GPU sessions and the auto-push did not run overnight.
