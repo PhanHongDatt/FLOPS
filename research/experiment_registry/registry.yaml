@@ -1223,20 +1223,30 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: goshihayashi/flops-s16c-a0c-s2024
   decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
   notes2: Launched 2026-10-15 on goshihayashi (flops-s16c-a0c-s2024).
+  results:
+    rule_mean_r10_20: {mAP50: 0.4386, AP50_bus: 0.3994, AP50_car: 0.6977, AP50_truck: 0.4328, AP50_motorcycle: 0.2243, FN_bus: 1364.0}
 - id: EXP-2026-10-14-S16-P4noKD-y11s-seed2024
   gate: 'G6 (phase 2: seeds)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: goshihayashi/flops-s16d-p4nokd-s2024
   decision_rule: P4noKD must beat A0c (mean r10/20 AP50 bus and mAP50) in all 3 seeds (schedule 2026-10-10)
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
   notes2: Launched 2026-10-15 on goshihayashi (flops-s16d-p4nokd-s2024).
+  results:
+    rule_mean_r10_20: {mAP50: 0.5295, AP50_bus: 0.4853, AP50_car: 0.7354, AP50_truck: 0.5323, AP50_motorcycle: 0.3651, FN_bus: 1211.5}
+    delta_vs_A0c_same_seed: {mAP50: +0.091, AP50_bus: +0.086}
+  phase2_conclusion: >-
+    Decision rule met in 3/3 seeds (42, 123, 2024). Mean r10/20 over 3 seeds, A0c vs P4noKD (delta mean+-std):
+    mAP50 0.4339+-0.0048 vs 0.5309+-0.0024 (+0.097+-0.007); AP50 bus 0.3866+-0.0113 vs 0.4916+-0.0092
+    (+0.105+-0.019); car +0.038+-0.002; truck +0.102+-0.010; motorcycle +0.142+-0.002; FN bus -171+-18.
+    No class degrades. Feasibility run class, S1b5 only; A1/FedProx/S0 controls on the same seeds still required (CLAUDE.md 11/22).
