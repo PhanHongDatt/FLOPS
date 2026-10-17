@@ -1255,7 +1255,7 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: A1c
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: goshihayashi/flops-s17a-baselines-s42
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
@@ -1264,7 +1264,7 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: goshihayashi/flops-s17a-baselines-s42
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
@@ -1273,7 +1273,7 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: A1c
   run_class: feasibility
-  status: planned
+  status: running
   seed: 123
   kaggle_kernel: goshihayashi/flops-s17b-baselines-s123
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
@@ -1282,7 +1282,7 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: planned
+  status: running
   seed: 123
   kaggle_kernel: goshihayashi/flops-s17b-baselines-s123
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
@@ -1291,7 +1291,7 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: A1c
   run_class: feasibility
-  status: planned
+  status: running
   seed: 2024
   kaggle_kernel: phdatt/flops-s17c-baselines-s2024
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
@@ -1300,7 +1300,7 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: planned
+  status: running
   seed: 2024
   kaggle_kernel: phdatt/flops-s17c-baselines-s2024
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
@@ -1309,7 +1309,7 @@ experiments:
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: planned
+  status: running
   seed: 123
   kaggle_kernel: phdatt/flops-s17d-pooled-s123
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
@@ -1318,7 +1318,7 @@ experiments:
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: planned
+  status: running
   seed: 123
   kaggle_kernel: phdatt/flops-s17d-pooled-s123
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
