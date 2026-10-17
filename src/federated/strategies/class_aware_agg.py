@@ -77,11 +77,12 @@ NUM_CLASSES: int = len(TARGET_CLASSES)
 CLASS_INDEX: dict[str, int] = {c: i for i, c in enumerate(TARGET_CLASSES)}
 
 
-def _is_final_cls_head(name: str, shape: tuple[int, ...]) -> bool:
-    return bool(_FINAL_CV3_RE.match(name)) and len(shape) >= 1 and shape[0] == NUM_CLASSES
+def _is_final_cls_head(name: str, shape: tuple[int, ...], num_rows: int = NUM_CLASSES) -> bool:
+    return bool(_FINAL_CV3_RE.match(name)) and len(shape) >= 1 and shape[0] == num_rows
 
 
-def find_cls_head_indices(param_names: list[str], shapes: list[tuple[int, ...]]) -> list[int]:
+def find_cls_head_indices(param_names: list[str], shapes: list[tuple[int, ...]],
+                          num_rows: int = NUM_CLASSES) -> list[int]:
     """Return indices of the class-specific params, failing loudly if none match.
 
     Raises:
@@ -89,11 +90,11 @@ def find_cls_head_indices(param_names: list[str], shapes: list[tuple[int, ...]])
             for the pinned Ultralytics version and class-aware aggregation would
             silently be a no-op.
     """
-    idx = [i for i, (n, s) in enumerate(zip(param_names, shapes)) if _is_final_cls_head(n, s)]
+    idx = [i for i, (n, s) in enumerate(zip(param_names, shapes)) if _is_final_cls_head(n, s, num_rows)]
     if not idx:
         raise ValueError(
             "No class-specific parameters matched "
-            f"{_FINAL_CV3_RE.pattern!r} with dim0 == {NUM_CLASSES}. "
+            f"{_FINAL_CV3_RE.pattern!r} with dim0 == {num_rows}. "
             "Class-aware aggregation cannot run. Re-verify F1 "
             "(research/feasibility/F1/parameter_map.yaml) against the pinned "
             "Ultralytics version."
@@ -121,6 +122,9 @@ class ClassAwareAggregation(FedAvg):
             variant.
         no_contributor_rule: True → A3 (keep ``theta^t``); False → A1 control.
         require_class_counts: True → raise when a client omits ``class_counts_json``.
+        class_rows: head row of each target class. Default 0..3 (4-class head); the COCO
+            80-class head (ADR-018) passes the COCO ids. Other rows get plain FedAvg (ADR-021).
+        num_rows: dim0 of the class conv (4, or 80 for the COCO head).
     """
 
     def __init__(
@@ -130,9 +134,13 @@ class ClassAwareAggregation(FedAvg):
         eligibility_threshold: int = 1,
         no_contributor_rule: bool = True,
         require_class_counts: bool = True,
+        class_rows: dict[str, int] | None = None,
+        num_rows: int | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
+        self.class_rows = dict(class_rows or CLASS_INDEX)
+        self.num_rows = int(num_rows or (NUM_CLASSES if class_rows is None else 80))
         self.param_names = param_names
         self.trace_dir = trace_dir
         self.eligibility_threshold = int(eligibility_threshold)
@@ -224,7 +232,7 @@ class ClassAwareAggregation(FedAvg):
 
         if self._cls_head_indices is None:
             self._cls_head_indices = find_cls_head_indices(
-                self.param_names, [tuple(a.shape) for a in agg]
+                self.param_names, [tuple(a.shape) for a in agg], self.num_rows
             )
 
         theta_prev = self._global_prev
@@ -242,7 +250,7 @@ class ClassAwareAggregation(FedAvg):
                 continue
             name = self.param_names[param_idx]
 
-            for cls_name, cls_idx in CLASS_INDEX.items():
+            for cls_name, cls_idx in self.class_rows.items():
                 eligible_i, eligible_cc = self._eligible(class_counts, cls_name)
                 entry: dict[str, Any] = {
                     "round": int(server_round),

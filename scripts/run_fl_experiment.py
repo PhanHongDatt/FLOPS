@@ -131,6 +131,9 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     # ADR-020 N2: P4noKD with the class conv of every Detect level frozen at COCO values (FedBABU-style)
     "P5f": {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr_cosine": True, "rfs_t": 0.5,
             "freeze_cls_head": True},
+    # ADR-021: reference baselines on the COCO-head setting (same model/data/rounds as A0c, P4noKD)
+    "A1c":      {"algorithm": "ClassCountFedAvg", "mechanism": "none", "coco_head": True},
+    "FedProxc": {"algorithm": "FedProx",          "mechanism": "none", "coco_head": True},
 }
 
 # ADR-019, fixed before any run: cosine from lr0 to LR_MIN_FACTOR * lr0 over the run.
@@ -493,6 +496,9 @@ def main() -> None:
     if algorithm in _CLASS_AWARE_STRATEGIES:
         param_names = _resolve_param_names(config["model"]["weights"])
         strategy_options = {"eligibility_threshold": int(args.tau_elig)}
+        if preset.get("coco_head"):   # ADR-021: the target rows of the 80-class COCO head
+            from src.model.yolo_wrapper import COCO_IDS
+            strategy_options.update(class_rows={c: int(COCO_IDS[c]) for c in COCO_IDS}, num_rows=80)
 
     run_fl_server(
         algorithm=algorithm,

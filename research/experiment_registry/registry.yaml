@@ -1250,3 +1250,93 @@ experiments:
     mAP50 0.4339+-0.0048 vs 0.5309+-0.0024 (+0.097+-0.007); AP50 bus 0.3866+-0.0113 vs 0.4916+-0.0092
     (+0.105+-0.019); car +0.038+-0.002; truck +0.102+-0.010; motorcycle +0.142+-0.002; FN bus -171+-18.
     No class degrades. Feasibility run class, S1b5 only; A1/FedProx/S0 controls on the same seeds still required (sections 11 and 22).
+- id: EXP-2026-10-17-S17-A1c-s5-y11s-seed42
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: A1c
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s17a-baselines-s42
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed42
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: FedProxc
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s17a-baselines-s42
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-17-S17-A1c-s5-y11s-seed123
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: A1c
+  run_class: feasibility
+  status: planned
+  seed: 123
+  kaggle_kernel: goshihayashi/flops-s17b-baselines-s123
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed123
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: FedProxc
+  run_class: feasibility
+  status: planned
+  seed: 123
+  kaggle_kernel: goshihayashi/flops-s17b-baselines-s123
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-17-S17-A1c-s5-y11s-seed2024
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: A1c
+  run_class: feasibility
+  status: planned
+  seed: 2024
+  kaggle_kernel: phdatt/flops-s17c-baselines-s2024
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed2024
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
+  method: FedProxc
+  run_class: feasibility
+  status: planned
+  seed: 2024
+  kaggle_kernel: phdatt/flops-s17c-baselines-s2024
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-17-S17-A0c-s5pooled-y11s-seed123
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
+  method: A0c
+  run_class: feasibility
+  status: planned
+  seed: 123
+  kaggle_kernel: phdatt/flops-s17d-pooled-s123
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-17-S17-P4noKD-s5pooled-y11s-seed123
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: planned
+  seed: 123
+  kaggle_kernel: phdatt/flops-s17d-pooled-s123
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-17-S17-A0c-s5pooled-y11s-seed2024
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
+  method: A0c
+  run_class: feasibility
+  status: planned
+  seed: 2024
+  kaggle_kernel: goshihayashi/flops-s17e-pooled-s2024
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-17-S17-P4noKD-s5pooled-y11s-seed2024
+  gate: 'G6 (baselines, ADR-021)'
+  scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: planned
+  seed: 2024
+  kaggle_kernel: goshihayashi/flops-s17e-pooled-s2024
+  decision_rule: ADR-021 pre-registered reading (rules 1-3)

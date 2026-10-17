@@ -48,7 +48,7 @@ def _args(**kw) -> argparse.Namespace:
 # ── ablation presets ──────────────────────────────────────────────────────
 def test_every_plan_arm_has_a_preset():
     assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c",
-                               "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD", "P5f"}
+                               "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD", "P5f", "A1c", "FedProxc"}
 
 
 def test_coco_head_arms():
@@ -272,3 +272,14 @@ def test_absolute_round_prevents_seed_replay_after_resume():
         for r in (4, 5)
     ]
     assert resumed_from_3 == fresh[3:]
+
+
+def test_coco_baselines_are_a0c_with_another_server_or_client_algorithm():
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts.run_fl_experiment import _ABLATIONS
+    a0c = _ABLATIONS["A0c"]
+    for name, algo in (("A1c", "ClassCountFedAvg"), ("FedProxc", "FedProx")):
+        p = dict(_ABLATIONS[name])
+        assert p.pop("algorithm") == algo and p == {k: v for k, v in a0c.items() if k != "algorithm"}

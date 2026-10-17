@@ -254,3 +254,41 @@ def test_aggregate_without_configure_fit_refuses_to_guess_global():
     specs = [(1.0, [1.0] * NC, 10, {c: 5 for c in TARGET_CLASSES})]
     with pytest.raises(RuntimeError, match="theta\\^t unavailable"):
         s.aggregate_fit(1, _results(specs), [])
+
+
+# ── COCO 80-class head (ADR-021): target classes live at COCO rows ────────
+COCO_ROWS = {CAR: 2, MOTO: 3, BUS: 5, TRUCK: 7}
+
+
+def _coco_params(shared_val: float, rows: dict[int, float]) -> list[np.ndarray]:
+    head = np.zeros(80, dtype=np.float32)
+    for r, v in rows.items():
+        head[r] = v
+    return [np.full((2, 2), shared_val, dtype=np.float32), head[:, None].copy(), head.copy()]
+
+
+def test_coco_head_matches_80_row_class_conv():
+    shapes = [(2, 2), (80, 1), (80,)]
+    assert find_cls_head_indices(PARAM_NAMES, shapes, num_rows=80) == [1, 2]
+
+
+def test_coco_head_class_count_weights_the_coco_row_and_fedavgs_the_rest():
+    s = build_class_count_fedavg(num_rounds=1, param_names=PARAM_NAMES, class_rows=COCO_ROWS)
+    g = _coco_params(0.0, {})
+    c0 = (_Proxy("C0"), _fitres(_coco_params(1.0, {5: 10.0, 0: 4.0}), 50, {CAR: 1, BUS: 30, TRUCK: 1, MOTO: 1}))
+    c1 = (_Proxy("C1"), _fitres(_coco_params(1.0, {5: 20.0, 0: 8.0}), 50, {CAR: 1, BUS: 10, TRUCK: 1, MOTO: 1}))
+    s.configure_fit(1, ndarrays_to_parameters(g), _ClientManager())
+    out = parameters_to_ndarrays(s.aggregate_fit(1, [c0, c1], [])[0])
+    assert out[2][5] == pytest.approx(12.5)          # bus row (COCO 5): box-count weighted
+    assert out[2][0] == pytest.approx(6.0)           # person row (COCO 0): not a target, plain FedAvg
+    assert out[2][1] == pytest.approx(0.0)
+
+
+def test_coco_head_no_contributor_keeps_the_coco_row():
+    s = build_class_aware_agg(num_rounds=1, param_names=PARAM_NAMES, class_rows=COCO_ROWS)
+    g = _coco_params(0.0, {5: 40.0})
+    counts = {CAR: 5, BUS: 0, TRUCK: 5, MOTO: 5}
+    res = [(_Proxy(f"C{i}"), _fitres(_coco_params(1.0, {5: v, 2: v}), 10, counts)) for i, v in enumerate((1.0, 3.0))]
+    s.configure_fit(1, ndarrays_to_parameters(g), _ClientManager())
+    out = parameters_to_ndarrays(s.aggregate_fit(1, res, [])[0])
+    assert out[2][5] == pytest.approx(40.0) and out[2][2] == pytest.approx(2.0)

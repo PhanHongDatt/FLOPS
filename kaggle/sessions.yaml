@@ -309,3 +309,48 @@ sessions:
       'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 2024'
       'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
 
+  # ── ADR-021 (2026-10-17): reference baselines on the COCO-head setting, YOLO11s, 20 rounds ──
+  s17a_g:  # A1c + FedProxc @ S1b5-3k, seed 42. ~5 h
+    slug: flops-s17a-baselines-s42
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A1c@s5", "FedProxc@s5"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+
+  s17b_g:  # A1c + FedProxc @ S1b5-3k, seed 123. ~5 h
+    slug: flops-s17b-baselines-s123
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A1c@s5", "FedProxc@s5"]'
+      'SEED = 42   # training seed': 'SEED = 123   # training seed'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+
+  s17c:  # A1c + FedProxc @ S1b5-3k, seed 2024. ~5 h
+    slug: flops-s17c-baselines-s2024
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A1c@s5", "FedProxc@s5"]'
+      'SEED = 42   # training seed': 'SEED = 2024   # training seed'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+
+  s17d:  # IID check: A0c + P4noKD @ pooled, seed 123. ~5 h
+    slug: flops-s17d-pooled-s123
+    notebook: notebooks/05_convergence_s1b.py
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0c@s5pooled", "P4noKD@s5pooled"]'
+      'SEED = 42   # training seed': 'SEED = 123   # training seed'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
+
+  s17e_g:  # IID check: A0c + P4noKD @ pooled, seed 2024. ~5 h
+    slug: flops-s17e-pooled-s2024
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0c@s5pooled", "P4noKD@s5pooled"]'
+      'SEED = 42   # training seed': 'SEED = 2024   # training seed'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
