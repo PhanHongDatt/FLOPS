@@ -1249,4 +1249,4 @@ experiments:
     Decision rule met in 3/3 seeds (42, 123, 2024). Mean r10/20 over 3 seeds, A0c vs P4noKD (delta mean+-std):
     mAP50 0.4339+-0.0048 vs 0.5309+-0.0024 (+0.097+-0.007); AP50 bus 0.3866+-0.0113 vs 0.4916+-0.0092
     (+0.105+-0.019); car +0.038+-0.002; truck +0.102+-0.010; motorcycle +0.142+-0.002; FN bus -171+-18.
-    No class degrades. Feasibility run class, S1b5 only; A1/FedProx/S0 controls on the same seeds still required (CLAUDE.md 11/22).
+    No class degrades. Feasibility run class, S1b5 only; A1/FedProx/S0 controls on the same seeds still required (sections 11 and 22).
