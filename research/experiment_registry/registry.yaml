@@ -1361,7 +1361,7 @@ experiments:
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: goshihayashi/flops-s18a-severity-s42
   decision_rule: ADR-022 pre-registered reading (R1-R3)
@@ -1370,7 +1370,7 @@ experiments:
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: goshihayashi/flops-s18a-severity-s42
   decision_rule: ADR-022 pre-registered reading (R1-R3)
@@ -1379,7 +1379,7 @@ experiments:
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: goshihayashi/flops-s18a-severity-s42
   decision_rule: ADR-022 pre-registered reading (R1-R3)
@@ -1388,7 +1388,7 @@ experiments:
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: planned
+  status: running
   seed: 123
   kaggle_kernel: phdatt/flops-s18b-severity-s123
   decision_rule: ADR-022 pre-registered reading (R1-R3)
@@ -1397,7 +1397,7 @@ experiments:
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: planned
+  status: running
   seed: 123
   kaggle_kernel: phdatt/flops-s18b-severity-s123
   decision_rule: ADR-022 pre-registered reading (R1-R3)
@@ -1406,7 +1406,7 @@ experiments:
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: planned
+  status: running
   seed: 123
   kaggle_kernel: phdatt/flops-s18b-severity-s123
   decision_rule: ADR-022 pre-registered reading (R1-R3)
@@ -1415,7 +1415,7 @@ experiments:
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: planned
+  status: running
   seed: 2024
   kaggle_kernel: phdatt/flops-s18c-severity-s2024
   decision_rule: ADR-022 pre-registered reading (R1-R3)
@@ -1424,7 +1424,7 @@ experiments:
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: planned
+  status: running
   seed: 2024
   kaggle_kernel: phdatt/flops-s18c-severity-s2024
   decision_rule: ADR-022 pre-registered reading (R1-R3)
@@ -1433,7 +1433,7 @@ experiments:
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: planned
+  status: running
   seed: 2024
   kaggle_kernel: phdatt/flops-s18c-severity-s2024
   decision_rule: ADR-022 pre-registered reading (R1-R3)
