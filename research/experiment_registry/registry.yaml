@@ -1255,73 +1255,89 @@ experiments:
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: A1c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s17a-baselines-s42
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4186, AP50_bus: 0.3512, AP50_car: 0.6916, AP50_truck: 0.427, AP50_motorcycle: 0.2046, FN_bus: 1320.0}
 - id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed42
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s17a-baselines-s42
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4283, AP50_bus: 0.3665, AP50_car: 0.6937, AP50_truck: 0.4272, AP50_motorcycle: 0.2257, FN_bus: 1413.0}
 - id: EXP-2026-10-17-S17-A1c-s5-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: A1c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: goshihayashi/flops-s17b-baselines-s123
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4288, AP50_bus: 0.3651, AP50_car: 0.6968, AP50_truck: 0.4258, AP50_motorcycle: 0.2276, FN_bus: 1372.0}
 - id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: goshihayashi/flops-s17b-baselines-s123
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.417, AP50_bus: 0.3377, AP50_car: 0.6942, AP50_truck: 0.432, AP50_motorcycle: 0.2039, FN_bus: 1439.0}
 - id: EXP-2026-10-17-S17-A1c-s5-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: A1c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: phdatt/flops-s17c-baselines-s2024
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4355, AP50_bus: 0.3578, AP50_car: 0.6961, AP50_truck: 0.4222, AP50_motorcycle: 0.2658, FN_bus: 1242.0}
 - id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: phdatt/flops-s17c-baselines-s2024
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4274, AP50_bus: 0.3787, AP50_car: 0.6919, AP50_truck: 0.4302, AP50_motorcycle: 0.2087, FN_bus: 1422.5}
 - id: EXP-2026-10-17-S17-A0c-s5pooled-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: phdatt/flops-s17d-pooled-s123
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4419, AP50_bus: 0.4145, AP50_car: 0.6964, AP50_truck: 0.4294, AP50_motorcycle: 0.2275, FN_bus: 1011.5}
 - id: EXP-2026-10-17-S17-P4noKD-s5pooled-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: phdatt/flops-s17d-pooled-s123
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.5463, AP50_bus: 0.5425, AP50_car: 0.738, AP50_truck: 0.5506, AP50_motorcycle: 0.3542, FN_bus: 821.0}
 - id: EXP-2026-10-17-S17-A0c-s5pooled-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20

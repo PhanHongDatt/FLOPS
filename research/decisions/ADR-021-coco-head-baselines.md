@@ -42,3 +42,29 @@ Report every class for every arm; a failure of any rule is recorded as a negativ
 ## Cost
 5 sessions × 2 arms, ~2.1–2.5 h per arm + ~0.3 h setup → ~25 GPU-h on T4 ×2. goshihayashi s17a_g, s17b_g, s17e_g
 (max 2 concurrent, s17e_g after one finishes); phdatt s17c, s17d.
+
+## Results (2026-10-19; s17a–s17d, s17e_g still running)
+All 8 arms completed. A1c trace: `class_count_weighted` on the 4 COCO rows of every level, every round; FedProxc ran
+FedProxClient with mu = 0.01. Mean of rounds 10/20, S1b5-3k, mean ± std over seeds 42/123/2024:
+
+| Arm | mAP50 | AP50 bus | car | truck | motorcycle | FN bus |
+|---|---:|---:|---:|---:|---:|---:|
+| A0c (FedAvg) | 0.434 ± 0.005 | 0.387 ± 0.011 | 0.697 | 0.429 | 0.223 | 1395 |
+| A1c | 0.428 ± 0.009 | 0.358 ± 0.007 | 0.695 | 0.425 | 0.233 | 1311 |
+| FedProxc | 0.424 ± 0.006 | 0.361 ± 0.021 | 0.693 | 0.430 | 0.213 | 1425 |
+| P4noKD | 0.531 ± 0.002 | 0.492 ± 0.009 | 0.735 | 0.531 | 0.366 | 1224 |
+
+- **Rule 1 met:** P4noKD − A1c, per seed: mAP50 +0.111 / +0.105 / +0.094, bus +0.136 / +0.137 / +0.127.
+- **Rule 2 met:** P4noKD − FedProxc, per seed: mAP50 +0.101 / +0.117 / +0.102, bus +0.121 / +0.164 / +0.107.
+  P4noKD is ahead on every class in every seed against both.
+- Both baselines are slightly **below** FedAvg on bus in every seed (A1c −0.031 / −0.013 / −0.042;
+  FedProxc −0.016 / −0.040 / −0.021): neither class-count weighting nor the proximal term helps here.
+- **Rule 3 (IID), 2 of 3 seeds:** pooled P4noKD − A0c mAP50 +0.108 (42), +0.104 (123); bus +0.130 / +0.128.
+  Pending seed 2024 (s17e_g).
+
+### Reading
+Observation, not a causal claim: P4noKD's gain on the IID re-split (~+0.106 mAP50, +0.129 bus) is as large as
+on S1b5 (+0.097, +0.105). The missing-class gap (pooled − S1b5, AP50 bus) is 0.031 / 0.036 for A0c and
+0.056 / 0.040 for P4noKD (seeds 42 / 123): it is **not reduced**. P4noKD is a better federated training recipe
+for this detector in general, not a missing-class remedy — consistent with ADR-020 (P5f) and section 22
+("shared representations dominate degradation").
