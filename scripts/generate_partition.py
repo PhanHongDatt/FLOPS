@@ -37,6 +37,7 @@ from src.data.partitioner import (
     partition_iid,
     partition_matched_control,
     partition_pooled_iid,
+    partition_redeal,
     partition_server_sample,
     partition_missing_class,
     save_match_report,
@@ -189,6 +190,24 @@ def _dispatch_pooled(config: dict[str, Any], label_dir: Path, output_dir: Path) 
     )
 
 
+def _dispatch_redeal(config: dict[str, Any], label_dir: Path, output_dir: Path) -> PartitionManifest:
+    """ADR-022: the reference partition's own images, re-dealt under another absent-class map."""
+    ref = config.get("reference_manifest")
+    absent = config.get("absent")
+    if not ref or not absent:
+        raise ValueError("scenario S1-Redeal requires 'reference_manifest' and 'absent'")
+    ref_path = Path(ref) if Path(ref).is_absolute() else output_dir / ref
+    if not ref_path.exists():
+        raise FileNotFoundError(f"reference manifest {ref_path} not found — generate it first")
+    return partition_redeal(
+        reference=load_partition_manifest(ref_path),
+        label_dir=label_dir,
+        absent={str(c): [str(x) for x in v] for c, v in dict(absent).items()},
+        seed=int(config["seed"]),
+        partition_id=str(config["partition_id"]),
+    )
+
+
 def _dispatch_server_sample(config: dict[str, Any], images: list[str], label_dir: Path,
                             output_dir: Path) -> PartitionManifest:
     """ADR-015: labelled sample held by the server, disjoint from every listed client partition."""
@@ -310,6 +329,8 @@ def generate_partition_artifacts(
             )
     elif config["scenario"] == "S1-Pooled-IID":
         manifest = _dispatch_pooled(config, label_dir, output_dir)
+    elif config["scenario"] == "S1-Redeal":
+        manifest = _dispatch_redeal(config, label_dir, output_dir)
     elif config["scenario"] == "Server-Sample":
         manifest = _dispatch_server_sample(config, images, label_dir, output_dir)
     else:

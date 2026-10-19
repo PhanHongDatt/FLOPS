@@ -698,6 +698,84 @@ def partition_pooled_iid(
     )
 
 
+def partition_redeal(
+    reference: PartitionManifest,
+    label_dir: Path,
+    absent: dict[str, list[str]],
+    seed: int,
+    partition_id: str,
+) -> PartitionManifest:
+    """Re-deal EXACTLY the reference images over the same clients under another absent-class map (ADR-022).
+
+    Same images, same box totals of every class and the same image count per client as the reference;
+    only WHERE each class lives changes. ``absent[c]`` lists the clients that must hold zero boxes of
+    class ``c``. Images are grouped by (allowed clients, class signature) and placed most-constrained
+    group first (rarer signature first among equals); each group is shuffled with ``seed`` and split over its allowed clients in proportion to
+    their size (overflow to whoever has room), so a class that is not constrained spreads evenly.
+
+    Raises:
+        ValueError: when an image has no allowed client with a free slot — fail before any training.
+    """
+    clients = sorted(reference.client_assignments)
+    capacity = {cid: len(reference.client_assignments[cid]) for cid in clients}
+    unknown = {cid for cids in absent.values() for cid in cids} - set(clients)
+    if unknown or set(absent) - set(TARGET_CLASSES):
+        raise ValueError(f"absent map names unknown clients/classes: {sorted(unknown)} {sorted(set(absent))}")
+    pool = sorted({n for imgs in reference.client_assignments.values() for n in imgs})
+    index = load_label_index(pool, label_dir)
+
+    def allowed(name: str) -> tuple[str, ...]:
+        banned = {cid for c in TARGET_CLASSES if index[name][c] > 0 for cid in absent.get(c, [])}
+        return tuple(cid for cid in clients if cid not in banned)
+
+    strata: dict[tuple[tuple[str, ...], tuple[str, ...]], list[str]] = {}
+    for name in pool:
+        sig = tuple(c for c in TARGET_CLASSES if index[name][c] > 0)
+        strata.setdefault((allowed(name), sig), []).append(name)
+
+    rng = random.Random(seed)
+    free = dict(capacity)
+    splits: dict[str, list[str]] = {cid: [] for cid in clients}
+    # most constrained first; among equals the smaller (rarer) signature first, so plain images fill last
+    for key in sorted(strata, key=lambda k: (len(k[0]), len(strata[k]), k)):
+        allow, _ = key
+        group = list(strata[key])
+        rng.shuffle(group)
+        # share of this group per allowed client ∝ client size (largest remainder), capped by free slots
+        total = sum(capacity[c] for c in allow) or 1
+        ideal = {c: len(group) * capacity[c] / total for c in allow}
+        take = {c: min(int(ideal[c]), free[c]) for c in allow}
+        for c in sorted(allow, key=lambda c: ideal[c] - int(ideal[c]), reverse=True):
+            if sum(take.values()) < len(group) and take[c] < free[c]:
+                take[c] += 1
+        while sum(take.values()) < len(group):              # overflow: whoever still has room
+            open_ = [c for c in allow if free[c] - take[c] > 0]
+            if not open_:
+                raise ValueError(f"cannot place {len(group) - sum(take.values())} images of signature "
+                                 f"{key[1]}: allowed clients {list(allow)} are full "
+                                 f"(absent map {absent} is infeasible for these images)")
+            take[max(open_, key=lambda c: (free[c] - take[c], -clients.index(c)))] += 1
+        k = 0
+        for c in allow:
+            splits[c].extend(group[k:k + take[c]])
+            free[c] -= take[c]
+            k += take[c]
+
+    counts = {cid: _sum_counts(imgs, index) for cid, imgs in splits.items()}
+    missing = {cid: [c for c in TARGET_CLASSES if counts[cid][c] == 0] for cid in clients}
+    for c, cids in absent.items():
+        assert all(counts[cid][c] == 0 for cid in cids), f"{c} leaked onto an absent client"
+    return PartitionManifest(
+        partition_id=partition_id,
+        seed=seed,
+        scenario="S1-Redeal",
+        num_clients=len(clients),
+        client_assignments=splits,
+        class_counts=counts,
+        missing_classes=missing,
+    )
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Server-held labelled sample (ADR-015)
 # ─────────────────────────────────────────────────────────────────────────────

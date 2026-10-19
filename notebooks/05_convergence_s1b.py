@@ -96,6 +96,20 @@ POOLED = PARTITIONS_DIR / "s1b_pooled_iid_2k_seed42"
 SERVER = PARTITIONS_DIR / "server_sample_1k_seed42"
 S1B5 = PARTITIONS_DIR / "s1b5_bus_3k_moto_seed42"
 POOLED5 = PARTITIONS_DIR / "s1b5_pooled_3k_moto_seed42"
+S1B5BUS1 = PARTITIONS_DIR / "s1b5_bus1_3k_moto_seed42"   # severity sweep (ADR-022): bus on 1 of 5 clients
+try:   # never block the other scenarios: an infeasible re-deal only fails the arms that use it
+    subprocess.check_call([
+        sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
+        "--partition-config", str(REPO_ROOT / "configs" / "partition" / "s1b5_bus1_3k_moto_seed42.yaml"),
+        "--yolo-root", str(YOLO_ROOT), "--output-dir", str(PARTITIONS_DIR),
+    ])
+    _ref5 = yaml.safe_load((S1B5 / "manifest.yaml").read_text())
+    _bus1 = yaml.safe_load((S1B5BUS1 / "manifest.yaml").read_text())
+    assert sorted(sum(_bus1["client_assignments"].values(), [])) == sorted(sum(_ref5["client_assignments"].values(), []))
+    assert [c for c in sorted(_bus1["class_counts"]) if _bus1["class_counts"][c]["bus"] > 0] == ["C4"]
+    print("bus1 re-deal class counts:", _bus1["class_counts"])
+except Exception as exc:
+    print(f"⚠️  s1b5_bus1 partition not available: {exc}")
 s1b = yaml.safe_load((S1B / "manifest.yaml").read_text())
 for cid, cls in (("C0", "bus"), ("C1", "bus"), ("C2", "truck")):
     assert s1b["class_counts"][cid][cls] == 0, f"S1b-2k {cid} {cls} must be 0"
@@ -243,7 +257,7 @@ import time as _time
 SESSION_BUDGET_H = 11.0
 ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override
 
-PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5}
+PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5, "s5bus1": S1B5BUS1}
 
 def arm_command(arm: str) -> tuple[list[str], Path]:
     name, _, where = arm.partition("@")

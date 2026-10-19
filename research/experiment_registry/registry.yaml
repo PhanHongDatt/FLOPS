@@ -1356,3 +1356,84 @@ experiments:
   seed: 2024
   kaggle_kernel: goshihayashi/flops-s17e-pooled-s2024
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+- id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed42
+  gate: 'G4/G6 (severity sweep, ADR-022)'
+  scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
+  method: A0c
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s18a-severity-s42
+  decision_rule: ADR-022 pre-registered reading (R1-R3)
+- id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed42
+  gate: 'G4/G6 (severity sweep, ADR-022)'
+  scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s18a-severity-s42
+  decision_rule: ADR-022 pre-registered reading (R1-R3)
+- id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed42
+  gate: 'G4/G6 (severity sweep, ADR-022)'
+  scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
+  method: FedProxc
+  run_class: feasibility
+  status: planned
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s18a-severity-s42
+  decision_rule: ADR-022 pre-registered reading (R1-R3)
+- id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed123
+  gate: 'G4/G6 (severity sweep, ADR-022)'
+  scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
+  method: A0c
+  run_class: feasibility
+  status: planned
+  seed: 123
+  kaggle_kernel: phdatt/flops-s18b-severity-s123
+  decision_rule: ADR-022 pre-registered reading (R1-R3)
+- id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed123
+  gate: 'G4/G6 (severity sweep, ADR-022)'
+  scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: planned
+  seed: 123
+  kaggle_kernel: phdatt/flops-s18b-severity-s123
+  decision_rule: ADR-022 pre-registered reading (R1-R3)
+- id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed123
+  gate: 'G4/G6 (severity sweep, ADR-022)'
+  scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
+  method: FedProxc
+  run_class: feasibility
+  status: planned
+  seed: 123
+  kaggle_kernel: phdatt/flops-s18b-severity-s123
+  decision_rule: ADR-022 pre-registered reading (R1-R3)
+- id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed2024
+  gate: 'G4/G6 (severity sweep, ADR-022)'
+  scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
+  method: A0c
+  run_class: feasibility
+  status: planned
+  seed: 2024
+  kaggle_kernel: phdatt/flops-s18c-severity-s2024
+  decision_rule: ADR-022 pre-registered reading (R1-R3)
+- id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed2024
+  gate: 'G4/G6 (severity sweep, ADR-022)'
+  scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: planned
+  seed: 2024
+  kaggle_kernel: phdatt/flops-s18c-severity-s2024
+  decision_rule: ADR-022 pre-registered reading (R1-R3)
+- id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed2024
+  gate: 'G4/G6 (severity sweep, ADR-022)'
+  scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
+  method: FedProxc
+  run_class: feasibility
+  status: planned
+  seed: 2024
+  kaggle_kernel: phdatt/flops-s18c-severity-s2024
+  decision_rule: ADR-022 pre-registered reading (R1-R3)

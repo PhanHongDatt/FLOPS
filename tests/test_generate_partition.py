@@ -220,3 +220,23 @@ def test_class_quota_reaches_the_partitioner_from_config(tmp_path):
     manifest_path, _ = generate_partition_artifacts(cfg, root, tmp_path / "out")
     m = load_partition_manifest(manifest_path)
     assert all(m.class_counts[c]["motorcycle"] >= 4 for c in ("C0", "C1", "C2"))
+
+
+def test_redeal_scenario_from_config_keeps_images_and_moves_the_class(tmp_path):
+    """ADR-022: S1-Redeal reads reference_manifest + absent from the config."""
+    imgs = [f"p_{i:03d}.jpg" for i in range(60)] + [f"b_{i:03d}.jpg" for i in range(10)]
+    cmap = {n: [0] for n in imgs[:60]} | {n: [0, 1] for n in imgs[60:]}
+    root = _make_yolo_root(tmp_path, imgs, cmap)
+    out = tmp_path / "out"
+    ref = _write_config(tmp_path, {"partition_id": "ref", "scenario": "S0", "seed": 3, "num_clients": 3,
+                                   "per_client": 20})
+    generate_partition_artifacts(ref, root, out)
+    cfg = tmp_path / "redeal.yaml"
+    cfg.write_text(yaml.safe_dump({"partition_id": "bus1", "scenario": "S1-Redeal", "seed": 3, "num_clients": 3,
+                                   "reference_manifest": "ref/manifest.yaml", "absent": {"bus": ["C0", "C1"]}}))
+    manifest_path, yamls = generate_partition_artifacts(cfg, root, out)
+    m, r = load_partition_manifest(manifest_path), load_partition_manifest(out / "ref" / "manifest.yaml")
+    assert sorted(sum(m.client_assignments.values(), [])) == sorted(sum(r.client_assignments.values(), []))
+    assert m.class_counts["C0"]["bus"] == m.class_counts["C1"]["bus"] == 0
+    assert m.class_counts["C2"]["bus"] == sum(c["bus"] for c in r.class_counts.values())
+    assert set(yamls) == {"C0", "C1", "C2"}
