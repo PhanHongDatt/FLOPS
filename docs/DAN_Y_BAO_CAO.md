@@ -58,7 +58,7 @@ GPU Kaggle T4 ×2. Partition tất định, lưu `partition_manifest`.
 |---|---|---|---|---|
 | **Pooled (lý tưởng, IID)** | 15.000 ảnh chia đều lại cho 5 client, phân tầng theo tổ hợp lớp | 0/5 | 0/5 | ADR-014, ADR-017 |
 | **S1b5-3k (chính)** | 5 client × 3.000 ảnh; bus vắng C0–C2, truck vắng C3 | 3/5 | 1/5 | ADR-017 |
-| **S1b5-bus1 (nặng hơn)** | cùng 15.000 ảnh, bus chỉ ở C4; truck vẫn vắng C3 | 4/5 | 1/5 | ADR-022 **[CHỜ]** |
+| **S1b5-bus1 (nặng hơn)** | cùng 15.000 ảnh, bus chỉ ở C4; truck vẫn vắng C3 | 4/5 | 1/5 | ADR-022 (2/3 seed; seed 2024 **[CHỜ s18c]**) |
 
 Số box của từng client (kiểm tra từ manifest, 2026-10-19):
 
@@ -130,7 +130,7 @@ S1b-2k: 4 client × 2.000 ảnh, bus vắng 2/4 client; đối chứng khớp (S
 | Lệch bộ phân loại | D1, N1 (CCVR), P5f (FedBABU) | Không thu hẹp gap → đóng hướng này | ADR-020 |
 | Đa seed | A0c, P4noKD × 3 seed | P4noKD thắng 3/3 | `EXP-...-S16-*` |
 | Baseline | A1c, FedProxc × 3 seed; IID | P4noKD thắng 3/3; nhưng gap không giảm | ADR-021 |
-| Mức độ thiếu | bus 4/5; FedProxc trên pooled | **[CHỜ]** | ADR-022 |
+| Mức độ thiếu | bus 4/5; FedProxc trên pooled | Gap A0c tăng theo mức thiếu; P4noKD, FedProxc không thu hẹp gap (2/3 seed) | ADR-022 |
 
 ---
 
@@ -159,7 +159,8 @@ S1b-2k: 4 client × 2.000 ảnh, bus vắng 2/4 client; đối chứng khớp (S
 | A0c | 123 | 0,378 | 0,415 | **+0,036** | +0,012 | −0,002 |
 | P4noKD | 42 | 0,487 | 0,543 | **+0,056** | +0,019 | +0,001 |
 | P4noKD | 123 | 0,502 | 0,543 | **+0,040** | +0,020 | +0,003 |
-| A0c / P4noKD | 2024 | 0,399 / 0,485 | **[CHỜ s17e_g]** | | | |
+| A0c | 2024 | 0,399 | 0,417 | **+0,018** | −0,005 | −0,002 |
+| P4noKD | 2024 | 0,485 | 0,539 | **+0,053** | +0,014 | +0,003 |
 
 Nguồn: `S12-A0c`, `S12-P4noKD`, `S13-*-pooled`, `S16-*`, `S17-*-s5pooled`.
 
@@ -207,8 +208,39 @@ Nguồn: `S12-A0c`, `S12-P4noKD`, `S13-*-pooled`, `S16-*`, `S17-*-s5pooled`.
 
 Nguồn: `S16-*`, `S17-*`, ADR-021. P4noKD hơn cả ba ở **mọi lớp, mọi seed**.
 
-**Trường hợp IID (pooled):** P4noKD − A0c = mAP50 +0,108 / +0,104, bus +0,130 / +0,128 (seed 42 / 123) →
-không làm IID kém đi; seed 2024 **[CHỜ]**.
+**Trường hợp IID (pooled):** P4noKD − A0c = mAP50 +0,108 / +0,104 / +0,112, bus +0,130 / +0,128 / +0,121
+(seed 42 / 123 / 2024) → **không làm IID kém đi, đạt 3/3 seed** (luật 3, ADR-021).
+
+### 6.5 Mức độ thiếu và FedProx (ADR-022; seed 42 / 123, seed 2024 **[CHỜ s18c]**)
+
+Kiểm tra partition (log phiên): bus1 có bus = 0 ở C0–C3, 2.628 box ở C4; truck vẫn vắng C3; cùng 15.000 ảnh.
+
+**AP50 bus theo số client thiếu bus (seed 42 / 123):**
+
+| Phương pháp | 0/5 (pooled) | 3/5 (S1b5) | 4/5 (bus1) |
+|---|---|---|---|
+| A0c | 0,414 / 0,415 | 0,382 / 0,378 | 0,373 / 0,361 |
+| P4noKD | 0,543 / 0,543 | 0,487 / 0,502 | 0,464 / 0,474 |
+| FedProxc | 0,409 / 0,422 | 0,367 / 0,338 | không chạy |
+
+**Gap bus = pooled − kịch bản (seed 42 / 123):**
+
+| Phương pháp | Gap ở 3/5 | Gap ở 4/5 |
+|---|---|---|
+| A0c | +0,031 / +0,036 | +0,041 / +0,053 |
+| P4noKD | +0,056 / +0,040 | +0,079 / +0,069 |
+| FedProxc | +0,043 / +0,085 | – |
+
+- **R1 đạt 2/2 seed (tạm thời):** gap A0c tăng từ 3/5 lên 4/5 (+0,009 / +0,017) → thiệt hại tăng theo mức thiếu,
+  nhưng vẫn nhỏ (≤ 0,053 AP50, ≤ 13 % AP bus pooled).
+- **R2 không đạt (2/2 seed):** gap P4noKD ở 4/5 lớn hơn A0c; nhưng AP50 bus tuyệt đối của P4noKD vẫn cao hơn A0c
+  +0,091 / +0,113.
+- **R3 không đạt (2/2 seed):** gap FedProxc ở 3/5 lớn hơn A0c. Trên pooled FedProxc ≈ A0c (mAP50 −0,008 / +0,002)
+  → phần thua FedAvg của FedProx chỉ xuất hiện khi có client thiếu bus.
+- Lớp không mục tiêu từ 3/5 → 4/5: car, motorcycle thay đổi ≤ 0,011; truck giảm (A0c −0,023 / −0,011; P4noKD −0,021 /
+  −0,007) — phân bố truck ở các client khác cũng đổi khi chia lại, nên chỉ báo cáo, không diễn giải.
+
+Nguồn: `S18-*`, ADR-022; hình `research/figures/fig3_bus_vs_severity`, `fig4_missing_class_gap`.
 
 ### 6.4 Kiểm tra giả thuyết "lệch bộ phân loại" (ADR-020, seed 42)
 
@@ -222,14 +254,15 @@ không làm IID kém đi; seed 2024 **[CHỜ]**.
 
 ## 7. Nhận xét
 
-1. **H1 được ủng hộ nhưng hiệu ứng nhỏ.** Bus vắng 3/5 client mất ≈ 0,03–0,04 AP50 (2/2 seed cùng dấu, YOLO11s),
-   khớp với +0,029 ở YOLOv8n. Truck chỉ vắng 1/5 client cho gap ≈ 0 → gợi ý hiệu ứng **phụ thuộc mức độ thiếu**
-   (đang kiểm chứng bằng kịch bản 4/5). Lớp không bị thiếu (car, motorcycle) có gap ≈ 0 → đối chứng sạch.
+1. **H1 được ủng hộ nhưng hiệu ứng nhỏ.** Bus vắng 3/5 client mất +0,031 / +0,036 / +0,018 AP50 (3/3 seed cùng dấu,
+   YOLO11s), khớp với +0,029 ở YOLOv8n; vắng 4/5 client mất +0,041 / +0,053 (2/2 seed) → hiệu ứng **tăng theo mức
+   độ thiếu**. Truck chỉ vắng 1/5 client cho gap ≈ 0. Lớp không bị thiếu (car, motorcycle) có gap ≈ 0 → đối chứng sạch.
 2. **H2/H3 ở dạng tham số theo lớp không được ủng hộ.** Trọng số theo số lớp (A1/A1c), giữ hàng khi không ai có lớp (A3),
    bảo toàn ρ (A2b/A4b) đều **thấp hơn FedAvg** ở bus — kể cả trên YOLO11s và 3 seed (A1c −0,013 đến −0,042).
 3. **Lợi ích lớn đến từ công thức huấn luyện chung**, không từ can thiệp riêng cho lớp thiếu: cosine LR + RFS tăng
-   ≈ +0,10 mAP50 ở **cả** S1b5 lẫn IID, lớn gấp ~3 lần chính hiệu ứng thiếu lớp, nhưng **gap không giảm** (A0c 0,031 /
-   0,036 → P4noKD 0,056 / 0,040).
+   ≈ +0,10 mAP50 ở **cả** S1b5 lẫn IID, lớn gấp ~3 lần chính hiệu ứng thiếu lớp, nhưng **gap không giảm** (ở 3/5: A0c 0,031 /
+   0,036 / 0,018 → P4noKD 0,056 / 0,040 / 0,053; ở 4/5: A0c 0,041 / 0,053 → P4noKD 0,079 / 0,069). FedProx cũng
+   không thu hẹp gap (0,043 / 0,085).
 4. **Bộ phân loại không phải nút thắt chính.** Hai can thiệp vào phân loại (N1, P5f) không thu hẹp gap; phần biểu diễn
    dùng chung chi phối — một kết quả âm hợp lệ.
 5. **Cách diễn giải đúng:** đây là quan sát có đối chứng, chưa phải kết luận nhân quả đầy đủ (chưa có bằng chứng
@@ -249,7 +282,7 @@ không làm IID kém đi; seed 2024 **[CHỜ]**.
 
 ### Hạn chế
 - **n = 3 seed**: chỉ khẳng định được "cùng dấu ở mọi seed", không có kiểm định ý nghĩa thống kê mạnh.
-- **Một bộ dữ liệu, một mức thiếu chính** (đang bổ sung mức 4/5); bus là lớp mục tiêu duy nhất được thao tác.
+- **Một bộ dữ liệu, ba mức thiếu** (0/5, 3/5, 4/5; mức 4/5 mới có 2/3 seed); bus là lớp mục tiêu duy nhất được thao tác.
 - **Quy mô feasibility:** 15.000 ảnh (≈ 22 % train BDD), 20 vòng, 1 epoch cục bộ; chưa có chạy tập trung YOLO11s làm mốc trần.
 - **G4/G5 chưa chốt chính thức:** F1–F3 (bản đồ tham số, nhiễu loạn có kiểm soát, so cập nhật cục bộ) mới ở mức code sẵn sàng.
 - **SCAFFOLD chưa có bản cài đặt đúng**; FedNova bỏ qua do trùng FedAvg trong thiết lập này.
@@ -262,10 +295,10 @@ không làm IID kém đi; seed 2024 **[CHỜ]**.
 
 | Việc | Trạng thái | Câu hỏi trả lời | Quy tắc đã đăng ký |
 |---|---|---|---|
-| A0c, P4noKD pooled seed 2024 (s17e_g) | **[CHỜ]** | Hoàn thiện 2×2 phương pháp × kịch bản, 3 seed | P4noKD pooled mAP50 ≥ A0c pooled − 0,01 |
-| A0c, P4noKD ở mức bus 4/5 × 3 seed (s18a–c) | **[CHỜ]** | Thiệt hại có tăng theo mức độ thiếu? | R1: gap A0c ở 4/5 > ở 3/5, cả 3 seed |
+| A0c, P4noKD pooled seed 2024 (s17e_g) | **Xong — đạt 3/3** | Hoàn thiện 2×2 phương pháp × kịch bản, 3 seed | P4noKD pooled mAP50 ≥ A0c pooled − 0,01 |
+| A0c, P4noKD ở mức bus 4/5 × 3 seed (s18a–c) | 2/3 seed: R1 đạt, R2 không; seed 2024 **[CHỜ s18c]** | Thiệt hại có tăng theo mức độ thiếu? | R1: gap A0c ở 4/5 > ở 3/5, cả 3 seed |
 | | | P4noKD có giảm thiệt hại khi thiếu nặng hơn? | R2: gap P4noKD < gap A0c ở 4/5, cả 3 seed |
-| FedProxc pooled × 3 seed (s18a–c) | **[CHỜ]** | FedProx có giảm gap không? | R3: gap FedProxc < gap A0c ở 3/5, cả 3 seed |
+| FedProxc pooled × 3 seed (s18a–c) | 2/3 seed: R3 không đạt; seed 2024 **[CHỜ s18c]** | FedProx có giảm gap không? | R3: gap FedProxc < gap A0c ở 3/5, cả 3 seed |
 | ADR chốt G4/G5 | Chưa làm | Ghi chính thức Gate C và lựa chọn thay thế | – |
 | Chạy tập trung YOLO11s (tùy chọn) | Chưa làm | Mốc trần | – |
 
@@ -289,5 +322,5 @@ không làm IID kém đi; seed 2024 **[CHỜ]**.
 8. **Chuyển hướng và ablation** — P3 → P4noKD (bảng 6.3 thành phần).
 9. **So với baseline 3 seed** — bảng mean ± std và chênh lệch từng seed.
 10. **Phát hiện chính** — gap không giảm: P4noKD tốt hơn *nói chung*; ADR-020 (D1, N1, P5f).
-11. **Mức độ thiếu (4/5) và FedProx trên IID** — **[CHỜ]**.
+11. **Mức độ thiếu (4/5) và FedProx trên IID** — hình fig3 + bảng gap 6.5: gap tăng theo mức thiếu; không phương pháp nào thu hẹp.
 12. **Kết luận, hạn chế, hướng tiếp** (mục 7–9).

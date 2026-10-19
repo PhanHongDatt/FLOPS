@@ -194,7 +194,7 @@ def fig_severity(runs: list[Run], t: dict, out: Path) -> None:
     ax.set_xlabel(t["f3_x"])
     ax.set_ylabel(t["ap50"].replace("AP50", "AP50 bus"))
     ax.set_title(t["f3_title"], fontsize=10.5)
-    ax.legend(loc="lower left", fontsize=9, title=t["seed_note"], title_fontsize=8.5)
+    ax.legend(loc="center", bbox_to_anchor=(0.4, 0.5), fontsize=9, title=t["seed_note"], title_fontsize=8.5)
     _save(fig, out, "fig3_bus_vs_severity", ["method", "clients_without_bus", "seed", "AP50_bus"], rows)
 
 

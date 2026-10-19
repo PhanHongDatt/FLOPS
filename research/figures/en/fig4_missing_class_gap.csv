@@ -1,0 +1,13 @@
+method,clients_without_bus,seed,gap_AP50_bus
+A0c,3,42,0.0314
+A0c,3,123,0.0364
+A0c,3,2024,0.0179
+FedProxc,3,42,0.0429
+FedProxc,3,123,0.0845
+P4noKD,3,42,0.0558
+P4noKD,3,123,0.0404
+P4noKD,3,2024,0.0532
+A0c,4,42,0.0407
+A0c,4,123,0.0534
+P4noKD,4,42,0.0792
+P4noKD,4,123,0.0686

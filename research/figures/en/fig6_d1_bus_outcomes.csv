@@ -1,0 +1,16 @@
+run,outcome,count,share
+"S1b5 (P4noKD r20, 1597 GT bus)",tp,565,0.3538
+"S1b5 (P4noKD r20, 1597 GT bus)",confused_car,264,0.1653
+"S1b5 (P4noKD r20, 1597 GT bus)",confused_truck,179,0.1121
+"S1b5 (P4noKD r20, 1597 GT bus)",missed,435,0.2724
+"S1b5 (P4noKD r20, 1597 GT bus)",low_score,154,0.0964
+pooled (P4noKD r20),tp,834,0.5226
+pooled (P4noKD r20),confused_car,159,0.0996
+pooled (P4noKD r20),confused_truck,120,0.0752
+pooled (P4noKD r20),missed,295,0.1848
+pooled (P4noKD r20),low_score,188,0.1178
+pooled (A0c r20),tp,643,0.4026
+pooled (A0c r20),confused_car,287,0.1797
+pooled (A0c r20),confused_truck,161,0.1008
+pooled (A0c r20),missed,409,0.2561
+pooled (A0c r20),low_score,97,0.0607

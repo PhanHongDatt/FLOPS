@@ -43,8 +43,8 @@ Report every class for every arm; a failure of any rule is recorded as a negativ
 5 sessions × 2 arms, ~2.1–2.5 h per arm + ~0.3 h setup → ~25 GPU-h on T4 ×2. goshihayashi s17a_g, s17b_g, s17e_g
 (max 2 concurrent, s17e_g after one finishes); phdatt s17c, s17d.
 
-## Results (2026-10-19; s17a–s17d, s17e_g still running)
-All 8 arms completed. A1c trace: `class_count_weighted` on the 4 COCO rows of every level, every round; FedProxc ran
+## Results (2026-10-19; s17a–s17e)
+All 10 arms completed. A1c trace: `class_count_weighted` on the 4 COCO rows of every level, every round; FedProxc ran
 FedProxClient with mu = 0.01. Mean of rounds 10/20, S1b5-3k, mean ± std over seeds 42/123/2024:
 
 | Arm | mAP50 | AP50 bus | car | truck | motorcycle | FN bus |
@@ -59,12 +59,13 @@ FedProxClient with mu = 0.01. Mean of rounds 10/20, S1b5-3k, mean ± std over se
   P4noKD is ahead on every class in every seed against both.
 - Both baselines are slightly **below** FedAvg on bus in every seed (A1c −0.031 / −0.013 / −0.042;
   FedProxc −0.016 / −0.040 / −0.021): neither class-count weighting nor the proximal term helps here.
-- **Rule 3 (IID), 2 of 3 seeds:** pooled P4noKD − A0c mAP50 +0.108 (42), +0.104 (123); bus +0.130 / +0.128.
-  Pending seed 2024 (s17e_g).
+- **Rule 3 (IID) met, 3 of 3 seeds:** pooled P4noKD − A0c mAP50 +0.108 / +0.104 / +0.112 (seeds 42 / 123 / 2024),
+  bus +0.130 / +0.128 / +0.121. P4noKD does not degrade the IID condition.
 
 ### Reading
-Observation, not a causal claim: P4noKD's gain on the IID re-split (~+0.106 mAP50, +0.129 bus) is as large as
-on S1b5 (+0.097, +0.105). The missing-class gap (pooled − S1b5, AP50 bus) is 0.031 / 0.036 for A0c and
-0.056 / 0.040 for P4noKD (seeds 42 / 123): it is **not reduced**. P4noKD is a better federated training recipe
+Observation, not a causal claim: P4noKD's gain on the IID re-split (+0.108 mAP50, +0.126 bus, mean of 3 seeds) is as large as
+on S1b5 (+0.097, +0.105). The missing-class gap (pooled − S1b5, AP50 bus) is
+0.056 / 0.040 / 0.053 for P4noKD vs 0.031 / 0.036 / 0.018 for A0c (seeds 42 / 123 / 2024): it is **not reduced**
+in any seed. P4noKD is a better federated training recipe
 for this detector in general, not a missing-class remedy — consistent with ADR-020 (P5f) and section 22
 ("shared representations dominate degradation").
