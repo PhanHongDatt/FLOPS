@@ -1343,73 +1343,89 @@ experiments:
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: goshihayashi/flops-s17e-pooled-s2024
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4351, AP50_bus: 0.4173, AP50_car: 0.6961, AP50_truck: 0.4282, AP50_motorcycle: 0.1988, FN_bus: 1051.5}
 - id: EXP-2026-10-17-S17-P4noKD-s5pooled-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: goshihayashi/flops-s17e-pooled-s2024
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.5467, AP50_bus: 0.5385, AP50_car: 0.7382, AP50_truck: 0.5458, AP50_motorcycle: 0.3642, FN_bus: 838.5}
 - id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed42
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s18a-severity-s42
   decision_rule: ADR-022 pre-registered reading (R1-R3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4248, AP50_bus: 0.3729, AP50_car: 0.6933, AP50_truck: 0.414, AP50_motorcycle: 0.2191, FN_bus: 1558.0}
 - id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed42
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s18a-severity-s42
   decision_rule: ADR-022 pre-registered reading (R1-R3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.5196, AP50_bus: 0.464, AP50_car: 0.7327, AP50_truck: 0.5099, AP50_motorcycle: 0.3718, FN_bus: 1457.5}
 - id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed42
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s18a-severity-s42
   decision_rule: ADR-022 pre-registered reading (R1-R3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4309, AP50_bus: 0.4094, AP50_car: 0.6937, AP50_truck: 0.4222, AP50_motorcycle: 0.1983, FN_bus: 1078.0}
 - id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed123
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: phdatt/flops-s18b-severity-s123
   decision_rule: ADR-022 pre-registered reading (R1-R3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4221, AP50_bus: 0.3611, AP50_car: 0.695, AP50_truck: 0.4058, AP50_motorcycle: 0.2266, FN_bus: 1522.0}
 - id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed123
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: phdatt/flops-s18b-severity-s123
   decision_rule: ADR-022 pre-registered reading (R1-R3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.5234, AP50_bus: 0.4739, AP50_car: 0.7339, AP50_truck: 0.5238, AP50_motorcycle: 0.3618, FN_bus: 1410.5}
 - id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed123
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: phdatt/flops-s18b-severity-s123
   decision_rule: ADR-022 pre-registered reading (R1-R3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4437, AP50_bus: 0.4222, AP50_car: 0.6962, AP50_truck: 0.4247, AP50_motorcycle: 0.2317, FN_bus: 1018.5}
 - id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed2024
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
