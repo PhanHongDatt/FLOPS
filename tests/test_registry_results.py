@@ -48,3 +48,29 @@ def test_gap_is_pooled_minus_scenario_paired_by_seed(tmp_path):
     assert {s: round(v, 4) for s, v in gap_by_seed(runs, "A0c", "s5").items()} == {42: 0.06}
     assert {s: round(v, 4) for s, v in gap_by_seed(runs, "A0c", "bus1").items()} == {42: 0.08}
     assert gap_by_seed(runs, "P5f", "s5") == {}                      # no pooled partner -> no gap
+
+
+def test_operating_metrics_are_merged_and_rule_metrics_win(tmp_path):
+    reg = {"experiments": [
+        {"id": "EXP-7-S18-A0c-s5bus1-y11s-seed123", "method": "A0c", "scenario": "S1b5-bus1-3k, YOLO11s",
+         "status": "completed", "seed": 123,
+         "results": {"rule_mean_r10_20": {"AP50_bus": 0.36, "FN_bus": 1522.0},
+                     "operating_r10_20": {"recall_bus": 0.064, "FN_bus": 9.0}}}]}
+    p = tmp_path / "registry.yaml"
+    p.write_text(yaml.safe_dump(reg), encoding="utf-8")
+    m = load_runs(p)[0].metrics
+    assert m["recall_bus"] == 0.064 and m["FN_bus"] == 1522.0 and m["AP50_bus"] == 0.36
+
+
+def test_backfill_inserts_one_line_at_the_end_of_results():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("bf", Path(__file__).parents[1] / "scripts" / "backfill_operating_metrics.py")
+    bf = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bf)
+    text = ("experiments:\n- id: EXP-A\n  status: completed\n  results:\n    rule_mean_r10_20:\n      AP50_bus: 0.38\n"
+            "  interpretation: x\n- id: EXP-B\n  results:\n    rule_mean_r10_20: {AP50_bus: 0.4}\n")
+    vals = {k: 1.0 for k in bf.KEYS}
+    out = bf.insert_block(bf.insert_block(text, "EXP-A", vals), "EXP-A", vals)     # idempotent
+    a = yaml.safe_load(out)["experiments"][0]
+    assert out.count("operating_r10_20") == 1 and a["interpretation"] == "x"
+    assert a["results"]["operating_r10_20"]["recall_bus"] == 1.0 and a["results"]["rule_mean_r10_20"]["AP50_bus"] == 0.38

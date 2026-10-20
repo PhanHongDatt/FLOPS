@@ -211,6 +211,14 @@ Nguồn: `S16-*`, `S17-*`, ADR-021. P4noKD hơn cả ba ở **mọi lớp, mọi
 **Trường hợp IID (pooled):** P4noKD − A0c = mAP50 +0,108 / +0,104 / +0,112, bus +0,130 / +0,128 / +0,121
 (seed 42 / 123 / 2024) → **không làm IID kém đi, đạt 3/3 seed** (luật 3, ADR-021).
 
+### 6.4 Kiểm tra giả thuyết "lệch bộ phân loại" (ADR-020, seed 42)
+
+| Thử nghiệm | Kết quả | Kết luận |
+|---|---|---|
+| D1 trên P4noKD vòng 20 (1.597 bus) | S1b5 − pooled: nhầm car + truck **+164**, không phát hiện **+140**, điểm thấp −34 | Ủng hộ yếu: gần một nửa phần dôi là "không phát hiện" |
+| N1 (CCVR) | mAP50 0,557 → 0,448; bus 0,530 → 0,412; FP bus 205 → 364.302 | Bác bỏ (lỗi thiết kế tỉ lệ mẫu ảo nền/dương, không tinh chỉnh lại) |
+| P5f (đóng băng phân loại) | bus +0,005 so với P4noKD (cần +0,010); vòng 20 trùng P4noKD (0,530 vs 0,530) | Không phải đóng góp riêng cho thiếu lớp |
+
 ### 6.5 Mức độ thiếu và FedProx (ADR-022; seed 42 / 123, seed 2024 **[CHỜ s18c]**)
 
 Kiểm tra partition (log phiên): bus1 có bus = 0 ở C0–C3, 2.628 box ở C4; truck vẫn vắng C3; cùng 15.000 ảnh.
@@ -242,13 +250,80 @@ Kiểm tra partition (log phiên): bus1 có bus = 0 ở C0–C3, 2.628 box ở C
 
 Nguồn: `S18-*`, ADR-022; hình `research/figures/fig3_bus_vs_severity`, `fig4_missing_class_gap`.
 
-### 6.4 Kiểm tra giả thuyết "lệch bộ phân loại" (ADR-020, seed 42)
+### 6.6 Ở ngưỡng vận hành, thiệt hại lớn hơn nhiều so với AP50 (phân tích khám phá)
 
-| Thử nghiệm | Kết quả | Kết luận |
-|---|---|---|
-| D1 trên P4noKD vòng 20 (1.597 bus) | S1b5 − pooled: nhầm car + truck **+164**, không phát hiện **+140**, điểm thấp −34 | Ủng hộ yếu: gần một nửa phần dôi là "không phát hiện" |
-| N1 (CCVR) | mAP50 0,557 → 0,448; bus 0,530 → 0,412; FP bus 205 → 364.302 | Bác bỏ (lỗi thiết kế tỉ lệ mẫu ảo nền/dương, không tinh chỉnh lại) |
-| P5f (đóng băng phân loại) | bus +0,005 so với P4noKD (cần +0,010); vòng 20 trùng P4noKD (0,530 vs 0,530) | Không phải đóng góp riêng cho thiếu lớp |
+Mỗi run ghi TP/FP/FN, precision, recall theo lớp tại `operating_conf = 0,25` (cùng evaluator, cùng quy tắc trung bình
+vòng 10/20; trường `results.operating_r10_20` trong registry). Đây **không phải tiêu chí đăng ký trước** → chỉ là quan sát.
+
+**Bus ở ngưỡng 0,25 (seed 42 / 123 / 2024; mức 4/5 chỉ seed 42 / 123):**
+
+| Phương pháp | Kịch bản | Recall bus | Precision bus | TP bus (/1.597) | FP bus |
+|---|---|---|---|---|---|
+| A0c | 0/5 | 0,365 / 0,376 / 0,362 | 0,61 / 0,56 / 0,62 | 550 / 586 / 546 | 804 / 930 / 794 |
+| A0c | 3/5 | 0,164 / 0,128 / 0,188 | 0,81 / 0,87 / 0,82 | 210 / 163 / 233 | 86 / 57 / 74 |
+| A0c | 4/5 | **0,030 / 0,064** | 0,94 / 0,94 | **39 / 75** | 12 / 29 |
+| P4noKD | 0/5 | 0,487 / 0,489 / 0,480 | 0,61 / 0,62 / 0,62 | 752 / 776 / 758 | 767 / 826 / 834 |
+| P4noKD | 3/5 | 0,293 / 0,240 / 0,288 | 0,82 / 0,88 / 0,81 | 400 / 335 / 386 | 136 / 110 / 124 |
+| P4noKD | 4/5 | 0,104 / 0,142 | 0,95 / 0,96 | 140 / 186 | 39 / 47 |
+| FedProxc | 0/5 | 0,346 / 0,383 | 0,61 / 0,59 | 519 / 578 | 714 / 866 |
+| FedProxc | 3/5 | 0,176 / 0,126 / 0,159 | 0,78 / 0,78 / 0,86 | 184 / 158 / 174 | 83 / 63 / 56 |
+| A1c | 3/5 | 0,238 / 0,189 / 0,280 | 0,68 / 0,78 / 0,60 | 277 / 225 / 355 | 284 / 152 / 580 |
+
+**Tỉ lệ giữ lại so với pooled (cùng seed, trung bình):**
+
+| Phương pháp | AP50 bus ở 3/5 | Recall bus ở 3/5 | AP50 bus ở 4/5 | Recall bus ở 4/5 |
+|---|---|---|---|---|
+| A0c | 93 % | **44 %** | 89 % | **13 %** |
+| P4noKD | 91 % | 56 % | 86 % | 25 % |
+
+- AP50 (không phụ thuộc ngưỡng) chỉ giảm 7–14 %, nhưng ở ngưỡng 0,25 mô hình **gần như ngừng dự đoán bus**: recall
+  A0c giảm 56 % (3/5) và 87 % (4/5), trong khi precision tăng lên 0,94. Mô hình trở nên rất "dè dặt" với bus.
+- Diễn giải (giả thuyết, chưa kiểm chứng): client không có bus học bus như nền → **điểm tin cậy bus bị đè xuống**, còn
+  thứ tự xếp hạng phần lớn được giữ — nên AP50 che phần lớn thiệt hại. Cần histogram điểm tin cậy của bus thật để xác nhận.
+- P4noKD giữ recall tốt hơn (25 % so với 13 % ở 4/5) và tìm đúng gấp 2,5–3,6 lần số bus, nhưng vẫn mất phần lớn recall.
+- A1c tăng recall so với A0c ở 3/5 nhưng FP tăng mạnh hơn → AP50 bus thấp hơn (mục 6.3).
+- Lớp khác cũng dịch chuyển ở ngưỡng 0,25 khi bus bị thiếu (A0c, pooled → 3/5): recall car 0,62 → 0,69, motorcycle
+  0,30 → 0,35, truck 0,38 → 0,33 (P4noKD tương tự). Các thay đổi này nhỏ hơn nhiều so với bus (−56 %) và AP50 của car,
+  motorcycle gần như không đổi (mục 6.5) → chỉ báo cáo, không diễn giải.
+
+Nguồn: `results.operating_r10_20` của 29 run (thêm bằng `scripts/backfill_operating_metrics.py`; mỗi run được đối
+chiếu AP50 bus với registry, sai lệch ≤ 1e-3); hình `fig7`, `fig8`.
+
+### 6.7 Danh mục hình (PNG, `research/figures/`; bản tiếng Anh trong `research/figures/en/`)
+
+Mọi hình vẽ bằng `python scripts/plot_results.py` chỉ từ registry; mỗi hình có file CSV cùng tên chứa đúng số liệu được vẽ.
+
+![Hình 1](../research/figures/fig1_baselines_per_class.png)
+**Hình 1.** AP50 theo lớp trên S1b5 (3/5 client thiếu bus), 3 seed. P4noKD dẫn ở mọi lớp: mAP50 0,531 so với
+0,434 (A0c), 0,428 (A1c), 0,424 (FedProxc); bus 0,492 so với 0,387 / 0,358 / 0,361.
+
+![Hình 2](../research/figures/fig2_paired_deltas.png)
+**Hình 2.** P4noKD − baseline, ghép cặp theo seed: dương ở 18/18 cặp. mAP50 +0,091 đến +0,117; AP50 bus +0,086 đến
++0,164.
+
+![Hình 3](../research/figures/fig3_bus_vs_severity.png)
+**Hình 3.** AP50 bus theo số client thiếu bus (seed chung ở mọi điểm, n = 2). A0c 0,414 → 0,380 → 0,367; P4noKD
+0,543 → 0,495 → 0,469; FedProxc 0,416 → 0,352.
+
+![Hình 4](../research/figures/fig4_missing_class_gap.png)
+**Hình 4.** Gap thiếu lớp = AP50 bus(pooled) − AP50 bus(kịch bản). Ở 3/5: A0c +0,029 (n = 3), FedProxc +0,064 (n = 2),
+P4noKD +0,050 (n = 3); ở 4/5: A0c +0,047, P4noKD +0,074 (n = 2). Không phương pháp nào có gap nhỏ hơn FedAvg.
+
+![Hình 5](../research/figures/fig5_ablation_seed42.png)
+**Hình 5.** Đóng góp từng thành phần (seed 42). mAP50 0,434 (A0c) → 0,467 (P3) → 0,493 (P3LR) → 0,533 (P4) → 0,529
+(P4noKD); bus 0,382 → 0,428 → 0,454 → 0,496 → 0,487. Cosine LR và RFS tạo phần lớn lợi ích; bỏ KD chỉ mất 0,008 bus.
+
+![Hình 6](../research/figures/fig6_d1_bus_outcomes.png)
+**Hình 6.** Kết cục của 1.597 bus thật ở vòng 20 (ngưỡng 0,25). P4noKD trên S1b5 phát hiện đúng 35 % so với 52 % trên
+pooled; phần chênh chủ yếu là nhầm car/truck (28 % so với 17 %) và không phát hiện (27 % so với 18 %).
+
+![Hình 7](../research/figures/fig7_operating_recall_precision.png)
+**Hình 7.** Recall và precision bus ở ngưỡng 0,25 theo số client thiếu bus (n = 2). Recall A0c 0,37 → 0,15 → 0,05,
+P4noKD 0,49 → 0,27 → 0,12; precision tăng từ ≈ 0,6 lên ≈ 0,95.
+
+![Hình 8](../research/figures/fig8_ap_vs_recall_retention.png)
+**Hình 8.** Tỉ lệ giữ lại so với pooled, ghép cặp theo seed. A0c: AP50 bus giữ 93 % / 89 % nhưng recall bus chỉ còn
+44 % / 13 % (3/5 / 4/5); P4noKD: 91 % / 86 % so với 56 % / 25 %. AP50 che phần lớn thiệt hại ở ngưỡng vận hành.
 
 ---
 
@@ -265,7 +340,10 @@ Nguồn: `S18-*`, ADR-022; hình `research/figures/fig3_bus_vs_severity`, `fig4_
    không thu hẹp gap (0,043 / 0,085).
 4. **Bộ phân loại không phải nút thắt chính.** Hai can thiệp vào phân loại (N1, P5f) không thu hẹp gap; phần biểu diễn
    dùng chung chi phối — một kết quả âm hợp lệ.
-5. **Cách diễn giải đúng:** đây là quan sát có đối chứng, chưa phải kết luận nhân quả đầy đủ (chưa có bằng chứng
+5. **AP50 đánh giá thấp thiệt hại.** Ở ngưỡng 0,25, recall bus của FedAvg chỉ còn 44 % (3/5) và 13 % (4/5) so với
+   pooled, trong khi AP50 còn 93 % / 89 % (mục 6.6). Thiếu lớp chủ yếu **đè điểm tin cậy** của lớp đó — quan sát khám
+   phá, cần histogram điểm để xác nhận.
+6. **Cách diễn giải đúng:** đây là quan sát có đối chứng, chưa phải kết luận nhân quả đầy đủ (chưa có bằng chứng
    tham số F1–F3).
 
 ---
@@ -299,6 +377,7 @@ Nguồn: `S18-*`, ADR-022; hình `research/figures/fig3_bus_vs_severity`, `fig4_
 | A0c, P4noKD ở mức bus 4/5 × 3 seed (s18a–c) | 2/3 seed: R1 đạt, R2 không; seed 2024 **[CHỜ s18c]** | Thiệt hại có tăng theo mức độ thiếu? | R1: gap A0c ở 4/5 > ở 3/5, cả 3 seed |
 | | | P4noKD có giảm thiệt hại khi thiếu nặng hơn? | R2: gap P4noKD < gap A0c ở 4/5, cả 3 seed |
 | FedProxc pooled × 3 seed (s18a–c) | 2/3 seed: R3 không đạt; seed 2024 **[CHỜ s18c]** | FedProx có giảm gap không? | R3: gap FedProxc < gap A0c ở 3/5, cả 3 seed |
+| Histogram điểm tin cậy bus thật theo kịch bản (checkpoint có sẵn) | Chưa làm | Xác nhận giả thuyết "đè điểm" (mục 6.6) | Khám phá; ≈ 1 GPU-giờ |
 | ADR chốt G4/G5 | Chưa làm | Ghi chính thức Gate C và lựa chọn thay thế | – |
 | Chạy tập trung YOLO11s (tùy chọn) | Chưa làm | Mốc trần | – |
 
@@ -310,7 +389,7 @@ Nguồn: `S18-*`, ADR-022; hình `research/figures/fig3_bus_vs_severity`, `fig4_
 
 ---
 
-## 10. Gợi ý kịch bản trình bày (≈ 12 slide)
+## 10. Gợi ý kịch bản trình bày (≈ 13 slide)
 
 1. **Bài toán** — ảnh minh họa client không có bus; câu hỏi nghiên cứu (mục 1).
 2. **Vì sao quan trọng** — non-IID làm FL tụt; G2 0,488 vs G3 0,377 (mục 2).
@@ -323,4 +402,5 @@ Nguồn: `S18-*`, ADR-022; hình `research/figures/fig3_bus_vs_severity`, `fig4_
 9. **So với baseline 3 seed** — bảng mean ± std và chênh lệch từng seed.
 10. **Phát hiện chính** — gap không giảm: P4noKD tốt hơn *nói chung*; ADR-020 (D1, N1, P5f).
 11. **Mức độ thiếu (4/5) và FedProx trên IID** — hình fig3 + bảng gap 6.5: gap tăng theo mức thiếu; không phương pháp nào thu hẹp.
-12. **Kết luận, hạn chế, hướng tiếp** (mục 7–9).
+12. **AP50 che thiệt hại** — hình 8: recall bus còn 13 % trong khi AP50 còn 89 % (A0c, 4/5).
+13. **Kết luận, hạn chế, hướng tiếp** (mục 7–9).

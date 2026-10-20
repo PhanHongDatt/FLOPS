@@ -784,6 +784,7 @@ experiments:
       AP50_motorcycle: 0.2969
       FP_bus: 718.0
       FN_bus: 1204.0
+    operating_r10_20: {TP_bus: 399.5, FP_bus: 619.5, FN_bus: 1197.5, precision_bus: 0.6543, precision_car: 0.7878, precision_truck: 0.5452, precision_motorcycle: 0.4396, recall_bus: 0.3522, recall_car: 0.6141, recall_truck: 0.4358, recall_motorcycle: 0.2993}
   interpretation: 'Round 20: mAP50 0.472, AP50 bus 0.425, car 0.703, truck 0.462, motorcycle 0.297 — +0.087 mAP50
     and +0.092 AP50 bus over P3 on YOLOv8n at round 20 (same scenario). FN bus @0.25 rises from 1,051 (round 0)
     to 1,204 while AP rises: scores become more conservative — operating threshold, not ranking. Descriptive (no
@@ -831,6 +832,7 @@ experiments:
       AP50_motorcycle: 0.2235
       FP_bus: 85.5
       FN_bus: 1386.5
+    operating_r10_20: {TP_bus: 210.5, FP_bus: 85.5, FN_bus: 1386.5, precision_bus: 0.8078, precision_car: 0.6569, precision_truck: 0.7009, precision_motorcycle: 0.2124, recall_bus: 0.1644, recall_car: 0.6823, recall_truck: 0.3159, recall_motorcycle: 0.3684}
   interpretation: 'Control. Very conservative: FP bus 85, FN bus 1,387 (rule mean).'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
     args
@@ -877,6 +879,7 @@ experiments:
       AP50_motorcycle: 0.3418
       FP_bus: 576.0
       FN_bus: 1134.5
+    operating_r10_20: {TP_bus: 462.5, FP_bus: 576.0, FN_bus: 1134.5, precision_bus: 0.6607, precision_car: 0.8076, precision_truck: 0.5489, precision_motorcycle: 0.4984, recall_bus: 0.3669, recall_car: 0.6124, recall_truck: 0.4553, recall_motorcycle: 0.3496}
   interpretation: '② kept: P3LR - P3 = +0.026 AP50 bus, +0.027 mAP50.'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
     args
@@ -926,6 +929,7 @@ experiments:
       AP50_motorcycle: 0.3928
       FP_bus: 607.5
       FN_bus: 1091.0
+    operating_r10_20: {TP_bus: 506.0, FP_bus: 607.5, FN_bus: 1091.0, precision_bus: 0.6541, precision_car: 0.7949, precision_truck: 0.5841, precision_motorcycle: 0.5615, recall_bus: 0.4073, recall_car: 0.6427, recall_truck: 0.4735, recall_motorcycle: 0.3872}
   interpretation: 'vs P3 (rule 10/20): AP50 bus +0.068, motorcycle +0.117, truck +0.052, mAP50 +0.066; FN bus @0.25
     1,204 -> 1,069 at round 20. ② and ③ not separable until P3LR finishes (ADR-019 rule for ③ is P4 vs P3LR).'
 - id: EXP-2026-10-09-S12-P4noKD-y11s
@@ -971,6 +975,7 @@ experiments:
       AP50_motorcycle: 0.3647
       FP_bus: 136.0
       FN_bus: 1197.5
+    operating_r10_20: {TP_bus: 399.5, FP_bus: 136.0, FN_bus: 1197.5, precision_bus: 0.8157, precision_car: 0.6700, precision_truck: 0.7458, precision_motorcycle: 0.3382, recall_bus: 0.2933, recall_car: 0.7096, recall_truck: 0.3960, recall_motorcycle: 0.4396}
   interpretation: 'Selected by the ADR-019 addendum: P4 - P4noKD = +0.008 AP50 bus (< 0.010) -> KD not needed once
     ② and ③ are present. P4noKD - A0c = +0.105 AP50 bus, +0.095 mAP50; FP bus 136 vs 608 for P4.'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
@@ -1084,6 +1089,7 @@ experiments:
       AP50_motorcycle: 0.2285
       FP_bus: 804.0
       FN_bus: 1047.5
+    operating_r10_20: {TP_bus: 549.5, FP_bus: 804.0, FN_bus: 1047.5, precision_bus: 0.6116, precision_car: 0.7591, precision_truck: 0.5970, precision_motorcycle: 0.3349, recall_bus: 0.3654, recall_car: 0.6299, recall_truck: 0.3792, recall_motorcycle: 0.2998}
   interpretation: 'Missing-class gap of A0c (pooled - S1b5): +0.031 AP50 bus (cf. YOLOv8n D3 +0.029).'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; pooled bus 499-550 boxes per client
 - id: EXP-2026-10-11-S13-P4noKD-y11s-pooled
@@ -1129,6 +1135,7 @@ experiments:
       AP50_motorcycle: 0.3598
       FP_bus: 767.0
       FN_bus: 845.0
+    operating_r10_20: {TP_bus: 752.0, FP_bus: 767.0, FN_bus: 845.0, precision_bus: 0.6134, precision_car: 0.8073, precision_truck: 0.6796, precision_motorcycle: 0.4695, recall_bus: 0.4869, recall_car: 0.6436, recall_truck: 0.4602, recall_motorcycle: 0.3955}
   interpretation: 'Gap with P4noKD: +0.056 AP50 bus — the gap does NOT shrink (rule failed). P4noKD gains +0.130
     bus on pooled vs +0.105 on S1b5: a general improvement, not missing-class specific. IID not harmed: pooled mAP50
     +0.108 over A0c.'
@@ -1177,6 +1184,7 @@ experiments:
   results:
     rule_mean_r10_20: {mAP50: 0.5285, AP50_bus: 0.4925, AP50_car: 0.7328, AP50_truck: 0.5297, AP50_motorcycle: 0.359, FP_bus: 233.5, FN_bus: 1169.5}
     round_20: {mAP50: 0.5558, AP50_bus: 0.5296, AP50_car: 0.7451, AP50_truck: 0.5525, AP50_motorcycle: 0.3959}
+    operating_r10_20: {TP_bus: 427.5, FP_bus: 233.5, FN_bus: 1169.5, precision_bus: 0.7783, precision_car: 0.7290, precision_truck: 0.7370, precision_motorcycle: 0.3812, recall_bus: 0.3245, recall_car: 0.6856, recall_truck: 0.4037, recall_motorcycle: 0.4428}
   interpretation: 'vs P4noKD (mean r10/20): bus +0.005 (rule 2 needs +0.010: FAIL), gap 0.056 -> 0.044 (shrinks 0.012:
     pass, but 0.007 of it is pooled getting worse), mAP50 -0.001, car -0.002 (pass). Not a missing-class-specific
     contribution. Round 20 identical to P4noKD (bus 0.530 vs 0.530). Single seed; differences within seed noise.'
@@ -1192,6 +1200,7 @@ experiments:
   results:
     rule_mean_r10_20: {mAP50: 0.5442, AP50_bus: 0.536, AP50_car: 0.7373, AP50_truck: 0.5447, AP50_motorcycle: 0.3588}
     round_20: {mAP50: 0.5646, AP50_bus: 0.5614, AP50_car: 0.7484}
+    operating_r10_20: {TP_bus: 760.5, FP_bus: 806.0, FN_bus: 836.5, precision_bus: 0.6098, precision_car: 0.8249, precision_truck: 0.6917, precision_motorcycle: 0.4817, recall_bus: 0.4853, recall_car: 0.6326, recall_truck: 0.4456, recall_motorcycle: 0.3993}
   interpretation: Pooled reference for P5f; within 0.008 of P4noKD pooled on every target.
 - id: EXP-2026-10-14-S16-A0c-y11s-seed123
   gate: 'G6 (phase 2: seeds)'
@@ -1205,6 +1214,7 @@ experiments:
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
   results:
     rule_mean_r10_20: {mAP50: 0.4289, AP50_bus: 0.3781, AP50_car: 0.6979, AP50_truck: 0.417, AP50_motorcycle: 0.2225, FN_bus: 1434.0}
+    operating_r10_20: {TP_bus: 163.0, FP_bus: 57.0, FN_bus: 1434.0, precision_bus: 0.8652, precision_car: 0.6317, precision_truck: 0.6511, precision_motorcycle: 0.2368, recall_bus: 0.1277, recall_car: 0.6941, recall_truck: 0.3484, recall_motorcycle: 0.3352}
 - id: EXP-2026-10-14-S16-P4noKD-y11s-seed123
   gate: 'G6 (phase 2: seeds)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1217,6 +1227,7 @@ experiments:
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
   results:
     rule_mean_r10_20: {mAP50: 0.5337, AP50_bus: 0.5021, AP50_car: 0.7347, AP50_truck: 0.5309, AP50_motorcycle: 0.3671, FN_bus: 1262.0}
+    operating_r10_20: {TP_bus: 335.0, FP_bus: 110.5, FN_bus: 1262.0, precision_bus: 0.8831, precision_car: 0.7206, precision_truck: 0.7086, precision_motorcycle: 0.3363, recall_bus: 0.2398, recall_car: 0.6897, recall_truck: 0.4168, recall_motorcycle: 0.4558}
   interpretation: 'Seed 123: P4noKD - A0c = mAP50 +0.105, bus +0.124, car +0.037, truck +0.114, motorcycle +0.145 (seed 42: +0.095 / +0.105). Rule holds for 2 of 3 seeds so far.'
 - id: EXP-2026-10-14-S16-A0c-y11s-seed2024
   gate: 'G6 (phase 2: seeds)'
@@ -1231,6 +1242,7 @@ experiments:
   notes2: Launched 2026-10-15 on goshihayashi (flops-s16c-a0c-s2024).
   results:
     rule_mean_r10_20: {mAP50: 0.4386, AP50_bus: 0.3994, AP50_car: 0.6977, AP50_truck: 0.4328, AP50_motorcycle: 0.2243, FN_bus: 1364.0}
+    operating_r10_20: {TP_bus: 233.0, FP_bus: 74.5, FN_bus: 1364.0, precision_bus: 0.8207, precision_car: 0.6171, precision_truck: 0.6853, precision_motorcycle: 0.2285, recall_bus: 0.1878, recall_car: 0.6995, recall_truck: 0.3330, recall_motorcycle: 0.3540}
 - id: EXP-2026-10-14-S16-P4noKD-y11s-seed2024
   gate: 'G6 (phase 2: seeds)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1245,6 +1257,7 @@ experiments:
   results:
     rule_mean_r10_20: {mAP50: 0.5295, AP50_bus: 0.4853, AP50_car: 0.7354, AP50_truck: 0.5323, AP50_motorcycle: 0.3651, FN_bus: 1211.5}
     delta_vs_A0c_same_seed: {mAP50: +0.091, AP50_bus: +0.086}
+    operating_r10_20: {TP_bus: 385.5, FP_bus: 123.5, FN_bus: 1211.5, precision_bus: 0.8134, precision_car: 0.6894, precision_truck: 0.7547, precision_motorcycle: 0.3203, recall_bus: 0.2880, recall_car: 0.7011, recall_truck: 0.3787, recall_motorcycle: 0.4735}
   phase2_conclusion: >-
     Decision rule met in 3/3 seeds (42, 123, 2024). Mean r10/20 over 3 seeds, A0c vs P4noKD (delta mean+-std):
     mAP50 0.4339+-0.0048 vs 0.5309+-0.0024 (+0.097+-0.007); AP50 bus 0.3866+-0.0113 vs 0.4916+-0.0092
@@ -1261,6 +1274,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4186, AP50_bus: 0.3512, AP50_car: 0.6916, AP50_truck: 0.427, AP50_motorcycle: 0.2046, FN_bus: 1320.0}
+    operating_r10_20: {TP_bus: 277.0, FP_bus: 283.5, FN_bus: 1320.0, precision_bus: 0.6845, precision_car: 0.6833, precision_truck: 0.6870, precision_motorcycle: 0.2630, recall_bus: 0.2380, recall_car: 0.6692, recall_truck: 0.3256, recall_motorcycle: 0.3274}
 - id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed42
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1272,6 +1286,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4283, AP50_bus: 0.3665, AP50_car: 0.6937, AP50_truck: 0.4272, AP50_motorcycle: 0.2257, FN_bus: 1413.0}
+    operating_r10_20: {TP_bus: 184.0, FP_bus: 83.0, FN_bus: 1413.0, precision_bus: 0.7790, precision_car: 0.6059, precision_truck: 0.6866, precision_motorcycle: 0.2065, recall_bus: 0.1761, recall_car: 0.7002, recall_truck: 0.3310, recall_motorcycle: 0.3772}
 - id: EXP-2026-10-17-S17-A1c-s5-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1283,6 +1298,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4288, AP50_bus: 0.3651, AP50_car: 0.6968, AP50_truck: 0.4258, AP50_motorcycle: 0.2276, FN_bus: 1372.0}
+    operating_r10_20: {TP_bus: 225.0, FP_bus: 151.5, FN_bus: 1372.0, precision_bus: 0.7815, precision_car: 0.6467, precision_truck: 0.6342, precision_motorcycle: 0.2660, recall_bus: 0.1892, recall_car: 0.6854, recall_truck: 0.3615, recall_motorcycle: 0.3507}
 - id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1294,6 +1310,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.417, AP50_bus: 0.3377, AP50_car: 0.6942, AP50_truck: 0.432, AP50_motorcycle: 0.2039, FN_bus: 1439.0}
+    operating_r10_20: {TP_bus: 158.0, FP_bus: 63.0, FN_bus: 1439.0, precision_bus: 0.7798, precision_car: 0.6142, precision_truck: 0.6720, precision_motorcycle: 0.2415, recall_bus: 0.1259, recall_car: 0.6982, recall_truck: 0.3405, recall_motorcycle: 0.3487}
 - id: EXP-2026-10-17-S17-A1c-s5-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1305,6 +1322,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4355, AP50_bus: 0.3578, AP50_car: 0.6961, AP50_truck: 0.4222, AP50_motorcycle: 0.2658, FN_bus: 1242.0}
+    operating_r10_20: {TP_bus: 355.0, FP_bus: 579.5, FN_bus: 1242.0, precision_bus: 0.5969, precision_car: 0.6904, precision_truck: 0.7005, precision_motorcycle: 0.3246, recall_bus: 0.2803, recall_car: 0.6682, recall_truck: 0.3073, recall_motorcycle: 0.3285}
 - id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1316,6 +1334,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4274, AP50_bus: 0.3787, AP50_car: 0.6919, AP50_truck: 0.4302, AP50_motorcycle: 0.2087, FN_bus: 1422.5}
+    operating_r10_20: {TP_bus: 174.5, FP_bus: 56.5, FN_bus: 1422.5, precision_bus: 0.8554, precision_car: 0.5760, precision_truck: 0.6391, precision_motorcycle: 0.2234, recall_bus: 0.1587, recall_car: 0.7113, recall_truck: 0.3625, recall_motorcycle: 0.3573}
 - id: EXP-2026-10-17-S17-A0c-s5pooled-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1327,6 +1346,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4419, AP50_bus: 0.4145, AP50_car: 0.6964, AP50_truck: 0.4294, AP50_motorcycle: 0.2275, FN_bus: 1011.5}
+    operating_r10_20: {TP_bus: 585.5, FP_bus: 930.5, FN_bus: 1011.5, precision_bus: 0.5554, precision_car: 0.7856, precision_truck: 0.5824, precision_motorcycle: 0.3316, recall_bus: 0.3760, recall_car: 0.6119, recall_truck: 0.3829, recall_motorcycle: 0.3020}
 - id: EXP-2026-10-17-S17-P4noKD-s5pooled-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1338,6 +1358,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.5463, AP50_bus: 0.5425, AP50_car: 0.738, AP50_truck: 0.5506, AP50_motorcycle: 0.3542, FN_bus: 821.0}
+    operating_r10_20: {TP_bus: 776.0, FP_bus: 826.5, FN_bus: 821.0, precision_bus: 0.6157, precision_car: 0.8374, precision_truck: 0.6843, precision_motorcycle: 0.4970, recall_bus: 0.4889, recall_car: 0.6266, recall_truck: 0.4590, recall_motorcycle: 0.3821}
 - id: EXP-2026-10-17-S17-A0c-s5pooled-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1349,6 +1370,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4351, AP50_bus: 0.4173, AP50_car: 0.6961, AP50_truck: 0.4282, AP50_motorcycle: 0.1988, FN_bus: 1051.5}
+    operating_r10_20: {TP_bus: 545.5, FP_bus: 793.5, FN_bus: 1051.5, precision_bus: 0.6146, precision_car: 0.7737, precision_truck: 0.5857, precision_motorcycle: 0.2761, recall_bus: 0.3618, recall_car: 0.6232, recall_truck: 0.3875, recall_motorcycle: 0.2976}
 - id: EXP-2026-10-17-S17-P4noKD-s5pooled-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1360,6 +1382,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.5467, AP50_bus: 0.5385, AP50_car: 0.7382, AP50_truck: 0.5458, AP50_motorcycle: 0.3642, FN_bus: 838.5}
+    operating_r10_20: {TP_bus: 758.5, FP_bus: 834.5, FN_bus: 838.5, precision_bus: 0.6238, precision_car: 0.8327, precision_truck: 0.6819, precision_motorcycle: 0.5005, recall_bus: 0.4803, recall_car: 0.6303, recall_truck: 0.4575, recall_motorcycle: 0.3761}
 - id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed42
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
@@ -1371,6 +1394,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.4248, AP50_bus: 0.3729, AP50_car: 0.6933, AP50_truck: 0.414, AP50_motorcycle: 0.2191, FN_bus: 1558.0}
+    operating_r10_20: {TP_bus: 39.0, FP_bus: 12.5, FN_bus: 1558.0, precision_bus: 0.9400, precision_car: 0.6808, precision_truck: 0.6689, precision_motorcycle: 0.3024, recall_bus: 0.0301, recall_car: 0.6689, recall_truck: 0.3185, recall_motorcycle: 0.3241}
 - id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed42
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
@@ -1382,6 +1406,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.5196, AP50_bus: 0.464, AP50_car: 0.7327, AP50_truck: 0.5099, AP50_motorcycle: 0.3718, FN_bus: 1457.5}
+    operating_r10_20: {TP_bus: 139.5, FP_bus: 39.0, FN_bus: 1457.5, precision_bus: 0.9493, precision_car: 0.7417, precision_truck: 0.6634, precision_motorcycle: 0.3818, recall_bus: 0.1039, recall_car: 0.6795, recall_truck: 0.4205, recall_motorcycle: 0.4580}
 - id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed42
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1393,6 +1418,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.4309, AP50_bus: 0.4094, AP50_car: 0.6937, AP50_truck: 0.4222, AP50_motorcycle: 0.1983, FN_bus: 1078.0}
+    operating_r10_20: {TP_bus: 519.0, FP_bus: 714.0, FN_bus: 1078.0, precision_bus: 0.6082, precision_car: 0.7649, precision_truck: 0.6094, precision_motorcycle: 0.2829, recall_bus: 0.3460, recall_car: 0.6233, recall_truck: 0.3582, recall_motorcycle: 0.2942}
 - id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed123
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
@@ -1404,6 +1430,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.4221, AP50_bus: 0.3611, AP50_car: 0.695, AP50_truck: 0.4058, AP50_motorcycle: 0.2266, FN_bus: 1522.0}
+    operating_r10_20: {TP_bus: 75.0, FP_bus: 29.0, FN_bus: 1522.0, precision_bus: 0.9373, precision_car: 0.6653, precision_truck: 0.6534, precision_motorcycle: 0.3021, recall_bus: 0.0640, recall_car: 0.6765, recall_truck: 0.3168, recall_motorcycle: 0.3126}
 - id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed123
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
@@ -1415,6 +1442,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.5234, AP50_bus: 0.4739, AP50_car: 0.7339, AP50_truck: 0.5238, AP50_motorcycle: 0.3618, FN_bus: 1410.5}
+    operating_r10_20: {TP_bus: 186.5, FP_bus: 47.0, FN_bus: 1410.5, precision_bus: 0.9549, precision_car: 0.7094, precision_truck: 0.6607, precision_motorcycle: 0.3480, recall_bus: 0.1421, recall_car: 0.6952, recall_truck: 0.4395, recall_motorcycle: 0.4580}
 - id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed123
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1426,6 +1454,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.4437, AP50_bus: 0.4222, AP50_car: 0.6962, AP50_truck: 0.4247, AP50_motorcycle: 0.2317, FN_bus: 1018.5}
+    operating_r10_20: {TP_bus: 578.5, FP_bus: 866.5, FN_bus: 1018.5, precision_bus: 0.5860, precision_car: 0.7725, precision_truck: 0.5800, precision_motorcycle: 0.3783, recall_bus: 0.3829, recall_car: 0.6249, recall_truck: 0.3879, recall_motorcycle: 0.2710}
 - id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed2024
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20

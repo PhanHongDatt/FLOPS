@@ -52,6 +52,11 @@ TEXT = {
         "d1": {"tp": "phát hiện đúng", "confused_car": "nhầm thành car", "confused_truck": "nhầm thành truck",
                "missed": "không phát hiện", "low_score": "điểm thấp"},
         "share": "Tỉ lệ bus thật",
+        "f7_title": "Ở ngưỡng 0.25, recall bus sụp theo số client thiếu bus; precision tăng",
+        "recall": "Recall bus @0.25", "precision": "Precision bus @0.25",
+        "f8_title": "AP50 bus giữ lại {ap:.0f} %, recall bus chỉ còn {rc:.0f} % khi 4/5 client thiếu bus (A0c)",
+        "f8_y": "% so với pooled (cùng seed)",
+        "f8_ap": "AP50 bus", "f8_rc": "Recall bus @0.25",
     },
     "en": {
         "classes": {"mAP50": "mAP50", "AP50_bus": "bus", "AP50_car": "car", "AP50_truck": "truck",
@@ -70,6 +75,11 @@ TEXT = {
         "d1": {"tp": "detected", "confused_car": "as car", "confused_truck": "as truck",
                "missed": "not detected", "low_score": "low score"},
         "share": "Share of ground-truth buses",
+        "f7_title": "At score 0.25, bus recall collapses with the number of clients missing bus; precision rises",
+        "recall": "Bus recall @0.25", "precision": "Bus precision @0.25",
+        "f8_title": "Bus AP50 keeps {ap:.0f} %, bus recall only {rc:.0f} % with 4/5 clients missing bus (A0c)",
+        "f8_y": "% of pooled (same seed)",
+        "f8_ap": "AP50 bus", "f8_rc": "Bus recall @0.25",
     },
 }
 BASELINES = ("A0c", "A1c", "FedProxc")
@@ -198,6 +208,92 @@ def fig_severity(runs: list[Run], t: dict, out: Path) -> None:
     _save(fig, out, "fig3_bus_vs_severity", ["method", "clients_without_bus", "seed", "AP50_bus"], rows)
 
 
+def _common_seeds(runs: list[Run], m: str, key: str) -> set[int]:
+    present = [set(by_seed(runs, m, sc, key)) for sc in MISSING_BUS_CLIENTS]
+    present = [s for s in present if s]
+    return set.intersection(*present) if present else set()
+
+
+def fig_operating(runs: list[Run], t: dict, out: Path) -> None:
+    """Small multiples (recall | precision of bus at conf 0.25) against clients without bus."""
+    fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.8), sharex=True)
+    rows, drawn = [], False
+    for ax, key in zip(axes, ("recall_bus", "precision_bus")):
+        for m in ("A0c", "FedProxc", "P4noKD"):
+            common = _common_seeds(runs, m, key)
+            xs, mus = [], []
+            for sc, k in sorted(MISSING_BUS_CLIENTS.items(), key=lambda kv: kv[1]):
+                vals = {s: v for s, v in by_seed(runs, m, sc, key).items() if s in common}
+                if not vals:
+                    continue
+                ax.scatter([k] * len(vals), list(vals.values()), s=14, color=COLOR[m], alpha=0.5, zorder=3)
+                xs.append(k)
+                mus.append(summary(vals)[0])
+                rows += [[key, m, k, s, f"{v:.4f}"] for s, v in vals.items()]
+            if xs:
+                drawn = True
+                ax.plot(xs, mus, marker=MARKER[m], ms=6.5, color=COLOR[m], mec=SURFACE,
+                        label=f"{m} (n={len(common)})")
+                dy = {"P4noKD": 9, "A0c": -11}.get(m)            # FedProxc sits on A0c: its values are in the CSV
+                for x, y in zip(xs, mus):
+                    if dy is not None:
+                        ax.annotate(f"{y:.2f}", (x, y), xytext=(4, dy), textcoords="offset points", va="center",
+                                    fontsize=8, color=INK)
+        ax.set_title(t["recall" if key == "recall_bus" else "precision"], fontsize=10.5)
+        ax.set_xticks([0, 3, 4], ["0/5", "3/5", "4/5"])
+        ax.set_xlim(-0.4, 4.7)
+        ax.set_xlabel(t["f3_x"])
+    if not drawn:
+        plt.close(fig)
+        return
+    axes[0].set_ylim(0, None)
+    axes[1].set_ylim(None, 1.02)
+    axes[0].legend(loc="lower left", fontsize=8.5)
+    fig.suptitle(t["f7_title"], x=0.01, ha="left", fontsize=11, fontweight="semibold")
+    fig.tight_layout()
+    _save(fig, out, "fig7_operating_recall_precision", ["metric", "method", "clients_without_bus", "seed", "value"], rows)
+
+
+def _retention(runs: list[Run], m: str, sc: str, key: str) -> dict[int, float]:
+    pooled, other = by_seed(runs, m, "pooled", key), by_seed(runs, m, sc, key)
+    return {s: 100 * other[s] / pooled[s] for s in sorted(pooled.keys() & other.keys()) if pooled[s] > 0}
+
+
+def fig_retention(runs: list[Run], t: dict, out: Path) -> None:
+    """Per method: share of the pooled AP50 bus vs bus recall@0.25 kept at 3/5 and 4/5, paired by seed."""
+    methods = [m for m in ("A0c", "P4noKD") if _retention(runs, m, "s5", "recall_bus")]
+    if not methods:
+        return
+    fig, axes = plt.subplots(1, len(methods), figsize=(8.4, 3.8), sharey=True, squeeze=False)
+    rows, w = [], 0.36
+    for ax, m in zip(axes[0], methods):
+        scs = [sc for sc in ("s5", "bus1") if _retention(runs, m, sc, "recall_bus")]
+        for i, sc in enumerate(scs):
+            for j, (key, label) in enumerate((("AP50_bus", t["f8_ap"]), ("recall_bus", t["f8_rc"]))):
+                r = _retention(runs, m, sc, key)
+                mu, x = summary(r)[0], i + (j - 0.5) * w
+                ax.bar(x, mu, width=w - 0.04, color=COLOR[m], alpha=0.85 if j == 0 else 0.25,
+                       edgecolor=COLOR[m], lw=1, hatch=None if j == 0 else "///",
+                       label=label if i == 0 else None)
+                ax.scatter([x] * len(r), list(r.values()), s=12, color=INK, zorder=3)
+                ax.annotate(f"{mu:.0f} %\nn={len(r)}", (x, max(mu, *r.values())), xytext=(0, 4),
+                            textcoords="offset points", ha="center", fontsize=8, color=INK,
+                            bbox={"fc": SURFACE, "ec": "none", "pad": 0.6})
+                rows += [[m, MISSING_BUS_CLIENTS[sc], key, s, f"{v:.2f}"] for s, v in r.items()]
+        ax.axhline(100, color=INK2, lw=1, ls="--", zorder=1)
+        ax.set_xticks(range(len(scs)), [f"{MISSING_BUS_CLIENTS[sc]}/5" for sc in scs])
+        ax.set_title(m, fontsize=10.5)
+        ax.set_ylim(0, 112)
+        ax.grid(axis="x", visible=False)
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), fontsize=8, ncols=2)
+    axes[0][0].set_ylabel(t["f8_y"])
+    ap = summary(_retention(runs, "A0c", "bus1", "AP50_bus") or {0: 0.0})[0]
+    rc = summary(_retention(runs, "A0c", "bus1", "recall_bus") or {0: 0.0})[0]
+    fig.suptitle(t["f8_title"].format(ap=ap, rc=rc), x=0.01, ha="left", fontsize=11, fontweight="semibold")
+    fig.tight_layout()
+    _save(fig, out, "fig8_ap_vs_recall_retention", ["method", "clients_without_bus", "metric", "seed", "pct_of_pooled"], rows)
+
+
 def fig_gap(runs: list[Run], t: dict, out: Path) -> None:
     """Missing-class gap per method, at each severity, paired by seed."""
     groups = [(m, sc) for sc in ("s5", "bus1") for m in ("A0c", "FedProxc", "P4noKD") if gap_by_seed(runs, m, sc)]
@@ -288,7 +384,8 @@ def main() -> None:
     t = TEXT[args.lang]
     runs = load_runs(args.registry)
     print(f"{len(runs)} completed YOLO11s runs in the registry")
-    for draw in (fig_baselines, fig_paired_deltas, fig_severity, fig_gap, fig_ablation):
+    for draw in (fig_baselines, fig_paired_deltas, fig_severity, fig_gap, fig_ablation, fig_operating,
+                 fig_retention):
         draw(runs, t, args.out)
     fig_d1(args.registry, t, args.out)
 

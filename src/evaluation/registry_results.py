@@ -45,12 +45,18 @@ def _method(raw: str) -> str:
 
 
 def _metrics(results: dict) -> dict[str, float] | None:
-    if isinstance(results.get("rule_mean_r10_20"), dict):
-        return {k: float(v) for k, v in results["rule_mean_r10_20"].items()}
+    """Rule metrics, plus ``results.operating_r10_20`` (TP/FP/FN, precision, recall at conf 0.25) when present."""
     r10, r20 = results.get("round_10"), results.get("round_20")
-    if isinstance(r10, dict) and isinstance(r20, dict):
-        return {k: (float(r10[k]) + float(r20[k])) / 2 for k in r10 if k in r20}
-    return None
+    if isinstance(results.get("rule_mean_r10_20"), dict):
+        metrics = {k: float(v) for k, v in results["rule_mean_r10_20"].items()}
+    elif isinstance(r10, dict) and isinstance(r20, dict):
+        metrics = {k: (float(r10[k]) + float(r20[k])) / 2 for k in r10 if k in r20}
+    else:
+        return None
+    operating = results.get("operating_r10_20")
+    if isinstance(operating, dict):
+        metrics = {**{k: float(v) for k, v in operating.items()}, **metrics}
+    return metrics
 
 
 def load_runs(registry: Path) -> list[Run]:
