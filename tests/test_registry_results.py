@@ -74,3 +74,17 @@ def test_backfill_inserts_one_line_at_the_end_of_results():
     a = yaml.safe_load(out)["experiments"][0]
     assert out.count("operating_r10_20") == 1 and a["interpretation"] == "x"
     assert a["results"]["operating_r10_20"]["recall_bus"] == 1.0 and a["results"]["rule_mean_r10_20"]["AP50_bus"] == 0.38
+
+
+def test_export_csv_has_runs_means_pending_and_notes(tmp_path):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("ex", Path(__file__).parents[1] / "scripts" / "export_results_csv.py")
+    ex = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ex)
+    reg = _reg(tmp_path)
+    rows = ex.build_rows(load_runs(reg), reg)
+    kinds = [r[0] for r in rows]
+    assert kinds.count("run") == 4 and "mean" in kinds and kinds.count("pending") == 1 and kinds.count("excluded") == 1
+    assert all(len(r) == len(ex.HEADER) for r in rows)
+    bus1 = next(r for r in rows if r[0] == "run" and r[4] == "bus1")
+    assert bus1[ex.HEADER.index("gap_AP50_bus_vs_pooled")] == "0.0800" and "ADR-022" in bus1[-1]
