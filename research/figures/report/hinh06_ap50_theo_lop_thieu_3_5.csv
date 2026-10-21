@@ -1,0 +1,49 @@
+﻿class,method,seed,AP50
+car,FedAvg,42,0.6938
+car,FedAvg,123,0.6979
+car,FedAvg,2024,0.6977
+car,FedProx,42,0.6937
+car,FedProx,123,0.6942
+car,FedProx,2024,0.6919
+car,Gộp theo số box,42,0.6916
+car,Gộp theo số box,123,0.6968
+car,Gộp theo số box,2024,0.6961
+car,Công thức cải tiến,42,0.7345
+car,Công thức cải tiến,123,0.7347
+car,Công thức cải tiến,2024,0.7354
+bus,FedAvg,42,0.3822
+bus,FedAvg,123,0.3781
+bus,FedAvg,2024,0.3994
+bus,FedProx,42,0.3665
+bus,FedProx,123,0.3377
+bus,FedProx,2024,0.3787
+bus,Gộp theo số box,42,0.3512
+bus,Gộp theo số box,123,0.3651
+bus,Gộp theo số box,2024,0.3578
+bus,Công thức cải tiến,42,0.4874
+bus,Công thức cải tiến,123,0.5021
+bus,Công thức cải tiến,2024,0.4853
+truck,FedAvg,42,0.4370
+truck,FedAvg,123,0.4170
+truck,FedAvg,2024,0.4328
+truck,FedProx,42,0.4272
+truck,FedProx,123,0.4320
+truck,FedProx,2024,0.4302
+truck,Gộp theo số box,42,0.4270
+truck,Gộp theo số box,123,0.4258
+truck,Gộp theo số box,2024,0.4222
+truck,Công thức cải tiến,42,0.5310
+truck,Công thức cải tiến,123,0.5309
+truck,Công thức cải tiến,2024,0.5323
+motorcycle,FedAvg,42,0.2235
+motorcycle,FedAvg,123,0.2225
+motorcycle,FedAvg,2024,0.2243
+motorcycle,FedProx,42,0.2257
+motorcycle,FedProx,123,0.2039
+motorcycle,FedProx,2024,0.2087
+motorcycle,Gộp theo số box,42,0.2046
+motorcycle,Gộp theo số box,123,0.2276
+motorcycle,Gộp theo số box,2024,0.2658
+motorcycle,Công thức cải tiến,42,0.3647
+motorcycle,Công thức cải tiến,123,0.3671
+motorcycle,Công thức cải tiến,2024,0.3651

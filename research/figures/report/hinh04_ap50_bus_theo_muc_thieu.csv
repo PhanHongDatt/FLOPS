@@ -1,0 +1,25 @@
+﻿method,scenario,seed,AP50_bus
+FedAvg,Lý tưởng (0/5),42,0.4136
+FedAvg,Lý tưởng (0/5),123,0.4145
+FedAvg,Lý tưởng (0/5),2024,0.4173
+FedAvg,Thiếu bus 3/5,42,0.3822
+FedAvg,Thiếu bus 3/5,123,0.3781
+FedAvg,Thiếu bus 3/5,2024,0.3994
+FedAvg,Thiếu bus 4/5,42,0.3729
+FedAvg,Thiếu bus 4/5,123,0.3611
+FedProx,Lý tưởng (0/5),42,0.4094
+FedProx,Lý tưởng (0/5),123,0.4222
+FedProx,Thiếu bus 3/5,42,0.3665
+FedProx,Thiếu bus 3/5,123,0.3377
+FedProx,Thiếu bus 3/5,2024,0.3787
+Gộp theo số box,Thiếu bus 3/5,42,0.3512
+Gộp theo số box,Thiếu bus 3/5,123,0.3651
+Gộp theo số box,Thiếu bus 3/5,2024,0.3578
+Công thức cải tiến,Lý tưởng (0/5),42,0.5432
+Công thức cải tiến,Lý tưởng (0/5),123,0.5425
+Công thức cải tiến,Lý tưởng (0/5),2024,0.5385
+Công thức cải tiến,Thiếu bus 3/5,42,0.4874
+Công thức cải tiến,Thiếu bus 3/5,123,0.5021
+Công thức cải tiến,Thiếu bus 3/5,2024,0.4853
+Công thức cải tiến,Thiếu bus 4/5,42,0.4640
+Công thức cải tiến,Thiếu bus 4/5,123,0.4739

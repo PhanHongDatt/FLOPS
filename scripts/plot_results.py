@@ -218,7 +218,7 @@ def fig_operating(runs: list[Run], t: dict, out: Path) -> None:
     """Small multiples (recall | precision of bus at conf 0.25) against clients without bus."""
     fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.8), sharex=True)
     rows, drawn = [], False
-    for ax, key in zip(axes, ("recall_bus", "precision_bus")):
+    for ax, key in zip(axes, ("recall_at025_bus", "precision_at025_bus")):
         for m in ("A0c", "FedProxc", "P4noKD"):
             common = _common_seeds(runs, m, key)
             xs, mus = [], []
@@ -239,7 +239,7 @@ def fig_operating(runs: list[Run], t: dict, out: Path) -> None:
                     if dy is not None:
                         ax.annotate(f"{y:.2f}", (x, y), xytext=(4, dy), textcoords="offset points", va="center",
                                     fontsize=8, color=INK)
-        ax.set_title(t["recall" if key == "recall_bus" else "precision"], fontsize=10.5)
+        ax.set_title(t["recall" if key == "recall_at025_bus" else "precision"], fontsize=10.5)
         ax.set_xticks([0, 3, 4], ["0/5", "3/5", "4/5"])
         ax.set_xlim(-0.4, 4.7)
         ax.set_xlabel(t["f3_x"])
@@ -261,15 +261,15 @@ def _retention(runs: list[Run], m: str, sc: str, key: str) -> dict[int, float]:
 
 def fig_retention(runs: list[Run], t: dict, out: Path) -> None:
     """Per method: share of the pooled AP50 bus vs bus recall@0.25 kept at 3/5 and 4/5, paired by seed."""
-    methods = [m for m in ("A0c", "P4noKD") if _retention(runs, m, "s5", "recall_bus")]
+    methods = [m for m in ("A0c", "P4noKD") if _retention(runs, m, "s5", "recall_at025_bus")]
     if not methods:
         return
     fig, axes = plt.subplots(1, len(methods), figsize=(8.4, 3.8), sharey=True, squeeze=False)
     rows, w = [], 0.36
     for ax, m in zip(axes[0], methods):
-        scs = [sc for sc in ("s5", "bus1") if _retention(runs, m, sc, "recall_bus")]
+        scs = [sc for sc in ("s5", "bus1") if _retention(runs, m, sc, "recall_at025_bus")]
         for i, sc in enumerate(scs):
-            for j, (key, label) in enumerate((("AP50_bus", t["f8_ap"]), ("recall_bus", t["f8_rc"]))):
+            for j, (key, label) in enumerate((("AP50_bus", t["f8_ap"]), ("recall_at025_bus", t["f8_rc"]))):
                 r = _retention(runs, m, sc, key)
                 mu, x = summary(r)[0], i + (j - 0.5) * w
                 ax.bar(x, mu, width=w - 0.04, color=COLOR[m], alpha=0.85 if j == 0 else 0.25,
@@ -288,7 +288,7 @@ def fig_retention(runs: list[Run], t: dict, out: Path) -> None:
         ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), fontsize=8, ncols=2)
     axes[0][0].set_ylabel(t["f8_y"])
     ap = summary(_retention(runs, "A0c", "bus1", "AP50_bus") or {0: 0.0})[0]
-    rc = summary(_retention(runs, "A0c", "bus1", "recall_bus") or {0: 0.0})[0]
+    rc = summary(_retention(runs, "A0c", "bus1", "recall_at025_bus") or {0: 0.0})[0]
     fig.suptitle(t["f8_title"].format(ap=ap, rc=rc), x=0.01, ha="left", fontsize=11, fontweight="semibold")
     fig.tight_layout()
     _save(fig, out, "fig8_ap_vs_recall_retention", ["method", "clients_without_bus", "metric", "seed", "pct_of_pooled"], rows)

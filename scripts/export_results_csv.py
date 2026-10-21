@@ -42,10 +42,10 @@ SCENARIO_DESC = {
     "bus1": "bus1: chỉ C4 có bus, truck vắng C3",
 }
 METRICS = ("mAP50", "AP50_bus", "AP50_car", "AP50_truck", "AP50_motorcycle",
-           "recall_bus", "precision_bus", "TP_bus", "FP_bus", "FN_bus")
+           "recall_at025_bus", "precision_at025_bus", "TP_bus", "FP_bus", "FN_bus")
 HEADER = ("row_type", "exp_id", "method", "method_desc", "scenario", "scenario_desc", "clients_without_bus", "seed",
           "n_seeds", *METRICS, "AP50_bus_std", "gap_AP50_bus_vs_pooled", "AP50_bus_pct_of_pooled",
-          "recall_bus_pct_of_pooled", "note")
+          "recall_at025_bus_pct_of_pooled", "note")
 MAIN = ("A0c", "A1c", "FedProxc", "P4noKD")
 
 
@@ -76,7 +76,7 @@ def run_note(r: Run, runs: list[Run]) -> str:
     a0 = by_seed(runs, "A0c", r.scenario, "AP50_bus").get(r.seed)
     if r.method != "A0c" and a0 is not None:
         notes.append(f"AP50 bus − A0c cùng seed = {r.metrics['AP50_bus'] - a0:+.3f}")
-    if "recall_bus" not in r.metrics:
+    if "recall_at025_bus" not in r.metrics:
         notes.append("không có số liệu ngưỡng 0,25")
     return "; ".join(notes)
 
@@ -128,7 +128,7 @@ def build_rows(runs: list[Run], registry: Path) -> list[list]:
                      MISSING_BUS_CLIENTS[r.scenario], r.seed, 1,
                      *[_f(r.metrics.get(k), 1 if k[:3] in ("TP_", "FP_", "FN_") else 4) for k in METRICS], "",
                      _f(gap), _f(_pct(runs, r.method, r.scenario, "AP50_bus", seeds) if r.scenario != "pooled" else None, 1),
-                     _f(_pct(runs, r.method, r.scenario, "recall_bus", seeds) if r.scenario != "pooled" else None, 1),
+                     _f(_pct(runs, r.method, r.scenario, "recall_at025_bus", seeds) if r.scenario != "pooled" else None, 1),
                      run_note(r, runs)])
     groups = sorted({(r.method, r.scenario) for r in runs if r.method in MAIN},
                     key=lambda g: (order[g[0]], MISSING_BUS_CLIENTS[g[1]]))
@@ -143,7 +143,7 @@ def build_rows(runs: list[Run], registry: Path) -> list[list]:
                      *[_f(mean(v), 1 if k[:3] in ("TP_", "FP_", "FN_") else 4) if v else "" for k, v in vals.items()],
                      _f(stdev(bus) if len(bus) > 1 else None), _f(gap),
                      _f(_pct(runs, m, sc, "AP50_bus", seeds) if sc != "pooled" else None, 1),
-                     _f(_pct(runs, m, sc, "recall_bus", seeds) if sc != "pooled" else None, 1),
+                     _f(_pct(runs, m, sc, "recall_at025_bus", seeds) if sc != "pooled" else None, 1),
                      mean_note(m, sc, len(sel), gap, runs)])
     return rows + pending_rows(registry, runs)
 
@@ -152,7 +152,9 @@ GLOSSARY = [
     "GHI CHÚ CỘT",
     "row_type: run = một lần chạy; mean = trung bình theo seed của phương pháp × kịch bản; pending = đã đăng ký, chưa có kết quả; excluded = lỗi kỹ thuật hoặc bị bác bỏ, có lý do ghi trong registry",
     "Chỉ số AP/mAP: quy tắc đăng ký trước = trung bình vòng 10 và 20 (ADR-019/021); YOLO11s giữ head COCO; 5 client; 20 vòng",
-    "recall_bus / precision_bus / TP_bus / FP_bus / FN_bus: tại ngưỡng điểm 0,25 (operating_conf); phân tích khám phá, không phải tiêu chí đăng ký trước",
+    "TP_bus / FP_bus / FN_bus: confusion matrix của Ultralytics, điểm > 0,25 và IoU > 0,45; FP gồm phát hiện trên nền và nhầm lớp, FN gồm bỏ sót và bị nhận thành lớp khác",
+    "recall_at025_bus = TP/(TP+FN); precision_at025_bus = TP/(TP+FP), tính theo từng vòng rồi lấy trung bình vòng 10/20; phân tích khám phá, không phải tiêu chí đăng ký trước",
+    "Lưu ý: precision/recall gốc của Ultralytics (results.box.p/r) lấy tại ngưỡng tối đa F1, khác nhau giữa các run, nên KHÔNG dùng ở đây",
     "Tổng số bus thật trong tập đánh giá = 1.597 (TP_bus + FN_bus)",
     "gap_AP50_bus_vs_pooled = AP50 bus(pooled) − AP50 bus(kịch bản), cùng phương pháp, ghép cặp theo seed; > 0 nghĩa là bị hại do thiếu lớp",
     "*_pct_of_pooled = giá trị kịch bản / giá trị pooled × 100, ghép cặp theo seed",

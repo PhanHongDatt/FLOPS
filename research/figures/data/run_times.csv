@@ -1,0 +1,30 @@
+run,method,scenario,seed,gpu,rounds,total_min,train_round_mean_min,train_round_median_min,eval_extra_min
+P3_feasibility_seed42_s1b5_bus_3k_moto_seed42,P3,s5,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,144.3,6.93,6.90,2.83
+A0c_feasibility_seed42_s1b5_bus_3k_moto_seed42,A0c,s5,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,123.8,5.88,5.86,3.09
+P3LR_feasibility_seed42_s1b5_bus_3k_moto_seed42,P3LR,s5,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,158.2,7.61,7.62,2.98
+P4_feasibility_seed42_s1b5_bus_3k_moto_seed42,P4,s5,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,184.6,8.87,8.83,3.61
+P4noKD_feasibility_seed42_s1b5_bus_3k_moto_seed42,P4noKD,s5,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,134.6,6.44,6.41,2.94
+A0c_feasibility_seed42_s1b5_pooled_3k_moto_seed42,A0c,pooled,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,115.7,5.47,5.43,3.18
+P4noKD_feasibility_seed42_s1b5_pooled_3k_moto_seed42,P4noKD,pooled,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,147.4,7.09,7.08,2.86
+P5f_feasibility_seed42_s1b5_bus_3k_moto_seed42,P5f,s5,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,141.2,6.71,6.66,3.46
+P5f_feasibility_seed42_s1b5_pooled_3k_moto_seed42,P5f,pooled,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,148.9,7.15,7.13,2.93
+A0c_feasibility_seed123_s1b5_bus_3k_moto_seed42,A0c,s5,123,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,118.2,5.63,5.62,2.82
+P4noKD_feasibility_seed123_s1b5_bus_3k_moto_seed42,P4noKD,s5,123,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,136.0,6.52,6.50,2.76
+A0c_feasibility_seed2024_s1b5_bus_3k_moto_seed42,A0c,s5,2024,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,119.1,5.64,5.55,3.12
+P4noKD_feasibility_seed2024_s1b5_bus_3k_moto_seed42,P4noKD,s5,2024,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,142.4,6.78,6.66,3.45
+A1c_feasibility_seed42_s1b5_bus_3k_moto_seed42,A1c,s5,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,118.1,5.59,5.55,3.11
+FedProxc_feasibility_seed42_s1b5_bus_3k_moto_seed42,FedProxc,s5,42,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,127.0,6.04,5.97,3.12
+A1c_feasibility_seed123_s1b5_bus_3k_moto_seed42,A1c,s5,123,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,127.5,6.04,5.97,3.30
+FedProxc_feasibility_seed123_s1b5_bus_3k_moto_seed42,FedProxc,s5,123,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,130.6,6.20,6.16,3.35
+A1c_feasibility_seed2024_s1b5_bus_3k_moto_seed42,A1c,s5,2024,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,113.2,5.37,5.43,2.91
+FedProxc_feasibility_seed2024_s1b5_bus_3k_moto_seed42,FedProxc,s5,2024,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,121.6,5.79,5.78,2.95
+A0c_feasibility_seed123_s1b5_pooled_3k_moto_seed42,A0c,pooled,123,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,115.5,5.48,5.42,2.94
+P4noKD_feasibility_seed123_s1b5_pooled_3k_moto_seed42,P4noKD,pooled,123,Tesla T4 (machine_shape in kaggle/sessions.yaml),20,146.4,7.03,7.01,2.97
+A0c_feasibility_seed2024_s1b5_pooled_3k_moto_seed42,A0c,pooled,2024,Tesla T4,20,118.6,5.58,5.56,3.46
+P4noKD_feasibility_seed2024_s1b5_pooled_3k_moto_seed42,P4noKD,pooled,2024,Tesla T4,20,151.5,7.27,7.25,3.10
+A0c_feasibility_seed42_s1b5_bus1_3k_moto_seed42,A0c,bus1,42,Tesla T4,20,116.2,5.50,5.46,3.10
+FedProxc_feasibility_seed42_s1b5_pooled_3k_moto_seed42,FedProxc,pooled,42,Tesla T4,20,123.6,5.89,5.87,2.91
+P4noKD_feasibility_seed42_s1b5_bus1_3k_moto_seed42,P4noKD,bus1,42,Tesla T4,20,132.0,6.31,6.32,2.88
+A0c_feasibility_seed123_s1b5_bus1_3k_moto_seed42,A0c,bus1,123,Tesla T4,20,117.3,5.57,5.56,2.91
+FedProxc_feasibility_seed123_s1b5_pooled_3k_moto_seed42,FedProxc,pooled,123,Tesla T4,20,125.0,5.96,5.93,2.83
+P4noKD_feasibility_seed123_s1b5_bus1_3k_moto_seed42,P4noKD,bus1,123,Tesla T4,20,134.8,6.45,6.44,2.89

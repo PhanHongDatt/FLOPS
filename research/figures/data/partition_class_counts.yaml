@@ -1,0 +1,86 @@
+note: boxes per client (C0-C4) and class; same 15,000 images and box totals in every
+  scenario
+totals:
+  car: 155250
+  bus: 2628
+  truck: 6421
+  motorcycle: 1963
+scenarios:
+  s5:
+    C0:
+      car: 30974
+      bus: 0
+      truck: 1489
+      motorcycle: 399
+    C1:
+      car: 31216
+      bus: 0
+      truck: 1296
+      motorcycle: 379
+    C2:
+      car: 31293
+      bus: 0
+      truck: 1264
+      motorcycle: 410
+    C3:
+      car: 30482
+      bus: 1380
+      truck: 0
+      motorcycle: 395
+    C4:
+      car: 31285
+      bus: 1248
+      truck: 2372
+      motorcycle: 380
+  pooled:
+    C0:
+      car: 31107
+      bus: 499
+      truck: 1334
+      motorcycle: 383
+    C1:
+      car: 30990
+      bus: 522
+      truck: 1274
+      motorcycle: 383
+    C2:
+      car: 31233
+      bus: 538
+      truck: 1279
+      motorcycle: 407
+    C3:
+      car: 31121
+      bus: 519
+      truck: 1240
+      motorcycle: 392
+    C4:
+      car: 30799
+      bus: 550
+      truck: 1294
+      motorcycle: 398
+  bus1:
+    C0:
+      car: 31322
+      bus: 0
+      truck: 1323
+      motorcycle: 345
+    C1:
+      car: 31515
+      bus: 0
+      truck: 1334
+      motorcycle: 346
+    C2:
+      car: 31176
+      bus: 0
+      truck: 1302
+      motorcycle: 338
+    C3:
+      car: 30634
+      bus: 0
+      truck: 0
+      motorcycle: 322
+    C4:
+      car: 30603
+      bus: 2628
+      truck: 2462
+      motorcycle: 612

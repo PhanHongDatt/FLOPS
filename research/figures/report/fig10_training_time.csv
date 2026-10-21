@@ -1,0 +1,7 @@
+raw_method,method,min_per_round,n_rounds,total_min
+A0c,FedAvg,4.5,20,90.0
+FedProxc,Prox,4.5,20,90.0
+P3,+KD,7.4,20,148.0
+P3LR,+Cosine LR,7.4,20,148.0
+P4noKD,Ours,7.4,20,148.0
+P4,Ours+KD,9.4,20,188.0

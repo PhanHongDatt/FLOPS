@@ -1,0 +1,19 @@
+﻿metric,baseline,seed,improved_minus_baseline
+mAP50,FedAvg,42,0.0953
+mAP50,FedAvg,123,0.1048
+mAP50,FedAvg,2024,0.0909
+mAP50,FedProx,42,0.1011
+mAP50,FedProx,123,0.1167
+mAP50,FedProx,2024,0.1021
+mAP50,Gộp theo số box,42,0.1108
+mAP50,Gộp theo số box,123,0.1049
+mAP50,Gộp theo số box,2024,0.0940
+AP50_bus,FedAvg,42,0.1052
+AP50_bus,FedAvg,123,0.1240
+AP50_bus,FedAvg,2024,0.0859
+AP50_bus,FedProx,42,0.1209
+AP50_bus,FedProx,123,0.1644
+AP50_bus,FedProx,2024,0.1066
+AP50_bus,Gộp theo số box,42,0.1362
+AP50_bus,Gộp theo số box,123,0.1370
+AP50_bus,Gộp theo số box,2024,0.1275

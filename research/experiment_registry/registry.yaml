@@ -784,7 +784,7 @@ experiments:
       AP50_motorcycle: 0.2969
       FP_bus: 718.0
       FN_bus: 1204.0
-    operating_r10_20: {TP_bus: 399.5, FP_bus: 619.5, FN_bus: 1197.5, precision_bus: 0.6543, precision_car: 0.7878, precision_truck: 0.5452, precision_motorcycle: 0.4396, recall_bus: 0.3522, recall_car: 0.6141, recall_truck: 0.4358, recall_motorcycle: 0.2993}
+    operating_r10_20: {TP_bus: 399.5, FP_bus: 619.5, FN_bus: 1197.5, TP_car: 67066.5, FP_car: 21527.5, FN_car: 35439.5, TP_truck: 1678.5, FP_truck: 2371.5, FN_truck: 2566.5, TP_motorcycle: 146.5, FP_motorcycle: 228.5, FN_motorcycle: 305.5, recall_at025_bus: 0.2502, recall_at025_car: 0.6543, recall_at025_truck: 0.3954, recall_at025_motorcycle: 0.3241, precision_at025_bus: 0.3959, precision_at025_car: 0.7570, precision_at025_truck: 0.4162, precision_at025_motorcycle: 0.4078, recall_maxF1_bus: 0.3522, recall_maxF1_car: 0.6141, recall_maxF1_truck: 0.4358, recall_maxF1_motorcycle: 0.2993, precision_maxF1_bus: 0.6543, precision_maxF1_car: 0.7878, precision_maxF1_truck: 0.5452, precision_maxF1_motorcycle: 0.4396}
   interpretation: 'Round 20: mAP50 0.472, AP50 bus 0.425, car 0.703, truck 0.462, motorcycle 0.297 — +0.087 mAP50
     and +0.092 AP50 bus over P3 on YOLOv8n at round 20 (same scenario). FN bus @0.25 rises from 1,051 (round 0)
     to 1,204 while AP rises: scores become more conservative — operating threshold, not ranking. Descriptive (no
@@ -832,7 +832,7 @@ experiments:
       AP50_motorcycle: 0.2235
       FP_bus: 85.5
       FN_bus: 1386.5
-    operating_r10_20: {TP_bus: 210.5, FP_bus: 85.5, FN_bus: 1386.5, precision_bus: 0.8078, precision_car: 0.6569, precision_truck: 0.7009, precision_motorcycle: 0.2124, recall_bus: 0.1644, recall_car: 0.6823, recall_truck: 0.3159, recall_motorcycle: 0.3684}
+    operating_r10_20: {TP_bus: 210.5, FP_bus: 85.5, FN_bus: 1386.5, TP_car: 70617.5, FP_car: 27735.0, FN_car: 31888.5, TP_truck: 1135.0, FP_truck: 586.0, FN_truck: 3110.0, TP_motorcycle: 155.0, FP_motorcycle: 531.5, FN_motorcycle: 297.0, recall_at025_bus: 0.1318, recall_at025_car: 0.6889, recall_at025_truck: 0.2674, recall_at025_motorcycle: 0.3429, precision_at025_bus: 0.6957, precision_at025_car: 0.7180, precision_at025_truck: 0.6591, precision_at025_motorcycle: 0.2376, recall_maxF1_bus: 0.1644, recall_maxF1_car: 0.6823, recall_maxF1_truck: 0.3159, recall_maxF1_motorcycle: 0.3684, precision_maxF1_bus: 0.8078, precision_maxF1_car: 0.6569, precision_maxF1_truck: 0.7009, precision_maxF1_motorcycle: 0.2124}
   interpretation: 'Control. Very conservative: FP bus 85, FN bus 1,387 (rule mean).'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
     args
@@ -879,7 +879,7 @@ experiments:
       AP50_motorcycle: 0.3418
       FP_bus: 576.0
       FN_bus: 1134.5
-    operating_r10_20: {TP_bus: 462.5, FP_bus: 576.0, FN_bus: 1134.5, precision_bus: 0.6607, precision_car: 0.8076, precision_truck: 0.5489, precision_motorcycle: 0.4984, recall_bus: 0.3669, recall_car: 0.6124, recall_truck: 0.4553, recall_motorcycle: 0.3496}
+    operating_r10_20: {TP_bus: 462.5, FP_bus: 576.0, FN_bus: 1134.5, TP_car: 67339.0, FP_car: 20081.0, FN_car: 35167.0, TP_truck: 1776.5, FP_truck: 2482.5, FN_truck: 2468.5, TP_motorcycle: 169.0, FP_motorcycle: 222.5, FN_motorcycle: 283.0, recall_at025_bus: 0.2896, recall_at025_car: 0.6569, recall_at025_truck: 0.4185, recall_at025_motorcycle: 0.3739, precision_at025_bus: 0.4451, precision_at025_car: 0.7705, precision_at025_truck: 0.4175, precision_at025_motorcycle: 0.4339, recall_maxF1_bus: 0.3669, recall_maxF1_car: 0.6124, recall_maxF1_truck: 0.4553, recall_maxF1_motorcycle: 0.3496, precision_maxF1_bus: 0.6607, precision_maxF1_car: 0.8076, precision_maxF1_truck: 0.5489, precision_maxF1_motorcycle: 0.4984}
   interpretation: '② kept: P3LR - P3 = +0.026 AP50 bus, +0.027 mAP50.'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
     args
@@ -929,7 +929,7 @@ experiments:
       AP50_motorcycle: 0.3928
       FP_bus: 607.5
       FN_bus: 1091.0
-    operating_r10_20: {TP_bus: 506.0, FP_bus: 607.5, FN_bus: 1091.0, precision_bus: 0.6541, precision_car: 0.7949, precision_truck: 0.5841, precision_motorcycle: 0.5615, recall_bus: 0.4073, recall_car: 0.6427, recall_truck: 0.4735, recall_motorcycle: 0.3872}
+    operating_r10_20: {TP_bus: 506.0, FP_bus: 607.5, FN_bus: 1091.0, TP_car: 69393.0, FP_car: 20403.0, FN_car: 33113.0, TP_truck: 1817.0, FP_truck: 2131.0, FN_truck: 2428.0, TP_motorcycle: 188.0, FP_motorcycle: 173.5, FN_motorcycle: 264.0, recall_at025_bus: 0.3168, recall_at025_car: 0.6770, recall_at025_truck: 0.4280, recall_at025_motorcycle: 0.4159, precision_at025_bus: 0.4551, precision_at025_car: 0.7736, precision_at025_truck: 0.4603, precision_at025_motorcycle: 0.5201, recall_maxF1_bus: 0.4073, recall_maxF1_car: 0.6427, recall_maxF1_truck: 0.4735, recall_maxF1_motorcycle: 0.3872, precision_maxF1_bus: 0.6541, precision_maxF1_car: 0.7949, precision_maxF1_truck: 0.5841, precision_maxF1_motorcycle: 0.5615}
   interpretation: 'vs P3 (rule 10/20): AP50 bus +0.068, motorcycle +0.117, truck +0.052, mAP50 +0.066; FN bus @0.25
     1,204 -> 1,069 at round 20. ② and ③ not separable until P3LR finishes (ADR-019 rule for ③ is P4 vs P3LR).'
 - id: EXP-2026-10-09-S12-P4noKD-y11s
@@ -975,7 +975,7 @@ experiments:
       AP50_motorcycle: 0.3647
       FP_bus: 136.0
       FN_bus: 1197.5
-    operating_r10_20: {TP_bus: 399.5, FP_bus: 136.0, FN_bus: 1197.5, precision_bus: 0.8157, precision_car: 0.6700, precision_truck: 0.7458, precision_motorcycle: 0.3382, recall_bus: 0.2933, recall_car: 0.7096, recall_truck: 0.3960, recall_motorcycle: 0.4396}
+    operating_r10_20: {TP_bus: 399.5, FP_bus: 136.0, FN_bus: 1197.5, TP_car: 73607.0, FP_car: 27007.5, FN_car: 28899.0, TP_truck: 1386.0, FP_truck: 705.5, FN_truck: 2859.0, TP_motorcycle: 200.0, FP_motorcycle: 322.0, FN_motorcycle: 252.0, recall_at025_bus: 0.2502, recall_at025_car: 0.7181, recall_at025_truck: 0.3265, recall_at025_motorcycle: 0.4425, precision_at025_bus: 0.7626, precision_at025_car: 0.7335, precision_at025_truck: 0.6945, precision_at025_motorcycle: 0.3854, recall_maxF1_bus: 0.2933, recall_maxF1_car: 0.7096, recall_maxF1_truck: 0.3960, recall_maxF1_motorcycle: 0.4396, precision_maxF1_bus: 0.8157, precision_maxF1_car: 0.6700, precision_maxF1_truck: 0.7458, precision_maxF1_motorcycle: 0.3382}
   interpretation: 'Selected by the ADR-019 addendum: P4 - P4noKD = +0.008 AP50 bus (< 0.010) -> KD not needed once
     ② and ③ are present. P4noKD - A0c = +0.105 AP50 bus, +0.095 mAP50; FP bus 136 vs 608 for P4.'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; lr/RFS settings checked in client
@@ -1089,7 +1089,7 @@ experiments:
       AP50_motorcycle: 0.2285
       FP_bus: 804.0
       FN_bus: 1047.5
-    operating_r10_20: {TP_bus: 549.5, FP_bus: 804.0, FN_bus: 1047.5, precision_bus: 0.6116, precision_car: 0.7591, precision_truck: 0.5970, precision_motorcycle: 0.3349, recall_bus: 0.3654, recall_car: 0.6299, recall_truck: 0.3792, recall_motorcycle: 0.2998}
+    operating_r10_20: {TP_bus: 549.5, FP_bus: 804.0, FN_bus: 1047.5, TP_car: 73678.0, FP_car: 40600.5, FN_car: 28828.0, TP_truck: 1561.5, FP_truck: 2268.5, FN_truck: 2683.5, TP_motorcycle: 158.0, FP_motorcycle: 634.5, FN_motorcycle: 294.0, recall_at025_bus: 0.3441, recall_at025_car: 0.7188, recall_at025_truck: 0.3678, recall_at025_motorcycle: 0.3496, precision_at025_bus: 0.4060, precision_at025_car: 0.6466, precision_at025_truck: 0.4099, precision_at025_motorcycle: 0.2046, recall_maxF1_bus: 0.3654, recall_maxF1_car: 0.6299, recall_maxF1_truck: 0.3792, recall_maxF1_motorcycle: 0.2998, precision_maxF1_bus: 0.6116, precision_maxF1_car: 0.7591, precision_maxF1_truck: 0.5970, precision_maxF1_motorcycle: 0.3349}
   interpretation: 'Missing-class gap of A0c (pooled - S1b5): +0.031 AP50 bus (cf. YOLOv8n D3 +0.029).'
   checks: 20/20 rounds with 5/5 clients; round 0 = verified zero-shot YOLO11s; pooled bus 499-550 boxes per client
 - id: EXP-2026-10-11-S13-P4noKD-y11s-pooled
@@ -1135,7 +1135,7 @@ experiments:
       AP50_motorcycle: 0.3598
       FP_bus: 767.0
       FN_bus: 845.0
-    operating_r10_20: {TP_bus: 752.0, FP_bus: 767.0, FN_bus: 845.0, precision_bus: 0.6134, precision_car: 0.8073, precision_truck: 0.6796, precision_motorcycle: 0.4695, recall_bus: 0.4869, recall_car: 0.6436, recall_truck: 0.4602, recall_motorcycle: 0.3955}
+    operating_r10_20: {TP_bus: 752.0, FP_bus: 767.0, FN_bus: 845.0, TP_car: 71832.0, FP_car: 22654.0, FN_car: 30674.0, TP_truck: 1851.5, FP_truck: 1509.0, FN_truck: 2393.5, TP_motorcycle: 199.5, FP_motorcycle: 304.0, FN_motorcycle: 252.5, recall_at025_bus: 0.4709, recall_at025_car: 0.7008, recall_at025_truck: 0.4362, recall_at025_motorcycle: 0.4414, precision_at025_bus: 0.4948, precision_at025_car: 0.7605, precision_at025_truck: 0.5503, precision_at025_motorcycle: 0.3993, recall_maxF1_bus: 0.4869, recall_maxF1_car: 0.6436, recall_maxF1_truck: 0.4602, recall_maxF1_motorcycle: 0.3955, precision_maxF1_bus: 0.6134, precision_maxF1_car: 0.8073, precision_maxF1_truck: 0.6796, precision_maxF1_motorcycle: 0.4695}
   interpretation: 'Gap with P4noKD: +0.056 AP50 bus — the gap does NOT shrink (rule failed). P4noKD gains +0.130
     bus on pooled vs +0.105 on S1b5: a general improvement, not missing-class specific. IID not harmed: pooled mAP50
     +0.108 over A0c.'
@@ -1184,7 +1184,7 @@ experiments:
   results:
     rule_mean_r10_20: {mAP50: 0.5285, AP50_bus: 0.4925, AP50_car: 0.7328, AP50_truck: 0.5297, AP50_motorcycle: 0.359, FP_bus: 233.5, FN_bus: 1169.5}
     round_20: {mAP50: 0.5558, AP50_bus: 0.5296, AP50_car: 0.7451, AP50_truck: 0.5525, AP50_motorcycle: 0.3959}
-    operating_r10_20: {TP_bus: 427.5, FP_bus: 233.5, FN_bus: 1169.5, precision_bus: 0.7783, precision_car: 0.7290, precision_truck: 0.7370, precision_motorcycle: 0.3812, recall_bus: 0.3245, recall_car: 0.6856, recall_truck: 0.4037, recall_motorcycle: 0.4428}
+    operating_r10_20: {TP_bus: 427.5, FP_bus: 233.5, FN_bus: 1169.5, TP_car: 72402.0, FP_car: 23728.5, FN_car: 30104.0, TP_truck: 1503.0, FP_truck: 889.0, FN_truck: 2742.0, TP_motorcycle: 205.5, FP_motorcycle: 325.5, FN_motorcycle: 246.5, recall_at025_bus: 0.2677, recall_at025_car: 0.7063, recall_at025_truck: 0.3541, recall_at025_motorcycle: 0.4546, precision_at025_bus: 0.6455, precision_at025_car: 0.7535, precision_at025_truck: 0.6425, precision_at025_motorcycle: 0.3913, recall_maxF1_bus: 0.3245, recall_maxF1_car: 0.6856, recall_maxF1_truck: 0.4037, recall_maxF1_motorcycle: 0.4428, precision_maxF1_bus: 0.7783, precision_maxF1_car: 0.7290, precision_maxF1_truck: 0.7370, precision_maxF1_motorcycle: 0.3812}
   interpretation: 'vs P4noKD (mean r10/20): bus +0.005 (rule 2 needs +0.010: FAIL), gap 0.056 -> 0.044 (shrinks 0.012:
     pass, but 0.007 of it is pooled getting worse), mAP50 -0.001, car -0.002 (pass). Not a missing-class-specific
     contribution. Round 20 identical to P4noKD (bus 0.530 vs 0.530). Single seed; differences within seed noise.'
@@ -1200,7 +1200,7 @@ experiments:
   results:
     rule_mean_r10_20: {mAP50: 0.5442, AP50_bus: 0.536, AP50_car: 0.7373, AP50_truck: 0.5447, AP50_motorcycle: 0.3588}
     round_20: {mAP50: 0.5646, AP50_bus: 0.5614, AP50_car: 0.7484}
-    operating_r10_20: {TP_bus: 760.5, FP_bus: 806.0, FN_bus: 836.5, precision_bus: 0.6098, precision_car: 0.8249, precision_truck: 0.6917, precision_motorcycle: 0.4817, recall_bus: 0.4853, recall_car: 0.6326, recall_truck: 0.4456, recall_motorcycle: 0.3993}
+    operating_r10_20: {TP_bus: 760.5, FP_bus: 806.0, FN_bus: 836.5, TP_car: 71692.0, FP_car: 22197.5, FN_car: 30814.0, TP_truck: 1839.0, FP_truck: 1485.0, FN_truck: 2406.0, TP_motorcycle: 205.5, FP_motorcycle: 311.0, FN_motorcycle: 246.5, recall_at025_bus: 0.4762, recall_at025_car: 0.6994, recall_at025_truck: 0.4332, recall_at025_motorcycle: 0.4546, precision_at025_bus: 0.4867, precision_at025_car: 0.7638, precision_at025_truck: 0.5529, precision_at025_motorcycle: 0.4011, recall_maxF1_bus: 0.4853, recall_maxF1_car: 0.6326, recall_maxF1_truck: 0.4456, recall_maxF1_motorcycle: 0.3993, precision_maxF1_bus: 0.6098, precision_maxF1_car: 0.8249, precision_maxF1_truck: 0.6917, precision_maxF1_motorcycle: 0.4817}
   interpretation: Pooled reference for P5f; within 0.008 of P4noKD pooled on every target.
 - id: EXP-2026-10-14-S16-A0c-y11s-seed123
   gate: 'G6 (phase 2: seeds)'
@@ -1214,7 +1214,7 @@ experiments:
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
   results:
     rule_mean_r10_20: {mAP50: 0.4289, AP50_bus: 0.3781, AP50_car: 0.6979, AP50_truck: 0.417, AP50_motorcycle: 0.2225, FN_bus: 1434.0}
-    operating_r10_20: {TP_bus: 163.0, FP_bus: 57.0, FN_bus: 1434.0, precision_bus: 0.8652, precision_car: 0.6317, precision_truck: 0.6511, precision_motorcycle: 0.2368, recall_bus: 0.1277, recall_car: 0.6941, recall_truck: 0.3484, recall_motorcycle: 0.3352}
+    operating_r10_20: {TP_bus: 163.0, FP_bus: 57.0, FN_bus: 1434.0, TP_car: 72626.5, FP_car: 33557.5, FN_car: 29879.5, TP_truck: 1269.0, FP_truck: 842.0, FN_truck: 2976.0, TP_motorcycle: 143.0, FP_motorcycle: 415.0, FN_motorcycle: 309.0, recall_at025_bus: 0.1021, recall_at025_car: 0.7085, recall_at025_truck: 0.2989, recall_at025_motorcycle: 0.3164, precision_at025_bus: 0.7587, precision_at025_car: 0.6843, precision_at025_truck: 0.6079, precision_at025_motorcycle: 0.2581, recall_maxF1_bus: 0.1277, recall_maxF1_car: 0.6941, recall_maxF1_truck: 0.3484, recall_maxF1_motorcycle: 0.3352, precision_maxF1_bus: 0.8652, precision_maxF1_car: 0.6317, precision_maxF1_truck: 0.6511, precision_maxF1_motorcycle: 0.2368}
 - id: EXP-2026-10-14-S16-P4noKD-y11s-seed123
   gate: 'G6 (phase 2: seeds)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1227,7 +1227,7 @@ experiments:
   notes: Re-run of the S13 seed sessions lost at the 12 h limit; one arm per session.
   results:
     rule_mean_r10_20: {mAP50: 0.5337, AP50_bus: 0.5021, AP50_car: 0.7347, AP50_truck: 0.5309, AP50_motorcycle: 0.3671, FN_bus: 1262.0}
-    operating_r10_20: {TP_bus: 335.0, FP_bus: 110.5, FN_bus: 1262.0, precision_bus: 0.8831, precision_car: 0.7206, precision_truck: 0.7086, precision_motorcycle: 0.3363, recall_bus: 0.2398, recall_car: 0.6897, recall_truck: 0.4168, recall_motorcycle: 0.4558}
+    operating_r10_20: {TP_bus: 335.0, FP_bus: 110.5, FN_bus: 1262.0, TP_car: 72421.0, FP_car: 23482.0, FN_car: 30085.0, TP_truck: 1572.5, FP_truck: 872.5, FN_truck: 2672.5, TP_motorcycle: 208.5, FP_motorcycle: 376.0, FN_motorcycle: 243.5, recall_at025_bus: 0.2098, recall_at025_car: 0.7065, recall_at025_truck: 0.3704, recall_at025_motorcycle: 0.4613, precision_at025_bus: 0.8081, precision_at025_car: 0.7555, precision_at025_truck: 0.6550, precision_at025_motorcycle: 0.3575, recall_maxF1_bus: 0.2398, recall_maxF1_car: 0.6897, recall_maxF1_truck: 0.4168, recall_maxF1_motorcycle: 0.4558, precision_maxF1_bus: 0.8831, precision_maxF1_car: 0.7206, precision_maxF1_truck: 0.7086, precision_maxF1_motorcycle: 0.3363}
   interpretation: 'Seed 123: P4noKD - A0c = mAP50 +0.105, bus +0.124, car +0.037, truck +0.114, motorcycle +0.145 (seed 42: +0.095 / +0.105). Rule holds for 2 of 3 seeds so far.'
 - id: EXP-2026-10-14-S16-A0c-y11s-seed2024
   gate: 'G6 (phase 2: seeds)'
@@ -1242,7 +1242,7 @@ experiments:
   notes2: Launched 2026-10-15 on goshihayashi (flops-s16c-a0c-s2024).
   results:
     rule_mean_r10_20: {mAP50: 0.4386, AP50_bus: 0.3994, AP50_car: 0.6977, AP50_truck: 0.4328, AP50_motorcycle: 0.2243, FN_bus: 1364.0}
-    operating_r10_20: {TP_bus: 233.0, FP_bus: 74.5, FN_bus: 1364.0, precision_bus: 0.8207, precision_car: 0.6171, precision_truck: 0.6853, precision_motorcycle: 0.2285, recall_bus: 0.1878, recall_car: 0.6995, recall_truck: 0.3330, recall_motorcycle: 0.3540}
+    operating_r10_20: {TP_bus: 233.0, FP_bus: 74.5, FN_bus: 1364.0, TP_car: 71849.5, FP_car: 31393.0, FN_car: 30656.5, TP_truck: 1159.0, FP_truck: 615.0, FN_truck: 3086.0, TP_motorcycle: 154.0, FP_motorcycle: 397.0, FN_motorcycle: 298.0, recall_at025_bus: 0.1459, recall_at025_car: 0.7009, recall_at025_truck: 0.2730, recall_at025_motorcycle: 0.3407, precision_at025_bus: 0.7654, precision_at025_car: 0.6968, precision_at025_truck: 0.6583, precision_at025_motorcycle: 0.2868, recall_maxF1_bus: 0.1878, recall_maxF1_car: 0.6995, recall_maxF1_truck: 0.3330, recall_maxF1_motorcycle: 0.3540, precision_maxF1_bus: 0.8207, precision_maxF1_car: 0.6171, precision_maxF1_truck: 0.6853, precision_maxF1_motorcycle: 0.2285}
 - id: EXP-2026-10-14-S16-P4noKD-y11s-seed2024
   gate: 'G6 (phase 2: seeds)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1257,7 +1257,7 @@ experiments:
   results:
     rule_mean_r10_20: {mAP50: 0.5295, AP50_bus: 0.4853, AP50_car: 0.7354, AP50_truck: 0.5323, AP50_motorcycle: 0.3651, FN_bus: 1211.5}
     delta_vs_A0c_same_seed: {mAP50: +0.091, AP50_bus: +0.086}
-    operating_r10_20: {TP_bus: 385.5, FP_bus: 123.5, FN_bus: 1211.5, precision_bus: 0.8134, precision_car: 0.6894, precision_truck: 0.7547, precision_motorcycle: 0.3203, recall_bus: 0.2880, recall_car: 0.7011, recall_truck: 0.3787, recall_motorcycle: 0.4735}
+    operating_r10_20: {TP_bus: 385.5, FP_bus: 123.5, FN_bus: 1211.5, TP_car: 72759.5, FP_car: 24336.5, FN_car: 29746.5, TP_truck: 1344.0, FP_truck: 729.5, FN_truck: 2901.0, TP_motorcycle: 209.0, FP_motorcycle: 409.0, FN_motorcycle: 243.0, recall_at025_bus: 0.2414, recall_at025_car: 0.7098, recall_at025_truck: 0.3166, recall_at025_motorcycle: 0.4624, precision_at025_bus: 0.7815, precision_at025_car: 0.7494, precision_at025_truck: 0.7041, precision_at025_motorcycle: 0.3466, recall_maxF1_bus: 0.2880, recall_maxF1_car: 0.7011, recall_maxF1_truck: 0.3787, recall_maxF1_motorcycle: 0.4735, precision_maxF1_bus: 0.8134, precision_maxF1_car: 0.6894, precision_maxF1_truck: 0.7547, precision_maxF1_motorcycle: 0.3203}
   phase2_conclusion: >-
     Decision rule met in 3/3 seeds (42, 123, 2024). Mean r10/20 over 3 seeds, A0c vs P4noKD (delta mean+-std):
     mAP50 0.4339+-0.0048 vs 0.5309+-0.0024 (+0.097+-0.007); AP50 bus 0.3866+-0.0113 vs 0.4916+-0.0092
@@ -1274,7 +1274,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4186, AP50_bus: 0.3512, AP50_car: 0.6916, AP50_truck: 0.427, AP50_motorcycle: 0.2046, FN_bus: 1320.0}
-    operating_r10_20: {TP_bus: 277.0, FP_bus: 283.5, FN_bus: 1320.0, precision_bus: 0.6845, precision_car: 0.6833, precision_truck: 0.6870, precision_motorcycle: 0.2630, recall_bus: 0.2380, recall_car: 0.6692, recall_truck: 0.3256, recall_motorcycle: 0.3274}
+    operating_r10_20: {TP_bus: 277.0, FP_bus: 283.5, FN_bus: 1320.0, TP_car: 71338.5, FP_car: 30059.0, FN_car: 31167.5, TP_truck: 1199.0, FP_truck: 879.0, FN_truck: 3046.0, TP_motorcycle: 151.0, FP_motorcycle: 441.0, FN_motorcycle: 301.0, recall_at025_bus: 0.1735, recall_at025_car: 0.6959, recall_at025_truck: 0.2824, recall_at025_motorcycle: 0.3341, precision_at025_bus: 0.4946, precision_at025_car: 0.7035, precision_at025_truck: 0.5882, precision_at025_motorcycle: 0.2548, recall_maxF1_bus: 0.2380, recall_maxF1_car: 0.6692, recall_maxF1_truck: 0.3256, recall_maxF1_motorcycle: 0.3274, precision_maxF1_bus: 0.6845, precision_maxF1_car: 0.6833, precision_maxF1_truck: 0.6870, precision_maxF1_motorcycle: 0.2630}
 - id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed42
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1286,7 +1286,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4283, AP50_bus: 0.3665, AP50_car: 0.6937, AP50_truck: 0.4272, AP50_motorcycle: 0.2257, FN_bus: 1413.0}
-    operating_r10_20: {TP_bus: 184.0, FP_bus: 83.0, FN_bus: 1413.0, precision_bus: 0.7790, precision_car: 0.6059, precision_truck: 0.6866, precision_motorcycle: 0.2065, recall_bus: 0.1761, recall_car: 0.7002, recall_truck: 0.3310, recall_motorcycle: 0.3772}
+    operating_r10_20: {TP_bus: 184.0, FP_bus: 83.0, FN_bus: 1413.0, TP_car: 71430.0, FP_car: 30002.5, FN_car: 31076.0, TP_truck: 1111.5, FP_truck: 584.0, FN_truck: 3133.5, TP_motorcycle: 155.5, FP_motorcycle: 461.0, FN_motorcycle: 296.5, recall_at025_bus: 0.1152, recall_at025_car: 0.6968, recall_at025_truck: 0.2618, recall_at025_motorcycle: 0.3440, precision_at025_bus: 0.6891, precision_at025_car: 0.7042, precision_at025_truck: 0.6741, precision_at025_motorcycle: 0.2521, recall_maxF1_bus: 0.1761, recall_maxF1_car: 0.7002, recall_maxF1_truck: 0.3310, recall_maxF1_motorcycle: 0.3772, precision_maxF1_bus: 0.7790, precision_maxF1_car: 0.6059, precision_maxF1_truck: 0.6866, precision_maxF1_motorcycle: 0.2065}
 - id: EXP-2026-10-17-S17-A1c-s5-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1298,7 +1298,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4288, AP50_bus: 0.3651, AP50_car: 0.6968, AP50_truck: 0.4258, AP50_motorcycle: 0.2276, FN_bus: 1372.0}
-    operating_r10_20: {TP_bus: 225.0, FP_bus: 151.5, FN_bus: 1372.0, precision_bus: 0.7815, precision_car: 0.6467, precision_truck: 0.6342, precision_motorcycle: 0.2660, recall_bus: 0.1892, recall_car: 0.6854, recall_truck: 0.3615, recall_motorcycle: 0.3507}
+    operating_r10_20: {TP_bus: 225.0, FP_bus: 151.5, FN_bus: 1372.0, TP_car: 72893.0, FP_car: 34938.5, FN_car: 29613.0, TP_truck: 1315.0, FP_truck: 1121.5, FN_truck: 2930.0, TP_motorcycle: 155.5, FP_motorcycle: 441.0, FN_motorcycle: 296.5, recall_at025_bus: 0.1409, recall_at025_car: 0.7111, recall_at025_truck: 0.3098, recall_at025_motorcycle: 0.3440, precision_at025_bus: 0.5968, precision_at025_car: 0.6762, precision_at025_truck: 0.5461, precision_at025_motorcycle: 0.2607, recall_maxF1_bus: 0.1892, recall_maxF1_car: 0.6854, recall_maxF1_truck: 0.3615, recall_maxF1_motorcycle: 0.3507, precision_maxF1_bus: 0.7815, precision_maxF1_car: 0.6467, precision_maxF1_truck: 0.6342, precision_maxF1_motorcycle: 0.2660}
 - id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1310,7 +1310,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.417, AP50_bus: 0.3377, AP50_car: 0.6942, AP50_truck: 0.432, AP50_motorcycle: 0.2039, FN_bus: 1439.0}
-    operating_r10_20: {TP_bus: 158.0, FP_bus: 63.0, FN_bus: 1439.0, precision_bus: 0.7798, precision_car: 0.6142, precision_truck: 0.6720, precision_motorcycle: 0.2415, recall_bus: 0.1259, recall_car: 0.6982, recall_truck: 0.3405, recall_motorcycle: 0.3487}
+    operating_r10_20: {TP_bus: 158.0, FP_bus: 63.0, FN_bus: 1439.0, TP_car: 72094.5, FP_car: 32125.0, FN_car: 30411.5, TP_truck: 1167.5, FP_truck: 704.0, FN_truck: 3077.5, TP_motorcycle: 139.5, FP_motorcycle: 429.0, FN_motorcycle: 312.5, recall_at025_bus: 0.0989, recall_at025_car: 0.7033, recall_at025_truck: 0.2750, recall_at025_motorcycle: 0.3086, precision_at025_bus: 0.7204, precision_at025_car: 0.6918, precision_at025_truck: 0.6331, precision_at025_motorcycle: 0.2753, recall_maxF1_bus: 0.1259, recall_maxF1_car: 0.6982, recall_maxF1_truck: 0.3405, recall_maxF1_motorcycle: 0.3487, precision_maxF1_bus: 0.7798, precision_maxF1_car: 0.6142, precision_maxF1_truck: 0.6720, precision_maxF1_motorcycle: 0.2415}
 - id: EXP-2026-10-17-S17-A1c-s5-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1322,7 +1322,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4355, AP50_bus: 0.3578, AP50_car: 0.6961, AP50_truck: 0.4222, AP50_motorcycle: 0.2658, FN_bus: 1242.0}
-    operating_r10_20: {TP_bus: 355.0, FP_bus: 579.5, FN_bus: 1242.0, precision_bus: 0.5969, precision_car: 0.6904, precision_truck: 0.7005, precision_motorcycle: 0.3246, recall_bus: 0.2803, recall_car: 0.6682, recall_truck: 0.3073, recall_motorcycle: 0.3285}
+    operating_r10_20: {TP_bus: 355.0, FP_bus: 579.5, FN_bus: 1242.0, TP_car: 72354.5, FP_car: 33150.5, FN_car: 30151.5, TP_truck: 1094.5, FP_truck: 998.0, FN_truck: 3150.5, TP_motorcycle: 154.5, FP_motorcycle: 376.0, FN_motorcycle: 297.5, recall_at025_bus: 0.2223, recall_at025_car: 0.7059, recall_at025_truck: 0.2578, recall_at025_motorcycle: 0.3418, precision_at025_bus: 0.4582, precision_at025_car: 0.6864, precision_at025_truck: 0.5215, precision_at025_motorcycle: 0.2908, recall_maxF1_bus: 0.2803, recall_maxF1_car: 0.6682, recall_maxF1_truck: 0.3073, recall_maxF1_motorcycle: 0.3285, precision_maxF1_bus: 0.5969, precision_maxF1_car: 0.6904, precision_maxF1_truck: 0.7005, precision_maxF1_motorcycle: 0.3246}
 - id: EXP-2026-10-17-S17-FedProxc-s5-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-3k, YOLO11s, 20 rounds, eval 10/20
@@ -1334,7 +1334,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4274, AP50_bus: 0.3787, AP50_car: 0.6919, AP50_truck: 0.4302, AP50_motorcycle: 0.2087, FN_bus: 1422.5}
-    operating_r10_20: {TP_bus: 174.5, FP_bus: 56.5, FN_bus: 1422.5, precision_bus: 0.8554, precision_car: 0.5760, precision_truck: 0.6391, precision_motorcycle: 0.2234, recall_bus: 0.1587, recall_car: 0.7113, recall_truck: 0.3625, recall_motorcycle: 0.3573}
+    operating_r10_20: {TP_bus: 174.5, FP_bus: 56.5, FN_bus: 1422.5, TP_car: 72545.0, FP_car: 34633.0, FN_car: 29961.0, TP_truck: 1186.0, FP_truck: 753.0, FN_truck: 3059.0, TP_motorcycle: 139.5, FP_motorcycle: 399.5, FN_motorcycle: 312.5, recall_at025_bus: 0.1093, recall_at025_car: 0.7077, recall_at025_truck: 0.2794, recall_at025_motorcycle: 0.3086, precision_at025_bus: 0.7555, precision_at025_car: 0.6769, precision_at025_truck: 0.6205, precision_at025_motorcycle: 0.2809, recall_maxF1_bus: 0.1587, recall_maxF1_car: 0.7113, recall_maxF1_truck: 0.3625, recall_maxF1_motorcycle: 0.3573, precision_maxF1_bus: 0.8554, precision_maxF1_car: 0.5760, precision_maxF1_truck: 0.6391, precision_maxF1_motorcycle: 0.2234}
 - id: EXP-2026-10-17-S17-A0c-s5pooled-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1346,7 +1346,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4419, AP50_bus: 0.4145, AP50_car: 0.6964, AP50_truck: 0.4294, AP50_motorcycle: 0.2275, FN_bus: 1011.5}
-    operating_r10_20: {TP_bus: 585.5, FP_bus: 930.5, FN_bus: 1011.5, precision_bus: 0.5554, precision_car: 0.7856, precision_truck: 0.5824, precision_motorcycle: 0.3316, recall_bus: 0.3760, recall_car: 0.6119, recall_truck: 0.3829, recall_motorcycle: 0.3020}
+    operating_r10_20: {TP_bus: 585.5, FP_bus: 930.5, FN_bus: 1011.5, TP_car: 72036.0, FP_car: 33918.0, FN_car: 30470.0, TP_truck: 1607.0, FP_truck: 2401.5, FN_truck: 2638.0, TP_motorcycle: 154.5, FP_motorcycle: 589.0, FN_motorcycle: 297.5, recall_at025_bus: 0.3666, recall_at025_car: 0.7027, recall_at025_truck: 0.3786, recall_at025_motorcycle: 0.3418, precision_at025_bus: 0.3862, precision_at025_car: 0.6806, precision_at025_truck: 0.4058, precision_at025_motorcycle: 0.2115, recall_maxF1_bus: 0.3760, recall_maxF1_car: 0.6119, recall_maxF1_truck: 0.3829, recall_maxF1_motorcycle: 0.3020, precision_maxF1_bus: 0.5554, precision_maxF1_car: 0.7856, precision_maxF1_truck: 0.5824, precision_maxF1_motorcycle: 0.3316}
 - id: EXP-2026-10-17-S17-P4noKD-s5pooled-y11s-seed123
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1358,7 +1358,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.5463, AP50_bus: 0.5425, AP50_car: 0.738, AP50_truck: 0.5506, AP50_motorcycle: 0.3542, FN_bus: 821.0}
-    operating_r10_20: {TP_bus: 776.0, FP_bus: 826.5, FN_bus: 821.0, precision_bus: 0.6157, precision_car: 0.8374, precision_truck: 0.6843, precision_motorcycle: 0.4970, recall_bus: 0.4889, recall_car: 0.6266, recall_truck: 0.4590, recall_motorcycle: 0.3821}
+    operating_r10_20: {TP_bus: 776.0, FP_bus: 826.5, FN_bus: 821.0, TP_car: 72106.5, FP_car: 22887.0, FN_car: 30399.5, TP_truck: 1912.5, FP_truck: 1678.0, FN_truck: 2332.5, TP_motorcycle: 198.0, FP_motorcycle: 319.5, FN_motorcycle: 254.0, recall_at025_bus: 0.4859, recall_at025_car: 0.7034, recall_at025_truck: 0.4505, recall_at025_motorcycle: 0.4381, precision_at025_bus: 0.4857, precision_at025_car: 0.7591, precision_at025_truck: 0.5322, precision_at025_motorcycle: 0.3866, recall_maxF1_bus: 0.4889, recall_maxF1_car: 0.6266, recall_maxF1_truck: 0.4590, recall_maxF1_motorcycle: 0.3821, precision_maxF1_bus: 0.6157, precision_maxF1_car: 0.8374, precision_maxF1_truck: 0.6843, precision_maxF1_motorcycle: 0.4970}
 - id: EXP-2026-10-17-S17-A0c-s5pooled-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1370,7 +1370,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.4351, AP50_bus: 0.4173, AP50_car: 0.6961, AP50_truck: 0.4282, AP50_motorcycle: 0.1988, FN_bus: 1051.5}
-    operating_r10_20: {TP_bus: 545.5, FP_bus: 793.5, FN_bus: 1051.5, precision_bus: 0.6146, precision_car: 0.7737, precision_truck: 0.5857, precision_motorcycle: 0.2761, recall_bus: 0.3618, recall_car: 0.6232, recall_truck: 0.3875, recall_motorcycle: 0.2976}
+    operating_r10_20: {TP_bus: 545.5, FP_bus: 793.5, FN_bus: 1051.5, TP_car: 73214.5, FP_car: 37635.0, FN_car: 29291.5, TP_truck: 1590.0, FP_truck: 2373.0, FN_truck: 2655.0, TP_motorcycle: 158.5, FP_motorcycle: 678.0, FN_motorcycle: 293.5, recall_at025_bus: 0.3416, recall_at025_car: 0.7142, recall_at025_truck: 0.3746, recall_at025_motorcycle: 0.3507, precision_at025_bus: 0.4082, precision_at025_car: 0.6612, precision_at025_truck: 0.4042, precision_at025_motorcycle: 0.1900, recall_maxF1_bus: 0.3618, recall_maxF1_car: 0.6232, recall_maxF1_truck: 0.3875, recall_maxF1_motorcycle: 0.2976, precision_maxF1_bus: 0.6146, precision_maxF1_car: 0.7737, precision_maxF1_truck: 0.5857, precision_maxF1_motorcycle: 0.2761}
 - id: EXP-2026-10-17-S17-P4noKD-s5pooled-y11s-seed2024
   gate: 'G6 (baselines, ADR-021)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1382,7 +1382,7 @@ experiments:
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
   results:
     rule_mean_r10_20: {mAP50: 0.5467, AP50_bus: 0.5385, AP50_car: 0.7382, AP50_truck: 0.5458, AP50_motorcycle: 0.3642, FN_bus: 838.5}
-    operating_r10_20: {TP_bus: 758.5, FP_bus: 834.5, FN_bus: 838.5, precision_bus: 0.6238, precision_car: 0.8327, precision_truck: 0.6819, precision_motorcycle: 0.5005, recall_bus: 0.4803, recall_car: 0.6303, recall_truck: 0.4575, recall_motorcycle: 0.3761}
+    operating_r10_20: {TP_bus: 758.5, FP_bus: 834.5, FN_bus: 838.5, TP_car: 72682.0, FP_car: 24219.5, FN_car: 29824.0, TP_truck: 1914.0, FP_truck: 1759.0, FN_truck: 2331.0, TP_motorcycle: 201.5, FP_motorcycle: 331.0, FN_motorcycle: 250.5, recall_at025_bus: 0.4750, recall_at025_car: 0.7091, recall_at025_truck: 0.4509, recall_at025_motorcycle: 0.4458, precision_at025_bus: 0.4823, precision_at025_car: 0.7507, precision_at025_truck: 0.5207, precision_at025_motorcycle: 0.3833, recall_maxF1_bus: 0.4803, recall_maxF1_car: 0.6303, recall_maxF1_truck: 0.4575, recall_maxF1_motorcycle: 0.3761, precision_maxF1_bus: 0.6238, precision_maxF1_car: 0.8327, precision_maxF1_truck: 0.6819, precision_maxF1_motorcycle: 0.5005}
 - id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed42
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
@@ -1394,7 +1394,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.4248, AP50_bus: 0.3729, AP50_car: 0.6933, AP50_truck: 0.414, AP50_motorcycle: 0.2191, FN_bus: 1558.0}
-    operating_r10_20: {TP_bus: 39.0, FP_bus: 12.5, FN_bus: 1558.0, precision_bus: 0.9400, precision_car: 0.6808, precision_truck: 0.6689, precision_motorcycle: 0.3024, recall_bus: 0.0301, recall_car: 0.6689, recall_truck: 0.3185, recall_motorcycle: 0.3241}
+    operating_r10_20: {TP_bus: 39.0, FP_bus: 12.5, FN_bus: 1558.0, TP_car: 71906.5, FP_car: 32729.5, FN_car: 30599.5, TP_truck: 1248.5, FP_truck: 872.5, FN_truck: 2996.5, TP_motorcycle: 148.5, FP_motorcycle: 382.0, FN_motorcycle: 303.5, recall_at025_bus: 0.0244, recall_at025_car: 0.7015, recall_at025_truck: 0.2941, recall_at025_motorcycle: 0.3285, precision_at025_bus: 0.7326, precision_at025_car: 0.6879, precision_at025_truck: 0.5905, precision_at025_motorcycle: 0.2836, recall_maxF1_bus: 0.0301, recall_maxF1_car: 0.6689, recall_maxF1_truck: 0.3185, recall_maxF1_motorcycle: 0.3241, precision_maxF1_bus: 0.9400, precision_maxF1_car: 0.6808, precision_maxF1_truck: 0.6689, precision_maxF1_motorcycle: 0.3024}
 - id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed42
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
@@ -1406,7 +1406,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.5196, AP50_bus: 0.464, AP50_car: 0.7327, AP50_truck: 0.5099, AP50_motorcycle: 0.3718, FN_bus: 1457.5}
-    operating_r10_20: {TP_bus: 139.5, FP_bus: 39.0, FN_bus: 1457.5, precision_bus: 0.9493, precision_car: 0.7417, precision_truck: 0.6634, precision_motorcycle: 0.3818, recall_bus: 0.1039, recall_car: 0.6795, recall_truck: 0.4205, recall_motorcycle: 0.4580}
+    operating_r10_20: {TP_bus: 139.5, FP_bus: 39.0, FN_bus: 1457.5, TP_car: 71891.0, FP_car: 22518.5, FN_car: 30615.0, TP_truck: 1632.5, FP_truck: 1084.5, FN_truck: 2612.5, TP_motorcycle: 213.5, FP_motorcycle: 337.5, FN_motorcycle: 238.5, recall_at025_bus: 0.0874, recall_at025_car: 0.7013, recall_at025_truck: 0.3846, recall_at025_motorcycle: 0.4723, precision_at025_bus: 0.8388, precision_at025_car: 0.7616, precision_at025_truck: 0.6036, precision_at025_motorcycle: 0.3892, recall_maxF1_bus: 0.1039, recall_maxF1_car: 0.6795, recall_maxF1_truck: 0.4205, recall_maxF1_motorcycle: 0.4580, precision_maxF1_bus: 0.9493, precision_maxF1_car: 0.7417, precision_maxF1_truck: 0.6634, precision_maxF1_motorcycle: 0.3818}
 - id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed42
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1418,7 +1418,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.4309, AP50_bus: 0.4094, AP50_car: 0.6937, AP50_truck: 0.4222, AP50_motorcycle: 0.1983, FN_bus: 1078.0}
-    operating_r10_20: {TP_bus: 519.0, FP_bus: 714.0, FN_bus: 1078.0, precision_bus: 0.6082, precision_car: 0.7649, precision_truck: 0.6094, precision_motorcycle: 0.2829, recall_bus: 0.3460, recall_car: 0.6233, recall_truck: 0.3582, recall_motorcycle: 0.2942}
+    operating_r10_20: {TP_bus: 519.0, FP_bus: 714.0, FN_bus: 1078.0, TP_car: 73067.0, FP_car: 37989.5, FN_car: 29439.0, TP_truck: 1474.5, FP_truck: 2020.0, FN_truck: 2770.5, TP_motorcycle: 162.0, FP_motorcycle: 704.5, FN_motorcycle: 290.0, recall_at025_bus: 0.3250, recall_at025_car: 0.7128, recall_at025_truck: 0.3473, recall_at025_motorcycle: 0.3584, precision_at025_bus: 0.4224, precision_at025_car: 0.6584, precision_at025_truck: 0.4261, precision_at025_motorcycle: 0.1885, recall_maxF1_bus: 0.3460, recall_maxF1_car: 0.6233, recall_maxF1_truck: 0.3582, recall_maxF1_motorcycle: 0.2942, precision_maxF1_bus: 0.6082, precision_maxF1_car: 0.7649, precision_maxF1_truck: 0.6094, precision_maxF1_motorcycle: 0.2829}
 - id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed123
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
@@ -1430,7 +1430,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.4221, AP50_bus: 0.3611, AP50_car: 0.695, AP50_truck: 0.4058, AP50_motorcycle: 0.2266, FN_bus: 1522.0}
-    operating_r10_20: {TP_bus: 75.0, FP_bus: 29.0, FN_bus: 1522.0, precision_bus: 0.9373, precision_car: 0.6653, precision_truck: 0.6534, precision_motorcycle: 0.3021, recall_bus: 0.0640, recall_car: 0.6765, recall_truck: 0.3168, recall_motorcycle: 0.3126}
+    operating_r10_20: {TP_bus: 75.0, FP_bus: 29.0, FN_bus: 1522.0, TP_car: 71163.5, FP_car: 29995.5, FN_car: 31342.5, TP_truck: 1181.0, FP_truck: 816.5, FN_truck: 3064.0, TP_motorcycle: 138.0, FP_motorcycle: 303.5, FN_motorcycle: 314.0, recall_at025_bus: 0.0470, recall_at025_car: 0.6942, recall_at025_truck: 0.2782, recall_at025_motorcycle: 0.3053, precision_at025_bus: 0.7317, precision_at025_car: 0.7045, precision_at025_truck: 0.5957, precision_at025_motorcycle: 0.3139, recall_maxF1_bus: 0.0640, recall_maxF1_car: 0.6765, recall_maxF1_truck: 0.3168, recall_maxF1_motorcycle: 0.3126, precision_maxF1_bus: 0.9373, precision_maxF1_car: 0.6653, precision_maxF1_truck: 0.6534, precision_maxF1_motorcycle: 0.3021}
 - id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed123
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
@@ -1442,7 +1442,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.5234, AP50_bus: 0.4739, AP50_car: 0.7339, AP50_truck: 0.5238, AP50_motorcycle: 0.3618, FN_bus: 1410.5}
-    operating_r10_20: {TP_bus: 186.5, FP_bus: 47.0, FN_bus: 1410.5, precision_bus: 0.9549, precision_car: 0.7094, precision_truck: 0.6607, precision_motorcycle: 0.3480, recall_bus: 0.1421, recall_car: 0.6952, recall_truck: 0.4395, recall_motorcycle: 0.4580}
+    operating_r10_20: {TP_bus: 186.5, FP_bus: 47.0, FN_bus: 1410.5, TP_car: 72496.0, FP_car: 24296.0, FN_car: 30010.0, TP_truck: 1646.5, FP_truck: 1108.5, FN_truck: 2598.5, TP_motorcycle: 203.0, FP_motorcycle: 348.0, FN_motorcycle: 249.0, recall_at025_bus: 0.1168, recall_at025_car: 0.7072, recall_at025_truck: 0.3879, recall_at025_motorcycle: 0.4491, precision_at025_bus: 0.8639, precision_at025_car: 0.7491, precision_at025_truck: 0.6016, precision_at025_motorcycle: 0.3682, recall_maxF1_bus: 0.1421, recall_maxF1_car: 0.6952, recall_maxF1_truck: 0.4395, recall_maxF1_motorcycle: 0.4580, precision_maxF1_bus: 0.9549, precision_maxF1_car: 0.7094, precision_maxF1_truck: 0.6607, precision_maxF1_motorcycle: 0.3480}
 - id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed123
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
@@ -1454,7 +1454,7 @@ experiments:
   decision_rule: ADR-022 pre-registered reading (R1-R3)
   results:
     rule_mean_r10_20: {mAP50: 0.4437, AP50_bus: 0.4222, AP50_car: 0.6962, AP50_truck: 0.4247, AP50_motorcycle: 0.2317, FN_bus: 1018.5}
-    operating_r10_20: {TP_bus: 578.5, FP_bus: 866.5, FN_bus: 1018.5, precision_bus: 0.5860, precision_car: 0.7725, precision_truck: 0.5800, precision_motorcycle: 0.3783, recall_bus: 0.3829, recall_car: 0.6249, recall_truck: 0.3879, recall_motorcycle: 0.2710}
+    operating_r10_20: {TP_bus: 578.5, FP_bus: 866.5, FN_bus: 1018.5, TP_car: 73319.0, FP_car: 39136.0, FN_car: 29187.0, TP_truck: 1625.0, FP_truck: 2453.0, FN_truck: 2620.0, TP_motorcycle: 154.0, FP_motorcycle: 489.5, FN_motorcycle: 298.0, recall_at025_bus: 0.3622, recall_at025_car: 0.7153, recall_at025_truck: 0.3828, recall_at025_motorcycle: 0.3407, precision_at025_bus: 0.4014, precision_at025_car: 0.6528, precision_at025_truck: 0.4000, precision_at025_motorcycle: 0.2393, recall_maxF1_bus: 0.3829, recall_maxF1_car: 0.6249, recall_maxF1_truck: 0.3879, recall_maxF1_motorcycle: 0.2710, precision_maxF1_bus: 0.5860, precision_maxF1_car: 0.7725, precision_maxF1_truck: 0.5800, precision_maxF1_motorcycle: 0.3783}
 - id: EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed2024
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
