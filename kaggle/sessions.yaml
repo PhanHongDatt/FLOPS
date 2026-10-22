@@ -391,21 +391,21 @@ sessions:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4noKD@s5moto", "P4t1@s5"]'
       'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r.yaml"'
 
-  s19b:  # idea 3 (960 px) on P4noKD @ S1b5, then the A0c baseline of the combined protocol, seed 42. ~5 h + ~4.2 h
+  s19b_g:  # idea 3 (960 px) on P4noKD @ S1b5, seed 42. ~5 h
     slug: flops-s19b-moto-960-s42
-    notebook: notebooks/05_convergence_s1b.py
-    replace:
-      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4noKD@s5", "A0c@s5moto"]'
-      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r_960.yaml"'
-      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "i960"'
-      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 6'
-      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 4.5'
-
-  s19c_g:  # combined: P4t1 on all motorcycle images at 960 px, seed 42. ~7.8 h. Push only after s19a/s19b are read.
-    slug: flops-s19c-moto-combined-s42
     owner: goshihayashi
     notebook: notebooks/05_convergence_s1b.py
     dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4noKD@s5"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r_960.yaml"'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "i960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 8'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 5'
+
+  s19c:  # combined: P4t1 on all motorcycle images at 960 px, seed 42, run alongside s19a_g/s19b_g (author). ~7.8 h
+    slug: flops-s19c-moto-combined-s42
+    notebook: notebooks/05_convergence_s1b.py
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4t1@s5moto"]'
       'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11s_20r_960.yaml"'

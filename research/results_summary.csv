@@ -48,7 +48,7 @@ pending,EXP-2026-10-19-S18-A0c-s5bus1-y11s-seed2024,A0c,FedAvg (đối chứng),
 pending,EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed2024,P4noKD,"cosine LR + RFS, không KD (phương pháp chính)",bus1,"bus1: chỉ C4 có bus, truck vắng C3",4,2024,,,,,,,,,,,,,,,,trạng thái registry: running; phiên phdatt/flops-s18c-severity-s2024 chưa trả kết quả
 pending,EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed2024,FedProxc,FedProx mu=0.01,pooled,pooled: mọi client đủ 4 lớp (phân phối lý tưởng),0,2024,,,,,,,,,,,,,,,,trạng thái registry: running; phiên phdatt/flops-s18c-severity-s2024 chưa trả kết quả
 pending,EXP-2026-10-23-S19-P4t1-s5-y11s-seed42,P4t1,,s5,"S1b5: bus vắng 3/5 client, truck vắng C3",3,42,,,,,,,,,,,,,,,,trạng thái registry: planned; phiên goshihayashi/flops-s19a-moto-640-s42 chưa trả kết quả
-pending,EXP-2026-10-23-S19-P4noKD-s5-y11s960-seed42,P4noKD,"cosine LR + RFS, không KD (phương pháp chính)",s5,"S1b5: bus vắng 3/5 client, truck vắng C3",3,42,,,,,,,,,,,,,,,,trạng thái registry: planned; phiên phdatt/flops-s19b-moto-960-s42 chưa trả kết quả
+pending,EXP-2026-10-23-S19-P4noKD-s5-y11s960-seed42,P4noKD,"cosine LR + RFS, không KD (phương pháp chính)",s5,"S1b5: bus vắng 3/5 client, truck vắng C3",3,42,,,,,,,,,,,,,,,,trạng thái registry: planned; phiên goshihayashi/flops-s19b-moto-960-s42 chưa trả kết quả
 
 note,GHI CHÚ CỘT
 note,"row_type: run = một lần chạy; mean = trung bình theo seed của phương pháp × kịch bản; pending = đã đăng ký, chưa có kết quả; excluded = lỗi kỹ thuật hoặc bị bác bỏ, có lý do ghi trong registry"

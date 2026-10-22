@@ -1507,16 +1507,7 @@ experiments:
   run_class: feasibility
   status: planned
   seed: 42
-  kaggle_kernel: phdatt/flops-s19b-moto-960-s42
-  decision_rule: ADR-023 pre-registered reading
-- id: EXP-2026-10-23-S19-A0c-s5moto-y11s960-seed42
-  gate: 'G6 (motorcycle, ADR-023 baseline of the combined protocol)'
-  scenario: S1b5-allmoto-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
-  method: A0c
-  run_class: feasibility
-  status: planned
-  seed: 42
-  kaggle_kernel: phdatt/flops-s19b-moto-960-s42
+  kaggle_kernel: goshihayashi/flops-s19b-moto-960-s42
   decision_rule: ADR-023 pre-registered reading
 - id: EXP-2026-10-23-S19-P4t1-s5moto-y11s960-seed42
   gate: 'G6 (motorcycle, ADR-023 combined)'
@@ -1525,5 +1516,5 @@ experiments:
   run_class: feasibility
   status: planned
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s19c-moto-combined-s42
-  decision_rule: ADR-023 pre-registered reading; pushed only after s19a/s19b are read
+  kaggle_kernel: phdatt/flops-s19c-moto-combined-s42
+  decision_rule: ADR-023 pre-registered reading, amendment 2026-10-23 (run alongside the single-idea arms)

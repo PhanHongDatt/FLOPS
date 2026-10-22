@@ -28,9 +28,8 @@ Three ideas, each changing one thing against the reference **P4noKD @ S1b5, 640 
 |---|---|---|---|
 | 2 data | P4noKD @ `s5moto`, 640 | partition `s1b5_bus_3k_allmoto_seed42`: quota 460 → every motorcycle image | s19a_g |
 | 4 method | P4t1 @ `s5`, 640 | KD back on and RFS threshold t 0.5 → 1.0 (P4 with t=1.0) | s19a_g |
-| 3 resolution | P4noKD @ `s5`, 960 | `image_size` 960 for training and global evaluation | s19b |
-| baseline | A0c @ `s5moto`, 960 | FedAvg under the combined protocol (data + resolution) | s19b |
-| combined | P4t1 @ `s5moto`, 960 | the ideas kept by the rule below | s19c_g |
+| 3 resolution | P4noKD @ `s5`, 960 | `image_size` 960 for training and global evaluation | s19b_g |
+| combined | P4t1 @ `s5moto`, 960 | all three ideas together | s19c |
 
 - **Partition** `[ENGINEERING]`: same rule, seed, missing map and client size as S1b5; only the quota changes.
   Generated locally from `det_train.json` with the project partitioner (which reproduces the S1b5 manifest
@@ -56,12 +55,24 @@ Three ideas, each changing one thing against the reference **P4noKD @ S1b5, 640 
   (both the combined arm and its A0c baseline).
 - Negative or mixed outcomes are recorded as they are.
 
+## Amendment (2026-10-23, before any s19 run)
+The author chose not to run the A0c baseline under the new protocol and to run the combined arm at the same time
+as the single-idea arms ("thay vì chạy baseline mới thì hãy tiến hành chạy theo phương pháp đề xuất kết hợp với
+các phương pháp để xem kết quả luôn"). Consequences, recorded rather than hidden:
+- The combined arm holds **all three ideas** whatever the single-idea results; the keep rule above is now only a
+  reading of which idea contributed, not a filter on the combination.
+- The combined result is compared with P4noKD @ S1b5 640 (reference) and A0c @ S1b5 640. Because data and
+  resolution also change, its gain over A0c mixes protocol and method (`CLAUDE.md` §14); it shows how far
+  motorcycle can go, not that the method beats FedAvg under the same protocol. A0c @ `s5moto` 960 can be added
+  later if that claim is needed.
+
 ## Cost (Tesla T4, estimates from measured 640 px times; 960 ≈ 2.25× compute `[NEEDS-VERIFICATION]`)
 | Session | Arms | Estimate |
 |---|---|---|
 | s19a_g (goshihayashi) | P4noKD@s5moto 640, P4t1@s5 640 | ~2.3 h + ~3.4 h |
-| s19b (phdatt) | P4noKD@s5 960, A0c@s5moto 960 | ~5 h + ~4.2 h |
-| s19c_g (goshihayashi) | P4t1@s5moto 960 | ~7.8 h |
+| s19b_g (goshihayashi) | P4noKD@s5 960 | ~5 h |
+| s19c (phdatt) | P4t1@s5moto 960 | ~7.8 h |
 
-≈ 23 GPU-h for seed 42. Risk: 960 px with the KD teacher may not fit batch 16 in 16 GB; s19b shows the
-memory without KD first. A smaller batch would have to be used for every arm compared at 960.
+≈ 18.5 GPU-h for seed 42. Risk: 960 px with the KD teacher may not fit batch 16 in 16 GB (no earlier run shows
+the memory now, since the combined arm starts at the same time). A smaller batch would have to be used for every
+arm compared at 960.
