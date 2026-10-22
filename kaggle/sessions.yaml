@@ -424,10 +424,12 @@ sessions:
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 10.3'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
 
-  s20b:  # part 2: restores the s20a run from its output and resumes to round 20. Push after s20a ends
+  s20b_g:  # part 2 on goshihayashi: s20a's flops_results.zip is uploaded as the private dataset below (a phdatt
+           # kernel output is not visible to another account); restore_run finds it under /kaggle/input. Push after s20a ends
     slug: flops-s20b-s9-combined-s42
+    owner: goshihayashi
     notebook: notebooks/05_convergence_s1b.py
-    kernel_sources: [s20a]
+    dataset_sources: [solesensei/solesensei_bdd100k, goshihayashi/flops-s20a-output]
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4t1@s9bus8"]'
       'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "i960"'

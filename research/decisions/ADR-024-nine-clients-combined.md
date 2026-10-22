@@ -4,7 +4,7 @@
 **Status:** accepted for one feasibility run, seed 42 (author: "đẩy lên queue kịch bản 9 client trong đó có 8 client
 thiếu lớp bus và mỗi client có 3000 ảnh, lớp truck thiếu 3/9 client, đồng thời sử dụng cách kết hợp cả 3 cách")
 **Scope:** `configs/partition/s9_bus8_3k_moto_seed42.yaml`, `configs/experiments/convergence_9c_y11s_20r_960.yaml`,
-`src/utils/kaggle_resume.py`, notebook 05 (`s9bus8`, run restore), sessions s20a / s20b
+`src/utils/kaggle_resume.py`, notebook 05 (`s9bus8`, run restore), sessions s20a / s20b_g
 
 ## Decision
 - **Partition** `[ENGINEERING]` (same partitioner, seed 42, 3,000 images per client): C0–C7 hold no bus,
@@ -24,9 +24,9 @@ thiếu lớp bus và mỗi client có 3000 ảnh, lớp truck thiếu 3/9 clien
   combined arm. 20 rounds, 1 local epoch, eval at rounds 10 and 20, same val set (9,905 images).
 - **Two sessions** `[ENGINEERING]`: 27,000 images are 1.8× the 5-client work, ≈ 41 min per round
   `[NEEDS-VERIFICATION]`, ≈ 14 h, above Kaggle's 12 h. Part 1 (s20a) is cut by the arm timeout at ~10.3 h
-  after a round checkpoint; part 2 (s20b) mounts part 1's output, `restore_run` copies the run directory back
+  after a round checkpoint; part 2 (s20b_g, goshihayashi) mounts part 1's output (uploaded as the private dataset goshihayashi/flops-s20a-output), `restore_run` copies the run directory back
   and `--resume` continues from the latest checkpoint. The cosine LR and the RFS draw depend on the absolute
-  round, so the split does not change the schedule. Cost ≈ 14–15 GPU-h on phdatt (goshihayashi already runs its limit of 2 GPU sessions).
+  round, so the split does not change the schedule. Cost ≈ 10.5 GPU-h on phdatt (part 1) and ≈ 4 GPU-h on goshihayashi (part 2).
 
 ## What the run can and cannot show
 - No 9-client reference exists (no A0c, no pooled 9-client re-split), so this run cannot measure a gap or a

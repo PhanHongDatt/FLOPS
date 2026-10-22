@@ -1525,5 +1525,5 @@ experiments:
   run_class: feasibility
   status: running
   seed: 42
-  kaggle_kernel: phdatt/flops-s20a-s9-combined-s42 (part 1), phdatt/flops-s20b-s9-combined-s42 (part 2)
+  kaggle_kernel: phdatt/flops-s20a-s9-combined-s42 (part 1), goshihayashi/flops-s20b-s9-combined-s42 (part 2)
   decision_rule: ADR-024, descriptive only (no 9-client reference)
