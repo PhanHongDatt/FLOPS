@@ -82,7 +82,8 @@ DATA_YAML = YOLO_ROOT / "data.yaml"
 
 for cfg in ("s1b_bus_2k_seed42", "s1_control_matched_2k_seed42",   # matched + pooled are built from S1b
             "s1b_pooled_iid_2k_seed42", "server_sample_1k_seed42",   # server sample excludes all three
-            "s1b5_bus_3k_moto_seed42", "s1b5_pooled_3k_moto_seed42"):  # 5-client scenario (ADR-017)
+            "s1b5_bus_3k_moto_seed42", "s1b5_pooled_3k_moto_seed42",   # 5-client scenario (ADR-017)
+            "s1b5_bus_3k_allmoto_seed42"):                               # every motorcycle image (ADR-023)
     subprocess.check_call([
         sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
         "--partition-config", str(REPO_ROOT / "configs" / "partition" / f"{cfg}.yaml"),
@@ -97,6 +98,7 @@ SERVER = PARTITIONS_DIR / "server_sample_1k_seed42"
 S1B5 = PARTITIONS_DIR / "s1b5_bus_3k_moto_seed42"
 POOLED5 = PARTITIONS_DIR / "s1b5_pooled_3k_moto_seed42"
 S1B5BUS1 = PARTITIONS_DIR / "s1b5_bus1_3k_moto_seed42"   # severity sweep (ADR-022): bus on 1 of 5 clients
+S1B5MOTO = PARTITIONS_DIR / "s1b5_bus_3k_allmoto_seed42"  # ADR-023 idea 2: all 3,002 motorcycle boxes
 try:   # never block the other scenarios: an infeasible re-deal only fails the arms that use it
     subprocess.check_call([
         sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
@@ -127,6 +129,12 @@ for cid in ("C0", "C1", "C2"):
     assert s1b5["class_counts"][cid]["bus"] == 0, f"S1b5 {cid} must have zero bus"
 assert s1b5["class_counts"]["C3"]["truck"] == 0
 print("S1b5-3k (ADR-017):", {c: len(v) for c, v in s1b5["client_assignments"].items()}, s1b5["class_counts"])
+s5moto = yaml.safe_load((S1B5MOTO / "manifest.yaml").read_text())
+for cid in ("C0", "C1", "C2"):
+    assert s5moto["class_counts"][cid]["bus"] == 0, f"S1b5-allmoto {cid} must have zero bus"
+assert s5moto["class_counts"]["C3"]["truck"] == 0
+assert sum(v["motorcycle"] for v in s5moto["class_counts"].values()) == 3002, "allmoto must hold every motorcycle box"
+print("S1b5-3k-allmoto (ADR-023):", s5moto["class_counts"])
 
 # %% [markdown]
 # ## Cell 2b — D1: error decomposition of finished runs (ADR-014)
@@ -257,7 +265,9 @@ import time as _time
 SESSION_BUDGET_H = 11.0
 ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override
 
-PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5, "s5bus1": S1B5BUS1}
+PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5, "s5bus1": S1B5BUS1,
+              "s5moto": S1B5MOTO}
+RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)
 
 def arm_command(arm: str) -> tuple[list[str], Path]:
     name, _, where = arm.partition("@")
@@ -271,6 +281,8 @@ def arm_command(arm: str) -> tuple[list[str], Path]:
         "--mlflow-experiment", "S1b-2k-convergence",
         "--global-data-yaml", str(DATA_YAML), "--resume",
     ]
+    if RUN_TAG:   # keep 960 px runs apart from the 640 px runs of the same arm, seed and partition
+        cmd += ["--run-id", f"{name}{RUN_TAG}_feasibility_seed{SEED}_{partition.name}"]
     cmd += ["--algorithm", "FedProx"] if name == "FedProx" else ["--ablation", name]
     if name in ("A2b", "A4b", "P2"):
         cmd += ["--rho", RHO]

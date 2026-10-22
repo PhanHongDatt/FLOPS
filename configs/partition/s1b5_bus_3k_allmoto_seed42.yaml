@@ -1,0 +1,21 @@
+# S1b5-3k-allmoto (ADR-023, idea 2): the S1b5 rule with the motorcycle quota raised from 300 to 460 images
+# per client, so every one of the 2,284 BDD train images holding a motorcycle (3,002 boxes) is used. All five
+# clients may hold motorcycle, so the quota stops at 457 / 457 / 457 / 457 / 456 (expected warning).
+# Same missing map, seed, client count and size as s1b5_bus_3k_moto_seed42. Measured locally from
+# det_train.json (2026-10-23): car 155,477, bus 2,657, truck 6,450, motorcycle 3,002 boxes (reference:
+# 155,250 / 2,628 / 6,421 / 1,963); bus 0 on C0-C2, truck 0 on C3.
+partition_id: s1b5_bus_3k_allmoto_seed42
+scenario: S1
+seed: 42
+num_clients: 5
+per_client: 3000
+missing_map:
+  C0: [bus]
+  C1: [bus]
+  C2: [bus]
+  C3: [truck]
+  C4: []
+class_quota:
+  motorcycle: 460
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50
