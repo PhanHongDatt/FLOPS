@@ -83,7 +83,8 @@ DATA_YAML = YOLO_ROOT / "data.yaml"
 for cfg in ("s1b_bus_2k_seed42", "s1_control_matched_2k_seed42",   # matched + pooled are built from S1b
             "s1b_pooled_iid_2k_seed42", "server_sample_1k_seed42",   # server sample excludes all three
             "s1b5_bus_3k_moto_seed42", "s1b5_pooled_3k_moto_seed42",   # 5-client scenario (ADR-017)
-            "s1b5_bus_3k_allmoto_seed42"):                               # every motorcycle image (ADR-023)
+            "s1b5_bus_3k_allmoto_seed42",                                # every motorcycle image (ADR-023)
+            "s9_bus8_3k_moto_seed42"):                                   # 9 clients, bus on 1 (ADR-024)
     subprocess.check_call([
         sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
         "--partition-config", str(REPO_ROOT / "configs" / "partition" / f"{cfg}.yaml"),
@@ -99,6 +100,7 @@ S1B5 = PARTITIONS_DIR / "s1b5_bus_3k_moto_seed42"
 POOLED5 = PARTITIONS_DIR / "s1b5_pooled_3k_moto_seed42"
 S1B5BUS1 = PARTITIONS_DIR / "s1b5_bus1_3k_moto_seed42"   # severity sweep (ADR-022): bus on 1 of 5 clients
 S1B5MOTO = PARTITIONS_DIR / "s1b5_bus_3k_allmoto_seed42"  # ADR-023 idea 2: all 3,002 motorcycle boxes
+S9BUS8 = PARTITIONS_DIR / "s9_bus8_3k_moto_seed42"   # ADR-024: 9 clients, bus absent on 8, truck on 3
 try:   # never block the other scenarios: an infeasible re-deal only fails the arms that use it
     subprocess.check_call([
         sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
@@ -135,6 +137,11 @@ for cid in ("C0", "C1", "C2"):
 assert s5moto["class_counts"]["C3"]["truck"] == 0
 assert sum(v["motorcycle"] for v in s5moto["class_counts"].values()) == 3002, "allmoto must hold every motorcycle box"
 print("S1b5-3k-allmoto (ADR-023):", s5moto["class_counts"])
+s9 = yaml.safe_load((S9BUS8 / "manifest.yaml").read_text())
+assert [c for c in sorted(s9["class_counts"]) if s9["class_counts"][c]["bus"] > 0] == ["C8"]
+assert sorted(c for c in s9["class_counts"] if s9["class_counts"][c]["truck"] == 0) == ["C5", "C6", "C7"]
+assert all(len(v) == 3000 for v in s9["client_assignments"].values())
+print("S9-bus8 (ADR-024):", s9["class_counts"])
 
 # %% [markdown]
 # ## Cell 2b — D1: error decomposition of finished runs (ADR-014)
@@ -266,7 +273,8 @@ SESSION_BUDGET_H = 11.0
 ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override
 
 PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5, "s5bus1": S1B5BUS1,
-              "s5moto": S1B5MOTO}
+              "s5moto": S1B5MOTO, "s9bus8": S9BUS8}
+EXP_CFG_9C = REPO_ROOT / "configs" / "experiments" / "convergence_9c_y11s_20r_960.yaml"   # ADR-024
 RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)
 
 def arm_command(arm: str) -> tuple[list[str], Path]:
@@ -276,13 +284,19 @@ def arm_command(arm: str) -> tuple[list[str], Path]:
         sys.executable, str(REPO_ROOT / "scripts" / "run_fl_experiment.py"),
         "--partition", str(partition / "manifest.yaml"),
         "--data-yaml-dir", str(partition),
-        "--run-class", "feasibility", "--exp-config", str(EXP_CFG_5C if where.startswith("s5") else EXP_CFG),
+        "--run-class", "feasibility",
+        "--exp-config", str(EXP_CFG_9C if where.startswith("s9") else EXP_CFG_5C if where.startswith("s5") else EXP_CFG),
         "--seed", str(SEED), "--mlflow-uri", MLFLOW_URI,
         "--mlflow-experiment", "S1b-2k-convergence",
         "--global-data-yaml", str(DATA_YAML), "--resume",
     ]
+    run_id = f"{name}{RUN_TAG}_feasibility_seed{SEED}_{partition.name}"   # = the default id when RUN_TAG is ""
     if RUN_TAG:   # keep 960 px runs apart from the 640 px runs of the same arm, seed and partition
-        cmd += ["--run-id", f"{name}{RUN_TAG}_feasibility_seed{SEED}_{partition.name}"]
+        cmd += ["--run-id", run_id]
+    from src.utils.kaggle_resume import restore_run   # ADR-024: continue a run cut by an earlier session
+    restored = restore_run(run_id, ARTIFACTS_DIR / "runs")
+    if restored:
+        print(f"restored {run_id} from an earlier session; --resume continues from its latest checkpoint")
     cmd += ["--algorithm", "FedProx"] if name == "FedProx" else ["--ablation", name]
     if name in ("A2b", "A4b", "P2"):
         cmd += ["--rho", RHO]

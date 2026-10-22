@@ -1,0 +1,24 @@
+# S9-bus8 (ADR-024): 9 clients x 3,000 images; bus absent on 8/9 (C0-C7), truck absent on 3/9 (C5-C7), C8 holds
+# all four classes. Motorcycle quota 260 images per client, the 9-client analogue of ADR-023's "every motorcycle
+# image": 2,789 of 3,002 boxes fit (motorcycle images that also hold bus can only go to C8, which is full).
+# Measured locally from det_train.json (2026-10-23): car 278,715, bus 3,908, truck 11,456, motorcycle 2,789;
+# C8 bus 3,908 (it is nearly all bus images: an expected side effect of one bus client with a 3,000 cap).
+partition_id: s9_bus8_3k_moto_seed42
+scenario: S1
+seed: 42
+num_clients: 9
+per_client: 3000
+missing_map:
+  C0: [bus]
+  C1: [bus]
+  C2: [bus]
+  C3: [bus]
+  C4: [bus]
+  C5: [bus, truck]
+  C6: [bus, truck]
+  C7: [bus, truck]
+  C8: []
+class_quota:
+  motorcycle: 260
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50

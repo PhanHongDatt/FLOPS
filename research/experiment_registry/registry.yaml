@@ -1518,3 +1518,12 @@ experiments:
   seed: 42
   kaggle_kernel: phdatt/flops-s19c-moto-combined-s42
   decision_rule: ADR-023 pre-registered reading, amendment 2026-10-23 (run alongside the single-idea arms)
+- id: EXP-2026-10-23-S20-P4t1-s9bus8-y11s960-seed42
+  gate: 'G6 (9 clients, ADR-024)'
+  scenario: S9-bus8-3k (9 x 3,000 images, bus absent on 8/9, truck on 3/9), YOLO11s 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s20a-s9-combined-s42 (part 1), goshihayashi/flops-s20b-s9-combined-s42 (part 2)
+  decision_rule: ADR-024, descriptive only (no 9-client reference)

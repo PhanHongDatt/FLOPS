@@ -31,3 +31,12 @@ def test_960_config_changes_only_the_image_size():
     ref["model"]["image_size"] = new["model"]["image_size"]
     ref.pop("notes", None), new.pop("notes", None)
     assert ref == new
+
+
+def test_nine_client_partition_contract():
+    cfg = yaml.safe_load((ROOT / "configs/partition/s9_bus8_3k_moto_seed42.yaml").read_text(encoding="utf-8"))
+    assert cfg["num_clients"] == 9 and cfg["per_client"] == 3000 and set(cfg["missing_map"]) == {f"C{i}" for i in range(9)}
+    assert [c for c, m in cfg["missing_map"].items() if "bus" not in m] == ["C8"]
+    assert sorted(c for c, m in cfg["missing_map"].items() if "truck" in m) == ["C5", "C6", "C7"]
+    exp = load_experiment_config(ROOT / "configs/experiments/convergence_9c_y11s_20r_960.yaml")
+    assert exp["federated"]["num_clients"] == 9 and exp["model"]["image_size"] == 960

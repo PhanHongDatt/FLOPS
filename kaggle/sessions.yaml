@@ -412,3 +412,28 @@ sessions:
       'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "i960"'
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 10'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 8'
+
+  # ADR-024: 9 clients x 3,000 images, bus absent on 8/9, truck on 3/9, ADR-023 combined method (P4t1, 960 px).
+  # ~41 min per round (estimate) -> ~14 h: part 1 runs until its budget, part 2 restores the run and resumes.
+  s20a_g:  # part 1 of P4t1 @ S9-bus8, 960 px, seed 42. Cut at ~10.3 h on purpose
+    slug: flops-s20a-s9-combined-s42
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4t1@s9bus8"]'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "i960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 10.3'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+  s20b_g:  # part 2: restores the s20a_g run from its output and resumes to round 20. Push after s20a_g ends
+    slug: flops-s20b-s9-combined-s42
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    kernel_sources: [s20a_g]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4t1@s9bus8"]'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "i960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 10.3'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
