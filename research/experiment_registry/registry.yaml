@@ -1487,7 +1487,7 @@ experiments:
   scenario: S1b5-allmoto-3k (every motorcycle image), YOLO11s 640 px, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: goshihayashi/flops-s19a-moto-640-s42
   decision_rule: ADR-023 pre-registered reading
@@ -1496,7 +1496,7 @@ experiments:
   scenario: S1b5-3k, YOLO11s 640 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: goshihayashi/flops-s19a-moto-640-s42
   decision_rule: ADR-023 pre-registered reading
@@ -1505,7 +1505,7 @@ experiments:
   scenario: S1b5-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: goshihayashi/flops-s19b-moto-960-s42
   decision_rule: ADR-023 pre-registered reading
@@ -1514,7 +1514,7 @@ experiments:
   scenario: S1b5-allmoto-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: phdatt/flops-s19c-moto-combined-s42
   decision_rule: ADR-023 pre-registered reading, amendment 2026-10-23 (run alongside the single-idea arms)
