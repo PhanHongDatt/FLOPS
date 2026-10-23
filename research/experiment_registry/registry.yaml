@@ -1583,6 +1583,6 @@ experiments:
   run_class: feasibility
   status: planned
   seed: 42
-  kaggle_kernel: phdatt/flops-s21c-s9-combined-s42
+  kaggle_kernel: goshihayashi/flops-s21c-s9-combined-s42 (phdatt quota used up)
   decision_rule: ADR-024, descriptive only (no 9-client reference)
   note: 'rerun of the failed s20a run with the device fix. Push refused 2026-10-23 (phdatt weekly GPU quota of 30 h used up); waits for the reset.'
