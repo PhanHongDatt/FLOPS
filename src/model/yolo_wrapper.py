@@ -154,13 +154,28 @@ def cls_head_freeze_list(model: "YOLO") -> list[str]:
     return [f"{det_idx}.cv3.{lvl}.{len(det.cv3[lvl]) - 1}" for lvl in range(len(det.cv3))]
 
 
-def release_training_memory(model: Any) -> None:
-    """Return PyTorch's cached CUDA blocks to the driver after a local fit.
+def resolve_device(device: int | str) -> int | str:
+    """The GPU this process was given, when the config asks for the default device 0.
 
-    A Ray worker that has finished a client's fit stays alive holding the allocator cache of that fit's
-    activations (GBs), while the next client and the server's evaluation start in other processes on the same
-    GPU. At 640 px this fit by luck; at 960 px it ran the T4 out of memory and Flower aggregated 0-2 of 5 clients
-    per round (s19b_g, s19c, s20a, 2026-10-23; ADR-023). The trainer itself (optimizer and EMA, tens of MB for
+    [YOLO-DOC] Ultralytics 8.3.253 ``select_device`` writes ``CUDA_VISIBLE_DEVICES = device`` before CUDA starts,
+    so ``device=0`` overrides the single GPU Ray assigned to a client actor (Ray sets ``CUDA_VISIBLE_DEVICES``
+    per actor). On a Kaggle T4 x2 both client actors then trained on physical GPU 0 while GPU 1 idled; at 960 px
+    that ran out of memory (s19b_g, s19c, s20a, 2026-10-23). Passing the assigned id keeps Ray's placement; the
+    process still sees it as cuda:0. Explicit non-default devices and multi-GPU visibility are left alone.
+    """
+    import os
+    visible = os.environ.get("CUDA_VISIBLE_DEVICES", "").strip()
+    if str(device) == "0" and visible and "," not in visible and visible not in ("-1", "0"):
+        return visible
+    return device
+
+
+def release_training_memory(model: Any) -> None:
+    """Return PyTorch's cached CUDA blocks after a local fit.
+
+    A Ray client actor stays alive between fits holding the allocator cache of its last fit's activations (GBs).
+    The main 960 px OOM cause was two actors on one GPU (see ``resolve_device``); this keeps an idle actor from
+    squeezing the server evaluation that shares its GPU. The trainer itself (optimizer and EMA, tens of MB for
     YOLO11s) is kept: callers and tests read ``model.trainer`` after training.
     """
     import gc
@@ -231,7 +246,7 @@ def train_one_round(
         imgsz=img_size,
         optimizer="SGD",
         lr0=lr0,
-        device=device,
+        device=resolve_device(device),
         project=str(project),
         name=name,
         exist_ok=True,
@@ -466,7 +481,7 @@ def confidence_stats(
     model.predictor = None
     try:
         for r in model.predict(source=list(images), imgsz=img_size, conf=conf, iou=iou,
-                               device=device, stream=True, verbose=False, batch=batch):
+                               device=resolve_device(device), stream=True, verbose=False, batch=batch):
             if r.boxes is None:
                 continue
             for c, cf in zip(r.boxes.cls.cpu().numpy().astype(int), r.boxes.conf.cpu().numpy()):
@@ -507,7 +522,7 @@ def evaluate(
             imgsz=img_size,
             conf=conf,
             iou=iou,
-            device=device,
+            device=resolve_device(device),
             verbose=False,
             **val_kwargs,
         )

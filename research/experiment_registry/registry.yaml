@@ -1524,7 +1524,7 @@ experiments:
   seed: 42
   kaggle_kernel: goshihayashi/flops-s19b-moto-960-s42
   decision_rule: ADR-023 pre-registered reading
-  failure: 'CUDA out of memory at 960 px; Flower aggregated only 0-2 of 5 clients per round (log aggregate_fit counts), so the run is not the registered experiment. Cause, 2026-10-23: finished Ray client workers kept their CUDA allocator cache on the same GPU. Fix: release_training_memory after each local fit and _wrap_fail_on_client_failures (a partial aggregation now stops the run). Round 20 checkpoint exists, round 20 evaluation OOM; round 10 AP50 bus 0.260 (not valid).'
+  failure: 'CUDA out of memory at 960 px; Flower aggregated only 0-2 of 5 clients per round (log aggregate_fit counts), so the run is not the registered experiment. Cause, 2026-10-23: the T4 x2 gave Ray 2 client actors, but Ultralytics select_device(0) rewrote CUDA_VISIBLE_DEVICES so both trained on physical GPU 0 (OOM messages list both actor pids on GPU 0; GPU 1 idle). Fix: resolve_device keeps the GPU Ray assigned, release_training_memory after each local fit, and _wrap_fail_on_client_failures (a partial aggregation now stops the run). Round 20 checkpoint exists, round 20 evaluation OOM; round 10 AP50 bus 0.260 (not valid).'
 - id: EXP-2026-10-23-S19-P4t1-s5moto-y11s960-seed42
   gate: 'G6 (motorcycle, ADR-023 combined)'
   scenario: S1b5-allmoto-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
@@ -1534,7 +1534,7 @@ experiments:
   seed: 42
   kaggle_kernel: phdatt/flops-s19c-moto-combined-s42
   decision_rule: ADR-023 pre-registered reading, amendment 2026-10-23 (run alongside the single-idea arms)
-  failure: 'CUDA out of memory at 960 px; Flower aggregated only 0-1 of 5 clients per round (log aggregate_fit counts), so the run is not the registered experiment. Cause, 2026-10-23: finished Ray client workers kept their CUDA allocator cache on the same GPU. Fix: release_training_memory after each local fit and _wrap_fail_on_client_failures (a partial aggregation now stops the run). Round 20 checkpoint exists, round 20 evaluation OOM; round 10 AP50 bus 0.289 (not valid).'
+  failure: 'CUDA out of memory at 960 px; Flower aggregated only 0-1 of 5 clients per round (log aggregate_fit counts), so the run is not the registered experiment. Cause, 2026-10-23: the T4 x2 gave Ray 2 client actors, but Ultralytics select_device(0) rewrote CUDA_VISIBLE_DEVICES so both trained on physical GPU 0 (OOM messages list both actor pids on GPU 0; GPU 1 idle). Fix: resolve_device keeps the GPU Ray assigned, release_training_memory after each local fit, and _wrap_fail_on_client_failures (a partial aggregation now stops the run). Round 20 checkpoint exists, round 20 evaluation OOM; round 10 AP50 bus 0.289 (not valid).'
 - id: EXP-2026-10-23-S20-P4t1-s9bus8-y11s960-seed42
   gate: 'G6 (9 clients, ADR-024)'
   scenario: S9-bus8-3k (9 x 3,000 images, bus absent on 8/9, truck on 3/9), YOLO11s 960 px, 20 rounds, eval 10/20
@@ -1544,4 +1544,34 @@ experiments:
   seed: 42
   kaggle_kernel: phdatt/flops-s20a-s9-combined-s42 (part 1), goshihayashi/flops-s20b-s9-combined-s42 (part 2)
   decision_rule: ADR-024, descriptive only (no 9-client reference)
-  failure: 'CUDA out of memory at 960 px; Flower aggregated only 0-1 of 9 clients per round (log aggregate_fit counts), so the run is not the registered experiment. Cause, 2026-10-23: finished Ray client workers kept their CUDA allocator cache on the same GPU. Fix: release_training_memory after each local fit and _wrap_fail_on_client_failures (a partial aggregation now stops the run). Stalled in round 10 (watchdog). Part 2 (s20b_g) not pushed.'
+  failure: 'CUDA out of memory at 960 px; Flower aggregated only 0-1 of 9 clients per round (log aggregate_fit counts), so the run is not the registered experiment. Cause, 2026-10-23: the T4 x2 gave Ray 2 client actors, but Ultralytics select_device(0) rewrote CUDA_VISIBLE_DEVICES so both trained on physical GPU 0 (OOM messages list both actor pids on GPU 0; GPU 1 idle). Fix: resolve_device keeps the GPU Ray assigned, release_training_memory after each local fit, and _wrap_fail_on_client_failures (a partial aggregation now stops the run). Stalled in round 10 (watchdog). Part 2 (s20b_g) not pushed.'
+- id: EXP-2026-10-23-S21-P4noKD-s5-y11s960-seed42
+  gate: 'G6 (motorcycle, ADR-023 idea 3)'
+  scenario: S1b5-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
+  method: P4noKD
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s21a-moto-960-s42
+  decision_rule: ADR-023 pre-registered reading
+  note: rerun of the failed s19b_g run with the device fix
+- id: EXP-2026-10-23-S21-P4t1-s5moto-y11s960-seed42
+  gate: 'G6 (motorcycle, ADR-023 combined)'
+  scenario: S1b5-allmoto-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
+  method: P4t1
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s21b-moto-combined-960-s42
+  decision_rule: ADR-023 pre-registered reading, amendment 2026-10-23 (combined arm keeps all three ideas)
+  note: rerun of the failed s19c run with the device fix, unchanged arm
+- id: EXP-2026-10-23-S21-P4t1-s9bus8-y11s960-seed42
+  gate: 'G6 (9 clients, ADR-024)'
+  scenario: S9-bus8-3k (9 x 3,000 images, bus absent on 8/9, truck on 3/9), YOLO11s 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s21c-s9-combined-s42
+  decision_rule: ADR-024, descriptive only (no 9-client reference)
+  note: rerun of the failed s20a run with the device fix; a part 2 on phdatt resumes from this kernel output if the 12 h session ends first

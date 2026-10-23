@@ -60,3 +60,17 @@ def test_partial_aggregation_is_refused():
     assert strategy.aggregate_fit(1, ["a"] * 5, []) == ("params", {})
     with pytest.raises(RuntimeError, match="2 client fit"):
         strategy.aggregate_fit(3, ["a"] * 3, [RuntimeError("CUDA out of memory"), RuntimeError("x")])
+
+
+def test_resolve_device_keeps_the_gpu_ray_assigned(monkeypatch):
+    from src.model.yolo_wrapper import resolve_device
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "1")        # second Ray actor on a T4 x2
+    assert resolve_device(0) == "1"
+    assert resolve_device("0") == "1"
+    assert resolve_device("cpu") == "cpu"                   # explicit choices are left alone
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0,1")       # driver sees both GPUs
+    assert resolve_device(0) == 0
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
+    assert resolve_device(0) == 0
+    monkeypatch.delenv("CUDA_VISIBLE_DEVICES")
+    assert resolve_device(0) == 0

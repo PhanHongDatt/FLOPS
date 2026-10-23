@@ -93,9 +93,16 @@ arm compared at 960.
 
 **Invalid — failed-technical (s19b_g idea 3, s19c combined, s20a 9 clients):** CUDA out of memory at 960 px. Flower
 aggregated only 0–2 of 5 clients (0–1 of 9 in s20a) in most rounds and did not stop, so these runs are not the
-registered experiments; their round-10 numbers (bus 0.26–0.29) are not results. Cause: a finished Ray client worker
-keeps its CUDA allocator cache on the same GPU while the next client and the server evaluation start in other
-processes; at 640 px this fit, at 960 px it did not. Fix (2026-10-23): `release_training_memory` empties the
-cache after every local fit, and `_wrap_fail_on_client_failures` stops a run at the first partial aggregation.
+registered experiments; their round-10 numbers (bus 0.26–0.29) are not results. Cause: the Kaggle T4 x2 gives Ray
+2 client actors, but `[YOLO-DOC]` Ultralytics 8.3.253 `select_device(0)` rewrites `CUDA_VISIBLE_DEVICES`, so both
+actors trained on physical GPU 0 (each OOM message lists both actor pids on GPU 0) while GPU 1 idled; at 640 px two
+fits fit in 15 GB, at 960 px they did not. Fix (2026-10-23): `resolve_device` keeps the GPU Ray assigned,
+`release_training_memory` empties the cache after every local fit, and `_wrap_fail_on_client_failures` stops a run
+at the first partial aggregation. Earlier 640 px runs are unaffected in content (two clients shared one GPU, every
+client aggregated).
 A scan of every downloaded log found one earlier partial round in a reported run: A1c seed 2024 (s17c), round 9
 aggregated 4 of 5 clients (recorded in the registry; kept). Idea 3 and the combination remain untested.
+
+**Rerun (2026-10-23, s21):** the three invalid runs are pushed again unchanged except for the fix: s21a_g (idea 3,
+P4noKD @ s5 960), s21b_g (combined, P4t1 @ s5moto 960: amendment 1 keeps all three ideas, so the null result of
+idea 2 does not remove it, which would be a post-hoc change) and s21c (ADR-024, 9 clients).
