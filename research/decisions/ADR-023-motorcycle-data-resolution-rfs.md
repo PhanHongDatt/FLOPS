@@ -106,3 +106,18 @@ aggregated 4 of 5 clients (recorded in the registry; kept). Idea 3 and the combi
 **Rerun (2026-10-23, s21):** the three invalid runs are pushed again unchanged except for the fix: s21a_g (idea 3,
 P4noKD @ s5 960), s21b_g (combined, P4t1 @ s5moto 960: amendment 1 keeps all three ideas, so the null result of
 idea 2 does not remove it, which would be a post-hoc change) and s21c (ADR-024, 9 clients).
+
+**s21 results (2026-10-23, seed 42; 5 of 5 clients aggregated in all 20 rounds, no OOM):**
+
+| Run | mAP50 | bus | car | truck | motorcycle | Δ motorcycle | keep rule |
+|---|---|---|---|---|---|---|---|
+| reference: P4noKD @ s5 640 | 0.529 | 0.487 | — | — | 0.365 | — | — |
+| idea 3: P4noKD @ s5 960 (s21a_g, 3.6 h) | 0.595 | 0.566 | 0.797 | 0.589 | 0.427 | **+0.062** | **met** (bus +0.079, mAP50 +0.066) |
+| combined: P4t1 @ s5moto 960 (s21b_g, 6.1 h) | 0.610 | 0.565 | 0.796 | 0.574 | **0.504** | **+0.139** | — |
+
+- Ideas 3 and 4 add up roughly: +0.062 and +0.058 alone, +0.139 together (idea 2 adds nothing at 640 px; whether it
+  helps at 960 px is not separated, since the combination keeps it). The combination does not raise bus over idea 3
+  alone (0.565 vs 0.566) and truck is 0.015 lower.
+- Training **and** evaluation are at 960 px, so the 960 gains include easier detection of small objects at test
+  time; they are not comparable with any 640 px number as a method effect, only as a protocol choice.
+- One seed: feasibility, not a claim (`CLAUDE.md` §14).

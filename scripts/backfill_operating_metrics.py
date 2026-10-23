@@ -35,7 +35,8 @@ CLASSES = ("bus", "car", "truck", "motorcycle")
 COUNTS = tuple(f"{k}_{c}" for c in CLASSES for k in ("TP", "FP", "FN"))
 KEYS = (*COUNTS, *(f"recall_at025_{c}" for c in CLASSES), *(f"precision_at025_{c}" for c in CLASSES),
         *(f"recall_maxF1_{c}" for c in CLASSES), *(f"precision_maxF1_{c}" for c in CLASSES))
-RUN_DIR = re.compile(r"^(?P<method>[A-Za-z0-9]+)_feasibility_seed(?P<seed>\d+)_s1b5_(?P<sc>bus|pooled|bus1)_3k_moto_seed42$")
+RUN_DIR = re.compile(r"^(?P<method>[A-Za-z0-9]+?)(?P<tag>i960)?_feasibility_seed(?P<seed>\d+)"
+                     r"_s1b5_(?P<sc>bus|pooled|bus1)_3k_(?P<all>all)?moto_seed42$")
 SCENARIO = {"bus": "s5", "pooled": "pooled", "bus1": "bus1"}
 
 
@@ -96,7 +97,9 @@ def main() -> None:
         m = RUN_DIR.match(csv_path.parent.name)
         if not m:
             continue
-        run = index.get((m["method"], SCENARIO[m["sc"]], int(m["seed"])))
+        scenario = "s5moto" if m["all"] else SCENARIO[m["sc"]]
+        scenario += "_960" if m["tag"] else ""                # ADR-023 run directories carry RUN_TAG "i960"
+        run = index.get((m["method"], scenario, int(m["seed"])))
         values = rule_mean(csv_path)
         if run is None or values is None:
             continue

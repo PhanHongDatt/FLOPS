@@ -1503,6 +1503,7 @@ experiments:
   decision_rule: ADR-023 pre-registered reading
   results:
     rule_mean_r10_20: {mAP50: 0.5289, AP50_bus: 0.4942, AP50_car: 0.7333, AP50_truck: 0.5231, AP50_motorcycle: 0.3648, FN_bus: 1216.5}
+    operating_r10_20: {TP_bus: 380.5, FP_bus: 120.5, FN_bus: 1216.5, TP_car: 72251.0, FP_car: 23611.0, FN_car: 30255.0, TP_truck: 1491.0, FP_truck: 806.0, FN_truck: 2754.0, TP_motorcycle: 211.5, FP_motorcycle: 458.0, FN_motorcycle: 240.5, recall_at025_bus: 0.2383, recall_at025_car: 0.7048, recall_at025_truck: 0.3512, recall_at025_motorcycle: 0.4679, precision_at025_bus: 0.7970, precision_at025_car: 0.7539, precision_at025_truck: 0.6804, precision_at025_motorcycle: 0.3226, recall_maxF1_bus: 0.2862, recall_maxF1_car: 0.6936, recall_maxF1_truck: 0.4012, recall_maxF1_motorcycle: 0.4845, precision_maxF1_bus: 0.8448, precision_maxF1_car: 0.6999, precision_maxF1_truck: 0.7136, precision_maxF1_motorcycle: 0.3100}
 - id: EXP-2026-10-23-S19-P4t1-s5-y11s-seed42
   gate: 'G6 (motorcycle, ADR-023 idea 4)'
   scenario: S1b5-3k, YOLO11s 640 px, 20 rounds, eval 10/20
@@ -1550,21 +1551,31 @@ experiments:
   scenario: S1b5-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s21a-moto-960-s42
   decision_rule: ADR-023 pre-registered reading
-  note: rerun of the failed s19b_g run with the device fix
+  note: 'rerun of the failed s19b_g run with the device fix; 5 of 5 clients aggregated in all 20 rounds, no OOM, wall 3.6 h on T4 x2'
+  results:
+    round_10: {mAP50: 0.5712, AP50_bus: 0.5348, AP50_car: 0.7893, AP50_truck: 0.5706, AP50_motorcycle: 0.3900, FN_bus: 1264.0}
+    round_20: {mAP50: 0.6183, AP50_bus: 0.5964, AP50_car: 0.8051, AP50_truck: 0.6081, AP50_motorcycle: 0.4637, FN_bus: 1002.0}
+    rule_mean_r10_20: {mAP50: 0.5948, AP50_bus: 0.5656, AP50_car: 0.7972, AP50_truck: 0.5893, AP50_motorcycle: 0.4269, FN_bus: 1133.0}
+    operating_r10_20: {TP_bus: 464.0, FP_bus: 133.0, FN_bus: 1133.0, TP_car: 78721.5, FP_car: 24110.5, FN_car: 23784.5, TP_truck: 1746.0, FP_truck: 908.5, FN_truck: 2499.0, TP_motorcycle: 237.5, FP_motorcycle: 334.5, FN_motorcycle: 214.5, recall_at025_bus: 0.2905, recall_at025_car: 0.7680, recall_at025_truck: 0.4113, recall_at025_motorcycle: 0.5254, precision_at025_bus: 0.8118, precision_at025_car: 0.7660, precision_at025_truck: 0.6707, precision_at025_motorcycle: 0.4196, recall_maxF1_bus: 0.3319, recall_maxF1_car: 0.7587, recall_maxF1_truck: 0.4688, recall_maxF1_motorcycle: 0.5310, precision_maxF1_bus: 0.8511, precision_maxF1_car: 0.7160, precision_maxF1_truck: 0.7219, precision_maxF1_motorcycle: 0.3958}
 - id: EXP-2026-10-23-S21-P4t1-s5moto-y11s960-seed42
   gate: 'G6 (motorcycle, ADR-023 combined)'
   scenario: S1b5-allmoto-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s21b-moto-combined-960-s42
   decision_rule: ADR-023 pre-registered reading, amendment 2026-10-23 (combined arm keeps all three ideas)
-  note: rerun of the failed s19c run with the device fix, unchanged arm
+  note: 'rerun of the failed s19c run with the device fix, unchanged arm; 5 of 5 clients aggregated in all 20 rounds, no OOM, wall 6.1 h on T4 x2'
+  results:
+    round_10: {mAP50: 0.5946, AP50_bus: 0.5398, AP50_car: 0.7901, AP50_truck: 0.5609, AP50_motorcycle: 0.4878, FN_bus: 1048.0}
+    round_20: {mAP50: 0.6244, AP50_bus: 0.5903, AP50_car: 0.8010, AP50_truck: 0.5861, AP50_motorcycle: 0.5200, FN_bus: 1013.0}
+    rule_mean_r10_20: {mAP50: 0.6095, AP50_bus: 0.5650, AP50_car: 0.7956, AP50_truck: 0.5735, AP50_motorcycle: 0.5039, FN_bus: 1030.5}
+    operating_r10_20: {TP_bus: 566.5, FP_bus: 619.5, FN_bus: 1030.5, TP_car: 74694.5, FP_car: 18110.0, FN_car: 27811.5, TP_truck: 2140.0, FP_truck: 2455.5, FN_truck: 2105.0, TP_motorcycle: 252.5, FP_motorcycle: 274.0, FN_motorcycle: 199.5, recall_at025_bus: 0.3547, recall_at025_car: 0.7287, recall_at025_truck: 0.5041, recall_at025_motorcycle: 0.5586, precision_at025_bus: 0.4778, precision_at025_car: 0.8050, precision_at025_truck: 0.4656, precision_at025_motorcycle: 0.4803, recall_maxF1_bus: 0.4461, recall_maxF1_car: 0.6766, recall_maxF1_truck: 0.5349, recall_maxF1_motorcycle: 0.5288, precision_maxF1_bus: 0.7069, precision_maxF1_car: 0.8516, precision_maxF1_truck: 0.6067, precision_maxF1_motorcycle: 0.5535}
 - id: EXP-2026-10-23-S21-P4t1-s9bus8-y11s960-seed42
   gate: 'G6 (9 clients, ADR-024)'
   scenario: S9-bus8-3k (9 x 3,000 images, bus absent on 8/9, truck on 3/9), YOLO11s 960 px, 20 rounds, eval 10/20
