@@ -1,0 +1,247 @@
+﻿method,scenario,seed,bin_lo,bin_hi,count,share
+FedAvg,Lý tưởng (0/5),123,0.000,0.025,51,0.0319
+FedAvg,Lý tưởng (0/5),123,0.025,0.050,13,0.0081
+FedAvg,Lý tưởng (0/5),123,0.050,0.075,14,0.0088
+FedAvg,Lý tưởng (0/5),123,0.075,0.100,6,0.0038
+FedAvg,Lý tưởng (0/5),123,0.100,0.125,9,0.0056
+FedAvg,Lý tưởng (0/5),123,0.125,0.150,12,0.0075
+FedAvg,Lý tưởng (0/5),123,0.150,0.175,13,0.0081
+FedAvg,Lý tưởng (0/5),123,0.175,0.200,9,0.0056
+FedAvg,Lý tưởng (0/5),123,0.200,0.225,11,0.0069
+FedAvg,Lý tưởng (0/5),123,0.225,0.250,14,0.0088
+FedAvg,Lý tưởng (0/5),123,0.250,0.275,5,0.0031
+FedAvg,Lý tưởng (0/5),123,0.275,0.300,9,0.0056
+FedAvg,Lý tưởng (0/5),123,0.300,0.325,4,0.0025
+FedAvg,Lý tưởng (0/5),123,0.325,0.350,12,0.0075
+FedAvg,Lý tưởng (0/5),123,0.350,0.375,18,0.0113
+FedAvg,Lý tưởng (0/5),123,0.375,0.400,17,0.0106
+FedAvg,Lý tưởng (0/5),123,0.400,0.425,10,0.0063
+FedAvg,Lý tưởng (0/5),123,0.425,0.450,12,0.0075
+FedAvg,Lý tưởng (0/5),123,0.450,0.475,16,0.0100
+FedAvg,Lý tưởng (0/5),123,0.475,0.500,10,0.0063
+FedAvg,Lý tưởng (0/5),123,0.500,0.525,10,0.0063
+FedAvg,Lý tưởng (0/5),123,0.525,0.550,18,0.0113
+FedAvg,Lý tưởng (0/5),123,0.550,0.575,12,0.0075
+FedAvg,Lý tưởng (0/5),123,0.575,0.600,15,0.0094
+FedAvg,Lý tưởng (0/5),123,0.600,0.625,11,0.0069
+FedAvg,Lý tưởng (0/5),123,0.625,0.650,15,0.0094
+FedAvg,Lý tưởng (0/5),123,0.650,0.675,35,0.0219
+FedAvg,Lý tưởng (0/5),123,0.675,0.700,32,0.0200
+FedAvg,Lý tưởng (0/5),123,0.700,0.725,32,0.0200
+FedAvg,Lý tưởng (0/5),123,0.725,0.750,34,0.0213
+FedAvg,Lý tưởng (0/5),123,0.750,0.775,39,0.0244
+FedAvg,Lý tưởng (0/5),123,0.775,0.800,40,0.0250
+FedAvg,Lý tưởng (0/5),123,0.800,0.825,38,0.0238
+FedAvg,Lý tưởng (0/5),123,0.825,0.850,46,0.0288
+FedAvg,Lý tưởng (0/5),123,0.850,0.875,39,0.0244
+FedAvg,Lý tưởng (0/5),123,0.875,0.900,60,0.0376
+FedAvg,Lý tưởng (0/5),123,0.900,0.925,48,0.0301
+FedAvg,Lý tưởng (0/5),123,0.925,0.950,4,0.0025
+FedAvg,Lý tưởng (0/5),123,0.950,0.975,0,0.0000
+FedAvg,Lý tưởng (0/5),123,0.975,1.000,0,0.0000
+FedAvg,Lý tưởng (0/5),123,no_bus_prediction,,804,0.5034
+FedAvg,Thiếu bus 3/5,123,0.000,0.025,32,0.0200
+FedAvg,Thiếu bus 3/5,123,0.025,0.050,7,0.0044
+FedAvg,Thiếu bus 3/5,123,0.050,0.075,7,0.0044
+FedAvg,Thiếu bus 3/5,123,0.075,0.100,7,0.0044
+FedAvg,Thiếu bus 3/5,123,0.100,0.125,7,0.0044
+FedAvg,Thiếu bus 3/5,123,0.125,0.150,13,0.0081
+FedAvg,Thiếu bus 3/5,123,0.150,0.175,16,0.0100
+FedAvg,Thiếu bus 3/5,123,0.175,0.200,18,0.0113
+FedAvg,Thiếu bus 3/5,123,0.200,0.225,18,0.0113
+FedAvg,Thiếu bus 3/5,123,0.225,0.250,23,0.0144
+FedAvg,Thiếu bus 3/5,123,0.250,0.275,21,0.0131
+FedAvg,Thiếu bus 3/5,123,0.275,0.300,15,0.0094
+FedAvg,Thiếu bus 3/5,123,0.300,0.325,12,0.0075
+FedAvg,Thiếu bus 3/5,123,0.325,0.350,10,0.0063
+FedAvg,Thiếu bus 3/5,123,0.350,0.375,19,0.0119
+FedAvg,Thiếu bus 3/5,123,0.375,0.400,8,0.0050
+FedAvg,Thiếu bus 3/5,123,0.400,0.425,18,0.0113
+FedAvg,Thiếu bus 3/5,123,0.425,0.450,10,0.0063
+FedAvg,Thiếu bus 3/5,123,0.450,0.475,18,0.0113
+FedAvg,Thiếu bus 3/5,123,0.475,0.500,15,0.0094
+FedAvg,Thiếu bus 3/5,123,0.500,0.525,15,0.0094
+FedAvg,Thiếu bus 3/5,123,0.525,0.550,14,0.0088
+FedAvg,Thiếu bus 3/5,123,0.550,0.575,17,0.0106
+FedAvg,Thiếu bus 3/5,123,0.575,0.600,21,0.0131
+FedAvg,Thiếu bus 3/5,123,0.600,0.625,5,0.0031
+FedAvg,Thiếu bus 3/5,123,0.625,0.650,7,0.0044
+FedAvg,Thiếu bus 3/5,123,0.650,0.675,2,0.0013
+FedAvg,Thiếu bus 3/5,123,0.675,0.700,2,0.0013
+FedAvg,Thiếu bus 3/5,123,0.700,0.725,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.725,0.750,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.750,0.775,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.775,0.800,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.800,0.825,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.825,0.850,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.850,0.875,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.875,0.900,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.900,0.925,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.925,0.950,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.950,0.975,0,0.0000
+FedAvg,Thiếu bus 3/5,123,0.975,1.000,0,0.0000
+FedAvg,Thiếu bus 3/5,123,no_bus_prediction,,1220,0.7639
+FedAvg,Thiếu bus 4/5,123,0.000,0.025,19,0.0119
+FedAvg,Thiếu bus 4/5,123,0.025,0.050,9,0.0056
+FedAvg,Thiếu bus 4/5,123,0.050,0.075,1,0.0006
+FedAvg,Thiếu bus 4/5,123,0.075,0.100,5,0.0031
+FedAvg,Thiếu bus 4/5,123,0.100,0.125,2,0.0013
+FedAvg,Thiếu bus 4/5,123,0.125,0.150,9,0.0056
+FedAvg,Thiếu bus 4/5,123,0.150,0.175,5,0.0031
+FedAvg,Thiếu bus 4/5,123,0.175,0.200,3,0.0019
+FedAvg,Thiếu bus 4/5,123,0.200,0.225,7,0.0044
+FedAvg,Thiếu bus 4/5,123,0.225,0.250,6,0.0038
+FedAvg,Thiếu bus 4/5,123,0.250,0.275,8,0.0050
+FedAvg,Thiếu bus 4/5,123,0.275,0.300,7,0.0044
+FedAvg,Thiếu bus 4/5,123,0.300,0.325,3,0.0019
+FedAvg,Thiếu bus 4/5,123,0.325,0.350,9,0.0056
+FedAvg,Thiếu bus 4/5,123,0.350,0.375,4,0.0025
+FedAvg,Thiếu bus 4/5,123,0.375,0.400,4,0.0025
+FedAvg,Thiếu bus 4/5,123,0.400,0.425,3,0.0019
+FedAvg,Thiếu bus 4/5,123,0.425,0.450,4,0.0025
+FedAvg,Thiếu bus 4/5,123,0.450,0.475,3,0.0019
+FedAvg,Thiếu bus 4/5,123,0.475,0.500,6,0.0038
+FedAvg,Thiếu bus 4/5,123,0.500,0.525,4,0.0025
+FedAvg,Thiếu bus 4/5,123,0.525,0.550,6,0.0038
+FedAvg,Thiếu bus 4/5,123,0.550,0.575,5,0.0031
+FedAvg,Thiếu bus 4/5,123,0.575,0.600,3,0.0019
+FedAvg,Thiếu bus 4/5,123,0.600,0.625,7,0.0044
+FedAvg,Thiếu bus 4/5,123,0.625,0.650,3,0.0019
+FedAvg,Thiếu bus 4/5,123,0.650,0.675,9,0.0056
+FedAvg,Thiếu bus 4/5,123,0.675,0.700,15,0.0094
+FedAvg,Thiếu bus 4/5,123,0.700,0.725,8,0.0050
+FedAvg,Thiếu bus 4/5,123,0.725,0.750,7,0.0044
+FedAvg,Thiếu bus 4/5,123,0.750,0.775,3,0.0019
+FedAvg,Thiếu bus 4/5,123,0.775,0.800,2,0.0013
+FedAvg,Thiếu bus 4/5,123,0.800,0.825,2,0.0013
+FedAvg,Thiếu bus 4/5,123,0.825,0.850,0,0.0000
+FedAvg,Thiếu bus 4/5,123,0.850,0.875,0,0.0000
+FedAvg,Thiếu bus 4/5,123,0.875,0.900,0,0.0000
+FedAvg,Thiếu bus 4/5,123,0.900,0.925,0,0.0000
+FedAvg,Thiếu bus 4/5,123,0.925,0.950,0,0.0000
+FedAvg,Thiếu bus 4/5,123,0.950,0.975,0,0.0000
+FedAvg,Thiếu bus 4/5,123,0.975,1.000,0,0.0000
+FedAvg,Thiếu bus 4/5,123,no_bus_prediction,,1406,0.8804
+Công thức cải tiến,Lý tưởng (0/5),123,0.000,0.025,79,0.0495
+Công thức cải tiến,Lý tưởng (0/5),123,0.025,0.050,39,0.0244
+Công thức cải tiến,Lý tưởng (0/5),123,0.050,0.075,14,0.0088
+Công thức cải tiến,Lý tưởng (0/5),123,0.075,0.100,20,0.0125
+Công thức cải tiến,Lý tưởng (0/5),123,0.100,0.125,17,0.0106
+Công thức cải tiến,Lý tưởng (0/5),123,0.125,0.150,20,0.0125
+Công thức cải tiến,Lý tưởng (0/5),123,0.150,0.175,14,0.0088
+Công thức cải tiến,Lý tưởng (0/5),123,0.175,0.200,10,0.0063
+Công thức cải tiến,Lý tưởng (0/5),123,0.200,0.225,13,0.0081
+Công thức cải tiến,Lý tưởng (0/5),123,0.225,0.250,15,0.0094
+Công thức cải tiến,Lý tưởng (0/5),123,0.250,0.275,17,0.0106
+Công thức cải tiến,Lý tưởng (0/5),123,0.275,0.300,10,0.0063
+Công thức cải tiến,Lý tưởng (0/5),123,0.300,0.325,22,0.0138
+Công thức cải tiến,Lý tưởng (0/5),123,0.325,0.350,11,0.0069
+Công thức cải tiến,Lý tưởng (0/5),123,0.350,0.375,14,0.0088
+Công thức cải tiến,Lý tưởng (0/5),123,0.375,0.400,16,0.0100
+Công thức cải tiến,Lý tưởng (0/5),123,0.400,0.425,11,0.0069
+Công thức cải tiến,Lý tưởng (0/5),123,0.425,0.450,18,0.0113
+Công thức cải tiến,Lý tưởng (0/5),123,0.450,0.475,13,0.0081
+Công thức cải tiến,Lý tưởng (0/5),123,0.475,0.500,23,0.0144
+Công thức cải tiến,Lý tưởng (0/5),123,0.500,0.525,19,0.0119
+Công thức cải tiến,Lý tưởng (0/5),123,0.525,0.550,19,0.0119
+Công thức cải tiến,Lý tưởng (0/5),123,0.550,0.575,18,0.0113
+Công thức cải tiến,Lý tưởng (0/5),123,0.575,0.600,19,0.0119
+Công thức cải tiến,Lý tưởng (0/5),123,0.600,0.625,12,0.0075
+Công thức cải tiến,Lý tưởng (0/5),123,0.625,0.650,16,0.0100
+Công thức cải tiến,Lý tưởng (0/5),123,0.650,0.675,17,0.0106
+Công thức cải tiến,Lý tưởng (0/5),123,0.675,0.700,15,0.0094
+Công thức cải tiến,Lý tưởng (0/5),123,0.700,0.725,23,0.0144
+Công thức cải tiến,Lý tưởng (0/5),123,0.725,0.750,28,0.0175
+Công thức cải tiến,Lý tưởng (0/5),123,0.750,0.775,27,0.0169
+Công thức cải tiến,Lý tưởng (0/5),123,0.775,0.800,33,0.0207
+Công thức cải tiến,Lý tưởng (0/5),123,0.800,0.825,42,0.0263
+Công thức cải tiến,Lý tưởng (0/5),123,0.825,0.850,48,0.0301
+Công thức cải tiến,Lý tưởng (0/5),123,0.850,0.875,65,0.0407
+Công thức cải tiến,Lý tưởng (0/5),123,0.875,0.900,86,0.0539
+Công thức cải tiến,Lý tưởng (0/5),123,0.900,0.925,110,0.0689
+Công thức cải tiến,Lý tưởng (0/5),123,0.925,0.950,71,0.0445
+Công thức cải tiến,Lý tưởng (0/5),123,0.950,0.975,12,0.0075
+Công thức cải tiến,Lý tưởng (0/5),123,0.975,1.000,0,0.0000
+Công thức cải tiến,Lý tưởng (0/5),123,no_bus_prediction,,521,0.3262
+Công thức cải tiến,Thiếu bus 3/5,123,0.000,0.025,74,0.0463
+Công thức cải tiến,Thiếu bus 3/5,123,0.025,0.050,22,0.0138
+Công thức cải tiến,Thiếu bus 3/5,123,0.050,0.075,16,0.0100
+Công thức cải tiến,Thiếu bus 3/5,123,0.075,0.100,13,0.0081
+Công thức cải tiến,Thiếu bus 3/5,123,0.100,0.125,17,0.0106
+Công thức cải tiến,Thiếu bus 3/5,123,0.125,0.150,13,0.0081
+Công thức cải tiến,Thiếu bus 3/5,123,0.150,0.175,13,0.0081
+Công thức cải tiến,Thiếu bus 3/5,123,0.175,0.200,13,0.0081
+Công thức cải tiến,Thiếu bus 3/5,123,0.200,0.225,16,0.0100
+Công thức cải tiến,Thiếu bus 3/5,123,0.225,0.250,19,0.0119
+Công thức cải tiến,Thiếu bus 3/5,123,0.250,0.275,12,0.0075
+Công thức cải tiến,Thiếu bus 3/5,123,0.275,0.300,18,0.0113
+Công thức cải tiến,Thiếu bus 3/5,123,0.300,0.325,16,0.0100
+Công thức cải tiến,Thiếu bus 3/5,123,0.325,0.350,9,0.0056
+Công thức cải tiến,Thiếu bus 3/5,123,0.350,0.375,13,0.0081
+Công thức cải tiến,Thiếu bus 3/5,123,0.375,0.400,13,0.0081
+Công thức cải tiến,Thiếu bus 3/5,123,0.400,0.425,15,0.0094
+Công thức cải tiến,Thiếu bus 3/5,123,0.425,0.450,12,0.0075
+Công thức cải tiến,Thiếu bus 3/5,123,0.450,0.475,11,0.0069
+Công thức cải tiến,Thiếu bus 3/5,123,0.475,0.500,13,0.0081
+Công thức cải tiến,Thiếu bus 3/5,123,0.500,0.525,20,0.0125
+Công thức cải tiến,Thiếu bus 3/5,123,0.525,0.550,12,0.0075
+Công thức cải tiến,Thiếu bus 3/5,123,0.550,0.575,18,0.0113
+Công thức cải tiến,Thiếu bus 3/5,123,0.575,0.600,20,0.0125
+Công thức cải tiến,Thiếu bus 3/5,123,0.600,0.625,22,0.0138
+Công thức cải tiến,Thiếu bus 3/5,123,0.625,0.650,15,0.0094
+Công thức cải tiến,Thiếu bus 3/5,123,0.650,0.675,21,0.0131
+Công thức cải tiến,Thiếu bus 3/5,123,0.675,0.700,24,0.0150
+Công thức cải tiến,Thiếu bus 3/5,123,0.700,0.725,24,0.0150
+Công thức cải tiến,Thiếu bus 3/5,123,0.725,0.750,27,0.0169
+Công thức cải tiến,Thiếu bus 3/5,123,0.750,0.775,40,0.0250
+Công thức cải tiến,Thiếu bus 3/5,123,0.775,0.800,35,0.0219
+Công thức cải tiến,Thiếu bus 3/5,123,0.800,0.825,47,0.0294
+Công thức cải tiến,Thiếu bus 3/5,123,0.825,0.850,41,0.0257
+Công thức cải tiến,Thiếu bus 3/5,123,0.850,0.875,31,0.0194
+Công thức cải tiến,Thiếu bus 3/5,123,0.875,0.900,5,0.0031
+Công thức cải tiến,Thiếu bus 3/5,123,0.900,0.925,0,0.0000
+Công thức cải tiến,Thiếu bus 3/5,123,0.925,0.950,0,0.0000
+Công thức cải tiến,Thiếu bus 3/5,123,0.950,0.975,0,0.0000
+Công thức cải tiến,Thiếu bus 3/5,123,0.975,1.000,0,0.0000
+Công thức cải tiến,Thiếu bus 3/5,123,no_bus_prediction,,847,0.5304
+Công thức cải tiến,Thiếu bus 4/5,123,0.000,0.025,53,0.0332
+Công thức cải tiến,Thiếu bus 4/5,123,0.025,0.050,18,0.0113
+Công thức cải tiến,Thiếu bus 4/5,123,0.050,0.075,9,0.0056
+Công thức cải tiến,Thiếu bus 4/5,123,0.075,0.100,10,0.0063
+Công thức cải tiến,Thiếu bus 4/5,123,0.100,0.125,17,0.0106
+Công thức cải tiến,Thiếu bus 4/5,123,0.125,0.150,9,0.0056
+Công thức cải tiến,Thiếu bus 4/5,123,0.150,0.175,2,0.0013
+Công thức cải tiến,Thiếu bus 4/5,123,0.175,0.200,6,0.0038
+Công thức cải tiến,Thiếu bus 4/5,123,0.200,0.225,7,0.0044
+Công thức cải tiến,Thiếu bus 4/5,123,0.225,0.250,14,0.0088
+Công thức cải tiến,Thiếu bus 4/5,123,0.250,0.275,8,0.0050
+Công thức cải tiến,Thiếu bus 4/5,123,0.275,0.300,18,0.0113
+Công thức cải tiến,Thiếu bus 4/5,123,0.300,0.325,15,0.0094
+Công thức cải tiến,Thiếu bus 4/5,123,0.325,0.350,14,0.0088
+Công thức cải tiến,Thiếu bus 4/5,123,0.350,0.375,16,0.0100
+Công thức cải tiến,Thiếu bus 4/5,123,0.375,0.400,9,0.0056
+Công thức cải tiến,Thiếu bus 4/5,123,0.400,0.425,18,0.0113
+Công thức cải tiến,Thiếu bus 4/5,123,0.425,0.450,14,0.0088
+Công thức cải tiến,Thiếu bus 4/5,123,0.450,0.475,15,0.0094
+Công thức cải tiến,Thiếu bus 4/5,123,0.475,0.500,16,0.0100
+Công thức cải tiến,Thiếu bus 4/5,123,0.500,0.525,12,0.0075
+Công thức cải tiến,Thiếu bus 4/5,123,0.525,0.550,11,0.0069
+Công thức cải tiến,Thiếu bus 4/5,123,0.550,0.575,14,0.0088
+Công thức cải tiến,Thiếu bus 4/5,123,0.575,0.600,17,0.0106
+Công thức cải tiến,Thiếu bus 4/5,123,0.600,0.625,14,0.0088
+Công thức cải tiến,Thiếu bus 4/5,123,0.625,0.650,13,0.0081
+Công thức cải tiến,Thiếu bus 4/5,123,0.650,0.675,7,0.0044
+Công thức cải tiến,Thiếu bus 4/5,123,0.675,0.700,18,0.0113
+Công thức cải tiến,Thiếu bus 4/5,123,0.700,0.725,17,0.0106
+Công thức cải tiến,Thiếu bus 4/5,123,0.725,0.750,20,0.0125
+Công thức cải tiến,Thiếu bus 4/5,123,0.750,0.775,24,0.0150
+Công thức cải tiến,Thiếu bus 4/5,123,0.775,0.800,24,0.0150
+Công thức cải tiến,Thiếu bus 4/5,123,0.800,0.825,10,0.0063
+Công thức cải tiến,Thiếu bus 4/5,123,0.825,0.850,3,0.0019
+Công thức cải tiến,Thiếu bus 4/5,123,0.850,0.875,0,0.0000
+Công thức cải tiến,Thiếu bus 4/5,123,0.875,0.900,0,0.0000
+Công thức cải tiến,Thiếu bus 4/5,123,0.900,0.925,0,0.0000
+Công thức cải tiến,Thiếu bus 4/5,123,0.925,0.950,0,0.0000
+Công thức cải tiến,Thiếu bus 4/5,123,0.950,0.975,0,0.0000
+Công thức cải tiến,Thiếu bus 4/5,123,0.975,1.000,0,0.0000
+Công thức cải tiến,Thiếu bus 4/5,123,no_bus_prediction,,1105,0.6919

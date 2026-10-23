@@ -497,6 +497,58 @@ def hinh12_histogram_diem(le: dict, out: Path) -> None:
     _save(fig, out, "hinh12_histogram_diem_bus", ["method", "scenario", "seed", "bin_lo", "bin_hi", "count", "share"], rows)
 
 
+# ADR-023 (motorcycle), seed 42. Colour = image size, not method: the other figures' method colours do not apply.
+ADR023 = (("P4noKD", "s5", "Mốc: công thức cải tiến", 640),
+          ("P4noKD", "s5moto", "Cách 2: đủ ảnh motorcycle", 640),
+          ("P4t1", "s5", "Cách 4: KD + RFS t = 1,0", 640),
+          ("P4noKD", "s5_960", "Cách 3: ảnh 960 px", 960),
+          ("P4t1", "s5moto_960", "Kết hợp 2 + 3 + 4", 960))
+SIZE_COLOR = {640: "#7a7975", 960: "#eda100"}
+
+
+def hinh15_motorcycle(runs: list[Run], out: Path, seed: int = 42) -> None:
+    items = []
+    for m, sc, label, size in ADR023:
+        r = next((r for r in runs if r.method == m and r.scenario == sc and r.seed == seed), None)
+        if r is not None:
+            items.append((label, size, r.metrics))
+    if len(items) < 2:
+        return
+    panels = (("AP50_motorcycle", "motorcycle"), ("AP50_bus", "bus"), ("AP50_truck", "truck"),
+              ("AP50_car", "car"), ("mAP50", "mAP50 (4 lớp)"))
+    ref = items[0][2]
+    fig, axes = plt.subplots(1, len(panels), figsize=(11.5, 0.9 + 0.45 * len(items)), sharey=True,
+                             gridspec_kw={"width_ratios": [1, 1, 1, 1, 1]})
+    y = np.arange(len(items))
+    for ax, (key, title) in zip(axes, panels):
+        vals = [it[2][key] for it in items]
+        ax.barh(y, vals, height=0.62, color=[SIZE_COLOR[it[1]] for it in items], edgecolor=SURFACE, linewidth=2)
+        for yi, v in zip(y, vals):
+            d = round(v - ref[key], 3) + 0.0                 # no "-0.000"
+            text = f"{v:.3f}" if yi == 0 else f"{v:.3f}  ({d:+.3f})"
+            ax.annotate(text, (v, yi), xytext=(4, 0), textcoords="offset points", va="center", fontsize=7.5,
+                        color=INK if key == "AP50_motorcycle" else INK2)
+        ax.axvline(ref[key], color=INK2, lw=0.8, ls="--")
+        ax.set_xlim(0, 1.3)                                    # one scale in every panel
+        ax.set_xticks([0, 0.5, 1.0])
+        ax.set_title(title)
+        ax.grid(axis="y", visible=False)
+        ax.tick_params(axis="x", labelsize=7.5)
+        ax.tick_params(axis="y", length=0)
+    axes[0].set_yticks(y, [it[0] for it in items], fontsize=8.5)
+    axes[0].set_ylim(len(items) - 0.5, -0.5)
+    axes[2].set_xlabel(f"AP50, {RULE}; trong ngoặc: chênh lệch so với mốc (đường đứt)")
+    handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in SIZE_COLOR.values()]
+    fig.legend(handles, ["Train và đánh giá ở 640 px", "Train và đánh giá ở 960 px"], loc="lower right",
+               bbox_to_anchor=(0.99, -0.06), ncols=2, fontsize=8)
+    _suptitle(fig, f"Cải thiện lớp motorcycle (ADR-023): kết hợp đưa AP50 motorcycle từ "
+                   f"{ref['AP50_motorcycle']:.3f} lên {items[-1][2]['AP50_motorcycle']:.3f}"
+                   f" · thiếu bus 3/5 · seed {seed} (n = 1, khả thi)")
+    fig.tight_layout(rect=(0, 0.02, 1, 0.93))
+    rows = [[it[0], it[1], *(f"{it[2][k]:.4f}" for k, _ in panels)] for it in items]
+    _save(fig, out, "hinh15_cai_thien_motorcycle", ["config", "image_size", *(k for k, _ in panels)], rows)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--registry", type=Path, default=_REPO_ROOT / "research" / "experiment_registry" / "registry.yaml")
@@ -520,6 +572,7 @@ def main() -> None:
     hinh12_histogram_diem(le, args.out)
     hinh13_giu_lai(runs, args.out)
     hinh14_thoi_gian(args.out)
+    hinh15_motorcycle(runs, args.out)
 
 
 if __name__ == "__main__":

@@ -7,8 +7,10 @@ FedAvg,Thiếu bus 3/5,123,0.3781
 FedAvg,Thiếu bus 3/5,2024,0.3994
 FedAvg,Thiếu bus 4/5,42,0.3729
 FedAvg,Thiếu bus 4/5,123,0.3611
+FedAvg,Thiếu bus 4/5,2024,0.3590
 FedProx,Lý tưởng (0/5),42,0.4094
 FedProx,Lý tưởng (0/5),123,0.4222
+FedProx,Lý tưởng (0/5),2024,0.4335
 FedProx,Thiếu bus 3/5,42,0.3665
 FedProx,Thiếu bus 3/5,123,0.3377
 FedProx,Thiếu bus 3/5,2024,0.3787
@@ -23,3 +25,4 @@ Công thức cải tiến,Thiếu bus 3/5,123,0.5021
 Công thức cải tiến,Thiếu bus 3/5,2024,0.4853
 Công thức cải tiến,Thiếu bus 4/5,42,0.4640
 Công thức cải tiến,Thiếu bus 4/5,123,0.4739
+Công thức cải tiến,Thiếu bus 4/5,2024,0.4759

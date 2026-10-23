@@ -1,0 +1,61 @@
+﻿method,scenario,seed,outcome,count,share
+FedAvg,Lý tưởng (0/5),42,tp,643,0.4026
+FedAvg,Lý tưởng (0/5),42,confused_car,287,0.1797
+FedAvg,Lý tưởng (0/5),42,confused_truck,161,0.1008
+FedAvg,Lý tưởng (0/5),42,low_score,97,0.0607
+FedAvg,Lý tưởng (0/5),42,missed,409,0.2561
+FedAvg,Lý tưởng (0/5),123,tp,641,0.4014
+FedAvg,Lý tưởng (0/5),123,confused_car,241,0.1509
+FedAvg,Lý tưởng (0/5),123,confused_truck,190,0.1190
+FedAvg,Lý tưởng (0/5),123,low_score,93,0.0582
+FedAvg,Lý tưởng (0/5),123,missed,432,0.2705
+FedAvg,Thiếu bus 3/5,42,tp,329,0.2060
+FedAvg,Thiếu bus 3/5,42,confused_car,474,0.2968
+FedAvg,Thiếu bus 3/5,42,confused_truck,133,0.0833
+FedAvg,Thiếu bus 3/5,42,low_score,122,0.0764
+FedAvg,Thiếu bus 3/5,42,missed,539,0.3375
+FedAvg,Thiếu bus 3/5,123,tp,229,0.1434
+FedAvg,Thiếu bus 3/5,123,confused_car,540,0.3381
+FedAvg,Thiếu bus 3/5,123,confused_truck,230,0.1440
+FedAvg,Thiếu bus 3/5,123,low_score,78,0.0488
+FedAvg,Thiếu bus 3/5,123,missed,520,0.3256
+FedAvg,Thiếu bus 4/5,42,tp,71,0.0445
+FedAvg,Thiếu bus 4/5,42,confused_car,626,0.3920
+FedAvg,Thiếu bus 4/5,42,confused_truck,268,0.1678
+FedAvg,Thiếu bus 4/5,42,low_score,51,0.0319
+FedAvg,Thiếu bus 4/5,42,missed,581,0.3638
+FedAvg,Thiếu bus 4/5,123,tp,125,0.0783
+FedAvg,Thiếu bus 4/5,123,confused_car,584,0.3657
+FedAvg,Thiếu bus 4/5,123,confused_truck,300,0.1879
+FedAvg,Thiếu bus 4/5,123,low_score,40,0.0250
+FedAvg,Thiếu bus 4/5,123,missed,548,0.3431
+Công thức cải tiến,Lý tưởng (0/5),42,tp,834,0.5222
+Công thức cải tiến,Lý tưởng (0/5),42,confused_car,159,0.0996
+Công thức cải tiến,Lý tưởng (0/5),42,confused_truck,120,0.0751
+Công thức cải tiến,Lý tưởng (0/5),42,low_score,188,0.1177
+Công thức cải tiến,Lý tưởng (0/5),42,missed,296,0.1853
+Công thức cải tiến,Lý tưởng (0/5),123,tp,835,0.5229
+Công thức cải tiến,Lý tưởng (0/5),123,confused_car,154,0.0964
+Công thức cải tiến,Lý tưởng (0/5),123,confused_truck,126,0.0789
+Công thức cải tiến,Lý tưởng (0/5),123,low_score,181,0.1133
+Công thức cải tiến,Lý tưởng (0/5),123,missed,301,0.1885
+Công thức cải tiến,Thiếu bus 3/5,42,tp,565,0.3538
+Công thức cải tiến,Thiếu bus 3/5,42,confused_car,264,0.1653
+Công thức cải tiến,Thiếu bus 3/5,42,confused_truck,179,0.1121
+Công thức cải tiến,Thiếu bus 3/5,42,low_score,154,0.0964
+Công thức cải tiến,Thiếu bus 3/5,42,missed,435,0.2724
+Công thức cải tiến,Thiếu bus 3/5,123,tp,534,0.3344
+Công thức cải tiến,Thiếu bus 3/5,123,confused_car,296,0.1853
+Công thức cải tiến,Thiếu bus 3/5,123,confused_truck,184,0.1152
+Công thức cải tiến,Thiếu bus 3/5,123,low_score,146,0.0914
+Công thức cải tiến,Thiếu bus 3/5,123,missed,437,0.2736
+Công thức cải tiến,Thiếu bus 4/5,42,tp,279,0.1747
+Công thức cải tiến,Thiếu bus 4/5,42,confused_car,387,0.2423
+Công thức cải tiến,Thiếu bus 4/5,42,confused_truck,346,0.2167
+Công thức cải tiến,Thiếu bus 4/5,42,low_score,88,0.0551
+Công thức cải tiến,Thiếu bus 4/5,42,missed,497,0.3112
+Công thức cải tiến,Thiếu bus 4/5,123,tp,347,0.2173
+Công thức cải tiến,Thiếu bus 4/5,123,confused_car,355,0.2223
+Công thức cải tiến,Thiếu bus 4/5,123,confused_truck,311,0.1947
+Công thức cải tiến,Thiếu bus 4/5,123,low_score,99,0.0620
+Công thức cải tiến,Thiếu bus 4/5,123,missed,485,0.3037
