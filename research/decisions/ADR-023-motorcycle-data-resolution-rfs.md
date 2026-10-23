@@ -76,3 +76,26 @@ các phương pháp để xem kết quả luôn"). Consequences, recorded rather
 ≈ 18.5 GPU-h for seed 42. Risk: 960 px with the KD teacher may not fit batch 16 in 16 GB (no earlier run shows
 the memory now, since the combined arm starts at the same time). A smaller batch would have to be used for every
 arm compared at 960.
+
+## Results (2026-10-23, seed 42)
+**Valid (s19a_g, 5 of 5 clients every round)**, mean of rounds 10/20, against the reference P4noKD @ S1b5 640
+(mAP50 0.529, bus 0.487, motorcycle 0.365):
+
+| Run | mAP50 | bus | car | truck | motorcycle | Δ motorcycle | keep rule |
+|---|---|---|---|---|---|---|---|
+| idea 2: P4noKD @ s5moto 640 | 0.529 | 0.494 | 0.733 | 0.523 | 0.365 | +0.000 | not met |
+| idea 4: P4t1 @ s5 640 | 0.545 | 0.501 | 0.732 | 0.526 | 0.423 | **+0.058** | **met** (bus +0.014, mAP50 +0.016) |
+
+- Idea 2: 53 % more motorcycle boxes did not move motorcycle AP50 (0.3648 vs 0.3645). More motorcycle examples are
+  not what limits it at 640 px.
+- Idea 4 splits into its two parts with the existing P4 run (KD, t = 0.5, motorcycle 0.393): KD +0.028
+  (P4 − P4noKD) and t = 1.0 +0.030 (P4t1 − P4). Both help; together they also lift bus and truck slightly.
+
+**Invalid — failed-technical (s19b_g idea 3, s19c combined, s20a 9 clients):** CUDA out of memory at 960 px. Flower
+aggregated only 0–2 of 5 clients (0–1 of 9 in s20a) in most rounds and did not stop, so these runs are not the
+registered experiments; their round-10 numbers (bus 0.26–0.29) are not results. Cause: a finished Ray client worker
+keeps its CUDA allocator cache on the same GPU while the next client and the server evaluation start in other
+processes; at 640 px this fit, at 960 px it did not. Fix (2026-10-23): `release_training_memory` empties the
+cache after every local fit, and `_wrap_fail_on_client_failures` stops a run at the first partial aggregation.
+A scan of every downloaded log found one earlier partial round in a reported run: A1c seed 2024 (s17c), round 9
+aggregated 4 of 5 clients (recorded in the registry; kept). Idea 3 and the combination remain untested.

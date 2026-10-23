@@ -222,6 +222,27 @@ def _build_centralized_evaluate_fn(
     return evaluate_fn
 
 
+def _wrap_fail_on_client_failures(strategy: Any) -> None:
+    """Stop the run when any client's fit fails instead of aggregating the survivors.
+
+    Flower's strategies aggregate whatever results arrived. A failed client is therefore silently left out:
+    at 960 px the T4 ran out of memory and rounds were averaged over 0-2 of 5 clients, which is a different
+    experiment than the one recorded (s19b_g, s19c, s20a, 2026-10-23). Raising here ends the simulation with the
+    previous round's checkpoint on disk, so the run is visibly failed and can be resumed after a fix.
+    """
+    original = strategy.aggregate_fit
+
+    def aggregate_fit(server_round: int, results: Any, failures: Any) -> Any:
+        if failures:
+            first = failures[0]
+            detail = repr(first[1] if isinstance(first, tuple) else first)[:300]
+            raise RuntimeError(f"round {server_round}: {len(failures)} client fit(s) failed, {len(results)} "
+                               f"succeeded; refusing a partial aggregation. First failure: {detail}")
+        return original(server_round, results, failures)
+
+    strategy.aggregate_fit = aggregate_fit
+
+
 def _wrap_server_finetune(strategy: Any, finetune: dict[str, Any], run_dir: Path, round_offset: int,
                           weights: str) -> None:
     """B2 (ADR-015): after every aggregation, train the global model on the server's labelled
@@ -379,6 +400,7 @@ def run_fl_server(
         )
 
     strategy = strategy_builder(**strategy_kwargs)
+    _wrap_fail_on_client_failures(strategy)
     if server_finetune:
         _wrap_server_finetune(strategy, server_finetune, run_dir, round_offset,
                               weights=str((eval_config or {}).get("weights", "yolov8n.pt")))

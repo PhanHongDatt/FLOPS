@@ -154,6 +154,25 @@ def cls_head_freeze_list(model: "YOLO") -> list[str]:
     return [f"{det_idx}.cv3.{lvl}.{len(det.cv3[lvl]) - 1}" for lvl in range(len(det.cv3))]
 
 
+def release_training_memory(model: Any) -> None:
+    """Return PyTorch's cached CUDA blocks to the driver after a local fit.
+
+    A Ray worker that has finished a client's fit stays alive holding the allocator cache of that fit's
+    activations (GBs), while the next client and the server's evaluation start in other processes on the same
+    GPU. At 640 px this fit by luck; at 960 px it ran the T4 out of memory and Flower aggregated 0-2 of 5 clients
+    per round (s19b_g, s19c, s20a, 2026-10-23; ADR-023). The trainer itself (optimizer and EMA, tens of MB for
+    YOLO11s) is kept: callers and tests read ``model.trainer`` after training.
+    """
+    import gc
+    gc.collect()
+    try:
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except ImportError:   # CPU-only test environments
+        pass
+
+
 def train_one_round(
     model: "YOLO",
     data_yaml: Path,
@@ -281,6 +300,7 @@ def train_one_round(
             model.callbacks["on_train_end"].remove(prox.on_train_end)
             prox.on_train_end(None)   # remove hooks even if training raised
     _load_fp32_ema(model, snapshot)
+    release_training_memory(model)
 
     # With val=False, results_dict is empty or partially populated — that is
     # expected, not an error. Local metrics are not used for reporting; the

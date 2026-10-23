@@ -15,7 +15,11 @@ from statistics import mean
 import yaml
 
 SCENARIOS = ("pooled", "s5", "bus1")              # clients without bus: 0/5, 3/5, 4/5
-MISSING_BUS_CLIENTS = {"pooled": 0, "s5": 3, "bus1": 4}
+# ADR-023 / ADR-024 runs change the data or the image size, so they get their own scenario keys and are never
+# averaged with the 640 px S1b5 runs: s5moto = S1b5 rule with every motorcycle image; "_960" = 960 px;
+# s9bus8 = 9 clients, bus absent on 8.
+MISSING_BUS_CLIENTS = {"pooled": 0, "s5": 3, "bus1": 4, "s5moto": 3, "s5_960": 3, "s5moto_960": 3,
+                       "s9bus8_960": 8}
 
 
 @dataclass(frozen=True)
@@ -31,13 +35,20 @@ def _scenario(exp_id: str, text: str) -> str | None:
     s = f"{exp_id} {text}".lower()
     if "yolo11s" not in s and "y11s" not in s:
         return None
-    if "bus1" in s:
-        return "bus1"
-    if "pooled" in s:
-        return "pooled"
-    if "s1b5-3k" in s:
-        return "s5"
-    return None
+    if "s9-bus8" in s:
+        base = "s9bus8"
+    elif "allmoto" in s:
+        base = "s5moto"
+    elif "bus1" in s:
+        base = "bus1"
+    elif "pooled" in s:
+        base = "pooled"
+    elif "s1b5-3k" in s:
+        base = "s5"
+    else:
+        return None
+    key = f"{base}_960" if "960 px" in s else base
+    return key if key in MISSING_BUS_CLIENTS else None
 
 
 def _method(raw: str) -> str:

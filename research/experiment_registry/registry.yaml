@@ -1320,6 +1320,7 @@ experiments:
   seed: 2024
   kaggle_kernel: phdatt/flops-s17c-baselines-s2024
   decision_rule: ADR-021 pre-registered reading (rules 1-3)
+  deviation: 'found 2026-10-23 by scanning every log: round 9 aggregated 4 of 5 clients (one client fit raised AssertionError); the other 19 rounds aggregated 5 of 5. Kept, reported as is.'
   results:
     rule_mean_r10_20: {mAP50: 0.4355, AP50_bus: 0.3578, AP50_car: 0.6961, AP50_truck: 0.4222, AP50_motorcycle: 0.2658, FN_bus: 1242.0}
     operating_r10_20: {TP_bus: 355.0, FP_bus: 579.5, FN_bus: 1242.0, TP_car: 72354.5, FP_car: 33150.5, FN_car: 30151.5, TP_truck: 1094.5, FP_truck: 998.0, FN_truck: 3150.5, TP_motorcycle: 154.5, FP_motorcycle: 376.0, FN_motorcycle: 297.5, recall_at025_bus: 0.2223, recall_at025_car: 0.7059, recall_at025_truck: 0.2578, recall_at025_motorcycle: 0.3418, precision_at025_bus: 0.4582, precision_at025_car: 0.6864, precision_at025_truck: 0.5215, precision_at025_motorcycle: 0.2908, recall_maxF1_bus: 0.2803, recall_maxF1_car: 0.6682, recall_maxF1_truck: 0.3073, recall_maxF1_motorcycle: 0.3285, precision_maxF1_bus: 0.5969, precision_maxF1_car: 0.6904, precision_maxF1_truck: 0.7005, precision_maxF1_motorcycle: 0.3246}
@@ -1460,70 +1461,87 @@ experiments:
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: A0c
   run_class: feasibility
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: phdatt/flops-s18c-severity-s2024
   decision_rule: ADR-022 pre-registered reading (R1-R3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.4246, AP50_bus: 0.359, AP50_car: 0.694, AP50_truck: 0.4258, AP50_motorcycle: 0.2197, FN_bus: 1528.0}
+    operating_r10_20: {TP_bus: 69.0, FP_bus: 17.0, FN_bus: 1528.0, TP_car: 72749.5, FP_car: 35271.5, FN_car: 29756.5, TP_truck: 1122.0, FP_truck: 645.5, FN_truck: 3123.0, TP_motorcycle: 125.0, FP_motorcycle: 220.0, FN_motorcycle: 327.0, recall_at025_bus: 0.0432, recall_at025_car: 0.7097, recall_at025_truck: 0.2643, recall_at025_motorcycle: 0.2765, precision_at025_bus: 0.8039, precision_at025_car: 0.6742, precision_at025_truck: 0.6342, precision_at025_motorcycle: 0.3915, recall_maxF1_bus: 0.0579, recall_maxF1_car: 0.7034, recall_maxF1_truck: 0.3257, recall_maxF1_motorcycle: 0.3064, precision_maxF1_bus: 0.9406, precision_maxF1_car: 0.5998, precision_maxF1_truck: 0.6770, precision_maxF1_motorcycle: 0.3437}
 - id: EXP-2026-10-19-S18-P4noKD-s5bus1-y11s-seed2024
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-bus1-3k (bus on 1/5 clients, same 15,000 images), YOLO11s, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: phdatt/flops-s18c-severity-s2024
   decision_rule: ADR-022 pre-registered reading (R1-R3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.5249, AP50_bus: 0.4759, AP50_car: 0.7331, AP50_truck: 0.5188, AP50_motorcycle: 0.3719, FN_bus: 1460.0}
+    operating_r10_20: {TP_bus: 137.0, FP_bus: 49.5, FN_bus: 1460.0, TP_car: 72673.5, FP_car: 24778.5, FN_car: 29832.5, TP_truck: 1598.0, FP_truck: 1093.5, FN_truck: 2647.0, TP_motorcycle: 213.0, FP_motorcycle: 394.0, FN_motorcycle: 239.0, recall_at025_bus: 0.0858, recall_at025_car: 0.7090, recall_at025_truck: 0.3764, recall_at025_motorcycle: 0.4712, precision_at025_bus: 0.8226, precision_at025_car: 0.7460, precision_at025_truck: 0.6103, precision_at025_motorcycle: 0.3536, recall_maxF1_bus: 0.1060, recall_maxF1_car: 0.6800, recall_maxF1_truck: 0.4047, recall_maxF1_motorcycle: 0.4635, precision_maxF1_bus: 0.8993, precision_maxF1_car: 0.7416, precision_maxF1_truck: 0.6856, precision_maxF1_motorcycle: 0.3720}
 - id: EXP-2026-10-19-S18-FedProxc-s5pooled-y11s-seed2024
   gate: 'G4/G6 (severity sweep, ADR-022)'
   scenario: S1b5-pooled-3k (IID re-split), YOLO11s, 20 rounds, eval 10/20
   method: FedProxc
   run_class: feasibility
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: phdatt/flops-s18c-severity-s2024
   decision_rule: ADR-022 pre-registered reading (R1-R3)
+  results:
+    rule_mean_r10_20: {mAP50: 0.443, AP50_bus: 0.4335, AP50_car: 0.6982, AP50_truck: 0.4256, AP50_motorcycle: 0.2145, FN_bus: 987.0}
+    operating_r10_20: {TP_bus: 610.0, FP_bus: 917.0, FN_bus: 987.0, TP_car: 73518.0, FP_car: 39009.5, FN_car: 28988.0, TP_truck: 1660.5, FP_truck: 2572.5, FN_truck: 2584.5, TP_motorcycle: 157.5, FP_motorcycle: 575.5, FN_motorcycle: 294.5, recall_at025_bus: 0.3820, recall_at025_car: 0.7172, recall_at025_truck: 0.3912, recall_at025_motorcycle: 0.3485, precision_at025_bus: 0.4002, precision_at025_car: 0.6537, precision_at025_truck: 0.3922, precision_at025_motorcycle: 0.2334, recall_maxF1_bus: 0.4052, recall_maxF1_car: 0.6334, recall_maxF1_truck: 0.4032, recall_maxF1_motorcycle: 0.2865, precision_maxF1_bus: 0.5602, precision_maxF1_car: 0.7551, precision_maxF1_truck: 0.5600, precision_maxF1_motorcycle: 0.3478}
 - id: EXP-2026-10-23-S19-P4noKD-s5moto-y11s-seed42
   gate: 'G6 (motorcycle, ADR-023 idea 2)'
   scenario: S1b5-allmoto-3k (every motorcycle image), YOLO11s 640 px, 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s19a-moto-640-s42
   decision_rule: ADR-023 pre-registered reading
+  results:
+    rule_mean_r10_20: {mAP50: 0.5289, AP50_bus: 0.4942, AP50_car: 0.7333, AP50_truck: 0.5231, AP50_motorcycle: 0.3648, FN_bus: 1216.5}
 - id: EXP-2026-10-23-S19-P4t1-s5-y11s-seed42
   gate: 'G6 (motorcycle, ADR-023 idea 4)'
   scenario: S1b5-3k, YOLO11s 640 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s19a-moto-640-s42
   decision_rule: ADR-023 pre-registered reading
+  results:
+    rule_mean_r10_20: {mAP50: 0.5453, AP50_bus: 0.5007, AP50_car: 0.7323, AP50_truck: 0.5258, AP50_motorcycle: 0.4225, FN_bus: 1090.0}
+    operating_r10_20: {TP_bus: 507.0, FP_bus: 610.0, FN_bus: 1090.0, TP_car: 68774.5, FP_car: 18511.5, FN_car: 33731.5, TP_truck: 1885.0, FP_truck: 2153.5, FN_truck: 2360.0, TP_motorcycle: 202.0, FP_motorcycle: 216.0, FN_motorcycle: 250.0, recall_at025_bus: 0.3175, recall_at025_car: 0.6709, recall_at025_truck: 0.4441, recall_at025_motorcycle: 0.4469, precision_at025_bus: 0.4545, precision_at025_car: 0.7879, precision_at025_truck: 0.4666, precision_at025_motorcycle: 0.4856, recall_maxF1_bus: 0.4088, recall_maxF1_car: 0.6306, recall_maxF1_truck: 0.4789, recall_maxF1_motorcycle: 0.4248, precision_maxF1_bus: 0.6773, precision_maxF1_car: 0.8194, precision_maxF1_truck: 0.5971, precision_maxF1_motorcycle: 0.5588}
 - id: EXP-2026-10-23-S19-P4noKD-s5-y11s960-seed42
   gate: 'G6 (motorcycle, ADR-023 idea 3)'
   scenario: S1b5-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
   method: P4noKD
   run_class: feasibility
-  status: running
+  status: failed-technical
   seed: 42
   kaggle_kernel: goshihayashi/flops-s19b-moto-960-s42
   decision_rule: ADR-023 pre-registered reading
+  failure: 'CUDA out of memory at 960 px; Flower aggregated only 0-2 of 5 clients per round (log aggregate_fit counts), so the run is not the registered experiment. Cause, 2026-10-23: finished Ray client workers kept their CUDA allocator cache on the same GPU. Fix: release_training_memory after each local fit and _wrap_fail_on_client_failures (a partial aggregation now stops the run). Round 20 checkpoint exists, round 20 evaluation OOM; round 10 AP50 bus 0.260 (not valid).'
 - id: EXP-2026-10-23-S19-P4t1-s5moto-y11s960-seed42
   gate: 'G6 (motorcycle, ADR-023 combined)'
   scenario: S1b5-allmoto-3k, YOLO11s 960 px (train and eval), 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: failed-technical
   seed: 42
   kaggle_kernel: phdatt/flops-s19c-moto-combined-s42
   decision_rule: ADR-023 pre-registered reading, amendment 2026-10-23 (run alongside the single-idea arms)
+  failure: 'CUDA out of memory at 960 px; Flower aggregated only 0-1 of 5 clients per round (log aggregate_fit counts), so the run is not the registered experiment. Cause, 2026-10-23: finished Ray client workers kept their CUDA allocator cache on the same GPU. Fix: release_training_memory after each local fit and _wrap_fail_on_client_failures (a partial aggregation now stops the run). Round 20 checkpoint exists, round 20 evaluation OOM; round 10 AP50 bus 0.289 (not valid).'
 - id: EXP-2026-10-23-S20-P4t1-s9bus8-y11s960-seed42
   gate: 'G6 (9 clients, ADR-024)'
   scenario: S9-bus8-3k (9 x 3,000 images, bus absent on 8/9, truck on 3/9), YOLO11s 960 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: failed-technical
   seed: 42
   kaggle_kernel: phdatt/flops-s20a-s9-combined-s42 (part 1), goshihayashi/flops-s20b-s9-combined-s42 (part 2)
   decision_rule: ADR-024, descriptive only (no 9-client reference)
+  failure: 'CUDA out of memory at 960 px; Flower aggregated only 0-1 of 9 clients per round (log aggregate_fit counts), so the run is not the registered experiment. Cause, 2026-10-23: finished Ray client workers kept their CUDA allocator cache on the same GPU. Fix: release_training_memory after each local fit and _wrap_fail_on_client_failures (a partial aggregation now stops the run). Stalled in round 10 (watchdog). Part 2 (s20b_g) not pushed.'

@@ -40,3 +40,23 @@ def test_nine_client_partition_contract():
     assert sorted(c for c, m in cfg["missing_map"].items() if "truck" in m) == ["C5", "C6", "C7"]
     exp = load_experiment_config(ROOT / "configs/experiments/convergence_9c_y11s_20r_960.yaml")
     assert exp["federated"]["num_clients"] == 9 and exp["model"]["image_size"] == 960
+
+
+def test_release_training_memory_keeps_the_model():
+    from types import SimpleNamespace
+    from src.model.yolo_wrapper import release_training_memory
+    trainer, weights = object(), object()
+    m = SimpleNamespace(trainer=trainer, model=weights)
+    release_training_memory(m)
+    assert m.trainer is trainer and m.model is weights
+
+
+def test_partial_aggregation_is_refused():
+    import pytest
+    from types import SimpleNamespace
+    from src.federated.server import _wrap_fail_on_client_failures
+    strategy = SimpleNamespace(aggregate_fit=lambda r, res, fail: ("params", {}))
+    _wrap_fail_on_client_failures(strategy)
+    assert strategy.aggregate_fit(1, ["a"] * 5, []) == ("params", {})
+    with pytest.raises(RuntimeError, match="2 client fit"):
+        strategy.aggregate_fit(3, ["a"] * 3, [RuntimeError("CUDA out of memory"), RuntimeError("x")])

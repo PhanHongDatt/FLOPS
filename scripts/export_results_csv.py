@@ -34,12 +34,17 @@ METHOD_DESC = {
     "P3LR": "P3 + cosine LR theo vòng",
     "P4": "P3LR + RFS t=0.5",
     "P4noKD": "cosine LR + RFS, không KD (phương pháp chính)",
+    "P4t1": "P4 (có KD) với RFS t=1.0 (ADR-023)",
     "P5f": "P4noKD + đóng băng nhánh phân loại (FedBABU)",
 }
 SCENARIO_DESC = {
     "pooled": "pooled: mọi client đủ 4 lớp (phân phối lý tưởng)",
     "s5": "S1b5: bus vắng 3/5 client, truck vắng C3",
     "bus1": "bus1: chỉ C4 có bus, truck vắng C3",
+    "s5moto": "S1b5 + đủ mọi ảnh có motorcycle (ADR-023), 640 px",
+    "s5_960": "S1b5, ảnh 960 px (ADR-023)",
+    "s5moto_960": "S1b5 + đủ ảnh motorcycle, 960 px (ADR-023)",
+    "s9bus8_960": "9 client: bus vắng 8/9, truck vắng 3/9, 960 px (ADR-024)",
 }
 METRICS = ("mAP50", "AP50_bus", "AP50_car", "AP50_truck", "AP50_motorcycle",
            "recall_at025_bus", "precision_at025_bus", "TP_bus", "FP_bus", "FN_bus")
@@ -53,13 +58,20 @@ def _f(v: float | None, nd: int = 4) -> str:
     return "" if v is None else f"{v:.{nd}f}"
 
 
+GAP_SCENARIOS = ("s5", "bus1")   # the pooled re-split holds the same 15,000 images only for these
+
+
 def _pct(runs: list[Run], m: str, sc: str, key: str, seeds: set[int]) -> float | None:
+    if sc not in GAP_SCENARIOS:
+        return None
     pooled, other = by_seed(runs, m, "pooled", key), by_seed(runs, m, sc, key)
     vals = [100 * other[s] / pooled[s] for s in seeds if s in pooled and s in other and pooled[s] > 0]
     return mean(vals) if vals else None
 
 
 def _gap(runs: list[Run], m: str, sc: str, seeds: set[int]) -> float | None:
+    if sc not in GAP_SCENARIOS:
+        return None
     pooled, other = by_seed(runs, m, "pooled", "AP50_bus"), by_seed(runs, m, sc, "AP50_bus")
     vals = [pooled[s] - other[s] for s in seeds if s in pooled and s in other]
     return mean(vals) if vals else None
@@ -108,7 +120,7 @@ def pending_rows(registry: Path, runs: list[Run]) -> list[list[str]]:
             note = f"trạng thái registry: {status}; phiên {e.get('kaggle_kernel', '?')} chưa trả kết quả"
         else:
             row_type = "excluded"
-            reason = str(e.get("notes") or e.get("interpretation") or "").split(". ")[0]
+            reason = str(e.get("failure") or e.get("notes") or e.get("interpretation") or "").split(". ")[0]
             note = f"trạng thái registry: {status}; giữ lại để minh bạch, không đưa vào trung bình. Lý do (registry): {reason}"
             rerun = done.get((m, sc, int(e["seed"])))
             note += f"; đã chạy lại thành công: {rerun}" if rerun else ("; không chạy lại" if status == "failed-technical" else "")

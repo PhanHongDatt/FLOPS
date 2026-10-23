@@ -85,3 +85,20 @@ Gap = AP50_bus(pooled) − AP50_bus(scenario), same method and seed (42 / 123):
 Observation, not a causal claim: on the same images and box totals, moving bus from 2 clients to 1 lowers FedAvg's
 bus AP by a further 0.01–0.02, so H1 holds as a small, severity-dependent effect. Neither the local recipe
 (P4noKD) nor the proximal term (FedProx) narrows it; both widen it, P4noKD while still being better in absolute terms.
+
+## Results, seed 2024 (s18c, downloaded 2026-10-23) — all three seeds
+All 3 arms completed 20 rounds with 5 of 5 clients in every round (log scan). Mean of rounds 10/20:
+A0c @ bus1 mAP50 0.425, bus 0.359, motorcycle 0.220; P4noKD @ bus1 0.525, 0.476, 0.372; FedProxc @ pooled 0.443, 0.434, 0.215.
+
+Gap = AP50_bus(pooled) − AP50_bus(scenario), seeds 42 / 123 / 2024:
+
+| Method | gap at 3/5 | gap at 4/5 |
+|---|---|---|
+| A0c | +0.031 / +0.036 / +0.018 | +0.041 / +0.053 / +0.058 |
+| P4noKD | +0.056 / +0.040 / +0.053 | +0.079 / +0.069 / +0.063 |
+| FedProxc | +0.043 / +0.085 / +0.055 | not run |
+
+- **R1 met, 3 of 3 seeds:** A0c gap at 4/5 > at 3/5 (+0.009, +0.017, +0.040). Mean A0c gap +0.029 (3/5) → +0.051 (4/5).
+- **R2 not met, 3 of 3:** P4noKD gap at 4/5 exceeds A0c's in every seed (+0.079 vs +0.041, +0.069 vs +0.053,
+  +0.063 vs +0.058); P4noKD bus at 4/5 is still +0.091 / +0.113 / +0.117 above A0c.
+- **R3 not met, 3 of 3:** FedProxc gap at 3/5 exceeds A0c's in every seed; on pooled FedProxc ≈ A0c (bus +0.007 mean).
