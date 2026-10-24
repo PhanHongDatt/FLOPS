@@ -1581,8 +1581,8 @@ experiments:
   scenario: S9-bus8-3k (9 x 3,000 images, bus absent on 8/9, truck on 3/9), YOLO11s 960 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
-  kaggle_kernel: phdatt/flops-s21c-s9-combined-s42 or goshihayashi (s21c_g), whichever has quota first
+  kaggle_kernel: phdatt/flops-s21c-s9-combined-s42
   decision_rule: ADR-024, descriptive only (no 9-client reference)
-  note: 'rerun of the failed s20a run with the device fix. Push refused 2026-10-23 on phdatt and on goshihayashi (both weekly GPU quotas of 30 h used up); waits for a reset.'
+  note: 'rerun of the failed s20a run with the device fix. Push refused 2026-10-23 (both accounts out of weekly GPU quota); pushed on phdatt 2026-10-24.'
