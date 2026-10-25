@@ -1,0 +1,17 @@
+# ADR-025: convergence_9c_y11s_20r_960 extended to 40 rounds (cosine LR over 40). ADR-024: the ADR-023 combined protocol (960 px, train and global evaluation) with 9 clients.
+# BDD frames are 1280x720: at 640 the median motorcycle side is ~25 px and 30 % are under 16 px (val, measured).
+# Every arm compared at 960 uses this file, baselines included (CLAUDE.md §14).
+run_class: feasibility
+model:
+  name: yolo11s
+  weights: yolo11s.pt
+  image_size: 960
+train:
+  batch_size: 16
+federated:
+  num_clients: 9
+  num_rounds: 40
+  eval_rounds: [10, 20, 30, 40]
+  fraction_evaluate: 0.0
+notes: >
+  Exploratory, seed 42; 9-client scenario with the combined protocol approved by the author (ADR-024).

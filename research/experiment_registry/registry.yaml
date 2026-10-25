@@ -1590,3 +1590,12 @@ experiments:
     round_10: {mAP50: 0.5857, AP50_bus: 0.5075, AP50_car: 0.7913, AP50_truck: 0.5614, AP50_motorcycle: 0.4826, FN_bus: 1235.0}
     round_20: {mAP50: 0.6133, AP50_bus: 0.5456, AP50_car: 0.8026, AP50_truck: 0.5828, AP50_motorcycle: 0.5223, FN_bus: 1141.0}
     rule_mean_r10_20: {mAP50: 0.5995, AP50_bus: 0.5265, AP50_car: 0.7969, AP50_truck: 0.5721, AP50_motorcycle: 0.5024, FN_bus: 1188.0}
+- id: EXP-2026-10-25-S22-P4t1-s9bus8-y11s960-40r-seed42
+  gate: 'G6 (9 clients, ADR-025)'
+  scenario: S9-bus8-3k (9 x 3,000 images, bus absent on 8/9, truck on 3/9), YOLO11s 960 px, 40 rounds, eval 10/20/30/40
+  method: P4t1
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s22a-s9-40r-s42 (part 1), goshihayashi/flops-s22b-s9-40r-s42 (part 2)
+  decision_rule: ADR-025, rounds 30 and 40 and their mean, descriptive only

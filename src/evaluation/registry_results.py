@@ -35,6 +35,8 @@ def _scenario(exp_id: str, text: str) -> str | None:
     s = f"{exp_id} {text}".lower()
     if "yolo11s" not in s and "y11s" not in s:
         return None
+    if "40 rounds" in s:                 # ADR-025 reads rounds 30/40, not the 10/20 rule: kept out of these tables
+        return None
     if "s9-bus8" in s:
         base = "s9bus8"
     elif "allmoto" in s:
