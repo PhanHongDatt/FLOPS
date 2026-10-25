@@ -33,3 +33,17 @@ thiếu lớp bus và mỗi client có 3000 ảnh, lớp truck thiếu 3/9 clien
   method gain. It is compared with the 5-client results only descriptively: more clients and more images
   change at the same time as severity (8/9 vs 3/5 or 4/5).
 - Single seed; the ADR-023 risk (960 px + KD memory on a T4) also applies here.
+
+## Results (2026-10-25, s21c, seed 42; descriptive only)
+The first attempt (s20a) was invalid (two client actors on one GPU, see ADR-023). The rerun s21c finished in one
+session: 9 of 9 clients aggregated in all 20 rounds, no OOM, 9.7 h on T4 x2.
+
+| Run | mAP50 | bus | car | truck | motorcycle |
+|---|---|---|---|---|---|
+| P4t1 @ S9-bus8 960 (round 10 / 20) | 0.586 / 0.613 | 0.507 / 0.546 | 0.791 / 0.803 | 0.561 / 0.583 | 0.483 / 0.522 |
+| **rule mean (10, 20)** | **0.599** | **0.527** | **0.797** | **0.572** | **0.502** |
+| for orientation only: P4t1 @ s5moto 960 (5 clients, bus absent on 3/5) | 0.610 | 0.565 | 0.796 | 0.574 | 0.504 |
+
+With bus on 1 client of 9, bus AP50 reaches 0.527, 0.038 below the 5-client run where 2 of 5 clients hold bus.
+The two runs differ in client count, image total (27,000 vs 15,000), bus boxes (3,908 vs 2,657) and truck absence,
+so the difference is not an effect of the missing-bus share (`CLAUDE.md` §14). No 9-client FedAvg reference exists.

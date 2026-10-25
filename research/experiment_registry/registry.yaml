@@ -1581,8 +1581,12 @@ experiments:
   scenario: S9-bus8-3k (9 x 3,000 images, bus absent on 8/9, truck on 3/9), YOLO11s 960 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s21c-s9-combined-s42
   decision_rule: ADR-024, descriptive only (no 9-client reference)
-  note: 'rerun of the failed s20a run with the device fix. Push refused 2026-10-23 (both accounts out of weekly GPU quota); pushed on phdatt 2026-10-24.'
+  note: 'rerun of the failed s20a run with the device fix. Push refused 2026-10-23 (both accounts out of weekly GPU quota); pushed on phdatt 2026-10-24. Completed in one session: 9 of 9 clients aggregated in all 20 rounds, no OOM, wall 9.7 h on T4 x2.'
+  results:
+    round_10: {mAP50: 0.5857, AP50_bus: 0.5075, AP50_car: 0.7913, AP50_truck: 0.5614, AP50_motorcycle: 0.4826, FN_bus: 1235.0}
+    round_20: {mAP50: 0.6133, AP50_bus: 0.5456, AP50_car: 0.8026, AP50_truck: 0.5828, AP50_motorcycle: 0.5223, FN_bus: 1141.0}
+    rule_mean_r10_20: {mAP50: 0.5995, AP50_bus: 0.5265, AP50_car: 0.7969, AP50_truck: 0.5721, AP50_motorcycle: 0.5024, FN_bus: 1188.0}
