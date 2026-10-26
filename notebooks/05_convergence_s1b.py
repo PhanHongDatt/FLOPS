@@ -276,6 +276,7 @@ PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled"
               "s5moto": S1B5MOTO, "s9bus8": S9BUS8}
 EXP_CFG_9C = REPO_ROOT / "configs" / "experiments" / "convergence_9c_y11s_20r_960.yaml"   # ADR-024
 RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)
+REQUIRE_RESTORE = False   # part-2 sessions set True: stop instead of silently restarting from round 1 (ADR-025)
 
 def arm_command(arm: str) -> tuple[list[str], Path]:
     name, _, where = arm.partition("@")
@@ -297,6 +298,8 @@ def arm_command(arm: str) -> tuple[list[str], Path]:
     restored = restore_run(run_id, ARTIFACTS_DIR / "runs")
     if restored:
         print(f"restored {run_id} from an earlier session; --resume continues from its latest checkpoint")
+    elif REQUIRE_RESTORE and not (ARTIFACTS_DIR / "runs" / run_id).exists():
+        raise FileNotFoundError(f"part-2 session: no earlier copy of {run_id} under /kaggle/input")
     cmd += ["--algorithm", "FedProx"] if name == "FedProx" else ["--ablation", name]
     if name in ("A2b", "A4b", "P2"):
         cmd += ["--rho", RHO]

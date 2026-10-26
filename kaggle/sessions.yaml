@@ -506,3 +506,4 @@ sessions:
       'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "i960r40"'
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 9.6'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+      'REQUIRE_RESTORE = False   # part-2 sessions set True: stop instead of silently restarting from round 1 (ADR-025)': 'REQUIRE_RESTORE = True'

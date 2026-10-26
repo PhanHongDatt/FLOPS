@@ -1599,3 +1599,4 @@ experiments:
   seed: 42
   kaggle_kernel: goshihayashi/flops-s22a-s9-40r-s42 (part 1), goshihayashi/flops-s22b-s9-40r-s42 (part 2)
   decision_rule: ADR-025, rounds 30 and 40 and their mean, descriptive only
+  note: 'part 1 (s22a_g) cut by its 9.6 h budget as planned after round 22 (9 of 9 clients every round, no OOM; round 10 bus 0.497, round 20 bus 0.527); Kaggle shows the kernel as ERROR because the arm ended by timeout. Part 2 (s22b_g) resumes from round 22.'
