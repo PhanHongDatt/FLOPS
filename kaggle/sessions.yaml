@@ -494,12 +494,12 @@ sessions:
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 9.6'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
 
-  s22b_g:  # part 2: mounts s22a_g's output (same account); restore_run + --resume continue from its last checkpoint
+  s22b_g:  # part 2: s22a_g's run dir uploaded as a private dataset (Kaggle did not mount the output of a kernel that
+           # ended as ERROR, 2026-10-27); restore_run + --resume continue from its last checkpoint
     slug: flops-s22b-s9-40r-s42
     owner: goshihayashi
     notebook: notebooks/05_convergence_s1b.py
-    dataset_sources: [solesensei/solesensei_bdd100k]
-    kernel_sources: [s22a_g]
+    dataset_sources: [solesensei/solesensei_bdd100k, goshihayashi/flops-s22a-output]
     replace:
       'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4t1@s9bus8"]'
       'EXP_CFG_9C = REPO_ROOT / "configs" / "experiments" / "convergence_9c_y11s_20r_960.yaml"   # ADR-024': 'EXP_CFG_9C = REPO_ROOT / "configs" / "experiments" / "convergence_9c_y11s_40r_960.yaml"'
