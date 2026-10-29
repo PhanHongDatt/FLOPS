@@ -549,6 +549,71 @@ def hinh15_motorcycle(runs: list[Run], out: Path, seed: int = 42) -> None:
     _save(fig, out, "hinh15_cai_thien_motorcycle", ["config", "image_size", *(k for k, _ in panels)], rows)
 
 
+R40_ID = "EXP-2026-10-25-S22-P4t1-s9bus8-y11s960-40r-seed42"     # ADR-025, 40 rounds
+R20_ID = "EXP-2026-10-23-S21-P4t1-s9bus8-y11s960-seed42"         # ADR-024, 20 rounds (s21c)
+CLASS_COLOR = dict(zip(CLASSES, COLOR.values()))                  # same 4 hues, fixed order
+
+
+def _rounds(entry: dict) -> dict[int, dict]:
+    res = entry.get("results", {})
+    return {int(k.split("_")[1]): v for k, v in res.items() if k.startswith("round_")}
+
+
+def hinh16_40_vong(registry: Path, out: Path) -> None:
+    entries = {e.get("id"): e for e in yaml.safe_load(registry.read_text(encoding="utf-8"))["experiments"]}
+    if R40_ID not in entries or entries[R40_ID].get("status") != "completed":
+        return
+    r40 = _rounds(entries[R40_ID])
+    r20 = _rounds(entries[R20_ID]) if R20_ID in entries else {}
+    series = [(f"AP50_{c}", c, CLASS_COLOR[c]) for c in CLASSES] + [("mAP50", "mAP50 (4 lớp)", INK)]
+    rounds = sorted(r40)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.5, 4.2), gridspec_kw={"width_ratios": [1.15, 1]})
+
+    for key, label, color in series:
+        ys = [r40[r][key] for r in rounds]
+        ax1.plot(rounds, ys, color=color, marker="o", ms=5, mec=SURFACE, mew=1.5, label=label,
+                 ls="-" if key != "mAP50" else (0, (4, 2)))
+        ax1.annotate(f"{label.split(' ')[0]} {ys[-1]:.3f}", (rounds[-1], ys[-1]), xytext=(6, 0),
+                     textcoords="offset points", va="center", fontsize=7.5, color=INK2)
+        if r20:
+            xs = sorted(r20)
+            ax1.scatter(xs, [r20[r][key] for r in xs], s=34, facecolors=SURFACE, edgecolors=color, lw=1.4, zorder=3)
+    ax1.axvspan(29, 41, color=GRID, alpha=0.45, lw=0, zorder=0)
+    ax1.text(35, 0.43, "vòng báo cáo\n30 và 40", ha="center", fontsize=7.5, color=INK2)
+    ax1.set_xticks(rounds)
+    ax1.set_xlim(7, 47)
+    ax1.set_ylim(0.4, 0.85)
+    ax1.set_xlabel("Vòng FL")
+    ax1.set_ylabel("AP50")
+    ax1.set_title("Đường cong 40 vòng (chấm rỗng: lần chạy 20 vòng, s21c)")
+    ax1.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), ncols=5, fontsize=7.5)
+
+    groups = [("Vòng 20 (s21c, 20 vòng)", r20.get(20), "#b5b4ae"), ("Vòng 30", r40.get(30), "#7a7975"),
+              ("Vòng 40", r40.get(40), INK)]
+    groups = [g for g in groups if g[1] is not None]
+    x = np.arange(len(series))
+    w = 0.8 / len(groups)
+    for i, (label, vals, color) in enumerate(groups):
+        ys = [vals[k] for k, _, _ in series]
+        xs = x - 0.4 + w * (i + 0.5)
+        ax2.bar(xs, ys, width=w, color=color, edgecolor=SURFACE, linewidth=2, label=label)
+        for xi, v in zip(xs, ys):
+            ax2.annotate(f"{v:.3f}", (xi, v), xytext=(0, 3), textcoords="offset points", ha="center",
+                         rotation=90, fontsize=6.8, color=INK2)
+    ax2.set_xticks(x, [lab.replace(" (4 lớp)", "\n(4 lớp)") for _, lab, _ in series])
+    ax2.set_ylim(0, 1.0)
+    ax2.grid(axis="x", visible=False)
+    ax2.set_ylabel("AP50")
+    ax2.set_title("So sánh theo lớp")
+    ax2.legend(loc="upper right", fontsize=7.5)
+
+    _suptitle(fig, "9 client, thiếu bus 8/9, YOLO11s 960 px, P4t1: 40 vòng so với 20 vòng · seed 42 (n = 1, mô tả)")
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    rows = [["run_40r", r, *(f"{r40[r][k]:.4f}" for k, _, _ in series)] for r in rounds]
+    rows += [["run_20r_s21c", r, *(f"{r20[r][k]:.4f}" for k, _, _ in series)] for r in sorted(r20)]
+    _save(fig, out, "hinh16_40_vong", ["run", "round", *(k for k, _, _ in series)], rows)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--registry", type=Path, default=_REPO_ROOT / "research" / "experiment_registry" / "registry.yaml")
@@ -573,6 +638,7 @@ def main() -> None:
     hinh13_giu_lai(runs, args.out)
     hinh14_thoi_gian(args.out)
     hinh15_motorcycle(runs, args.out)
+    hinh16_40_vong(args.registry, args.out)
 
 
 if __name__ == "__main__":
