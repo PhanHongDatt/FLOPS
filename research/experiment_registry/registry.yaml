@@ -1595,8 +1595,14 @@ experiments:
   scenario: S9-bus8-3k (9 x 3,000 images, bus absent on 8/9, truck on 3/9), YOLO11s 960 px, 40 rounds, eval 10/20/30/40
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s22a-s9-40r-s42 (part 1), goshihayashi/flops-s22b-s9-40r-s42 (part 2)
   decision_rule: ADR-025, rounds 30 and 40 and their mean, descriptive only
-  note: 'part 1 (s22a_g) cut by its 9.6 h budget as planned after round 22 (9 of 9 clients every round, no OOM; round 10 bus 0.497, round 20 bus 0.527); Kaggle shows the kernel as ERROR because the arm ended by timeout. Part 2 (s22b_g) resumes from round 22. First s22b_g push (2026-10-26) stopped after 7.5 min by the REQUIRE_RESTORE guard: Kaggle did not mount the ERROR kernel output; pushed again 2026-10-27 with the run dir as private dataset goshihayashi/flops-s22a-output.'
+  note: 'part 1 (s22a_g) cut by its 9.6 h budget as planned after round 22 (9 of 9 clients every round, no OOM; round 10 bus 0.497, round 20 bus 0.527); Kaggle shows the kernel as ERROR because the arm ended by timeout. Part 2 (s22b_g) resumes from round 22. First s22b_g push (2026-10-26) stopped after 7.5 min by the REQUIRE_RESTORE guard: Kaggle did not mount the ERROR kernel output; pushed again 2026-10-27 with the run dir as private dataset goshihayashi/flops-s22a-output. Part 2 log: restored the run, resumed from round 22 (global_round_022.npz), rounds 23-40 with 9 of 9 clients and 0 failures (40 of 40 rounds in total), artifact check passed; wall about 7 h.'
+  results:
+    round_10: {mAP50: 0.5756, AP50_bus: 0.4972, AP50_car: 0.7884, AP50_truck: 0.5535, AP50_motorcycle: 0.4632, FN_bus: 1238.0}
+    round_20: {mAP50: 0.6086, AP50_bus: 0.5274, AP50_car: 0.8015, AP50_truck: 0.5771, AP50_motorcycle: 0.5285, FN_bus: 1207.0}
+    round_30: {mAP50: 0.6177, AP50_bus: 0.5430, AP50_car: 0.8071, AP50_truck: 0.5887, AP50_motorcycle: 0.5321, FN_bus: 1178.0}
+    round_40: {mAP50: 0.6195, AP50_bus: 0.5502, AP50_car: 0.8091, AP50_truck: 0.5937, AP50_motorcycle: 0.5250, FN_bus: 1139.0}
+    mean_r30_40: {mAP50: 0.6186, AP50_bus: 0.5466, AP50_car: 0.8081, AP50_truck: 0.5912, AP50_motorcycle: 0.5285, FN_bus: 1158.5}
