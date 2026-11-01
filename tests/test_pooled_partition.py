@@ -62,3 +62,15 @@ def test_deterministic(tmp_path):
     c = partition_pooled_iid(ref, label_dir, seed=8, partition_id="p")
     assert a.client_assignments == b.client_assignments
     assert a.client_assignments != c.client_assignments
+
+
+def test_one_client_holds_every_image(tmp_path):
+    """Centralized ceiling (ADR-026): the reference images pooled into a single client C0."""
+    names, label_dir = _dataset(tmp_path)
+    ref = _reference(names, label_dir)
+    central = partition_pooled_iid(ref, label_dir, seed=42, partition_id="central", num_clients=1)
+
+    assert central.num_clients == 1 and list(central.client_assignments) == ["C0"]
+    assert sorted(central.client_assignments["C0"]) == sorted(n for v in ref.client_assignments.values() for n in v)
+    for cls in TARGET_CLASSES:
+        assert central.class_counts["C0"][cls] == sum(c[cls] for c in ref.class_counts.values())

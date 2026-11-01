@@ -653,6 +653,7 @@ def partition_pooled_iid(
     label_dir: Path,
     seed: int,
     partition_id: str,
+    num_clients: int | None = None,
 ) -> PartitionManifest:
     """Re-deal EXACTLY the reference partition's images evenly over the same clients.
 
@@ -666,8 +667,12 @@ def partition_pooled_iid(
     classes they contain, each group is shuffled with ``seed``, and the groups are
     dealt round-robin with one running pointer, so every client receives the same
     image count (±1) and near-equal shares of each signature.
+
+    ``num_clients`` deals the same images over C0..C{n-1} instead; ``num_clients=1`` is the
+    centralized ceiling on exactly the federated data (ADR-026).
     """
-    clients = sorted(reference.client_assignments)
+    clients = (sorted(reference.client_assignments) if num_clients is None
+               else [f"C{i}" for i in range(num_clients)])
     pool = sorted({n for imgs in reference.client_assignments.values() for n in imgs})
     index = load_label_index(pool, label_dir)
     strata: dict[tuple[str, ...], list[str]] = {}

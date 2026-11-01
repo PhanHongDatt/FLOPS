@@ -1,0 +1,9 @@
+# Centralized ceiling (ADR-026): exactly the 15,000 images of s1b5_bus_3k_allmoto_seed42 in ONE client.
+# Same images and box totals as the federated run; only the split into clients is removed.
+partition_id: s1b5_central_3k_allmoto_seed42
+scenario: S1-Pooled-IID
+seed: 42
+num_clients: 1
+reference_manifest: s1b5_bus_3k_allmoto_seed42/manifest.yaml
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50

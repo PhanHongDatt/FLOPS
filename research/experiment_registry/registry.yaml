@@ -1606,3 +1606,13 @@ experiments:
     round_30: {mAP50: 0.6177, AP50_bus: 0.5430, AP50_car: 0.8071, AP50_truck: 0.5887, AP50_motorcycle: 0.5321, FN_bus: 1178.0}
     round_40: {mAP50: 0.6195, AP50_bus: 0.5502, AP50_car: 0.8091, AP50_truck: 0.5937, AP50_motorcycle: 0.5250, FN_bus: 1139.0}
     mean_r30_40: {mAP50: 0.6186, AP50_bus: 0.5466, AP50_car: 0.8081, AP50_truck: 0.5912, AP50_motorcycle: 0.5285, FN_bus: 1158.5}
+- id: EXP-2026-11-01-S23-P4t1-central-y11s960-seed42
+  gate: 'G6 (upper bound, ADR-026)'
+  scenario: S1b5-central-3k-allmoto (the 15,000 s5moto images in 1 client), YOLO11s 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s23a-central-ceiling-960-s42
+  decision_rule: ADR-026, mean of rounds 10/20 per class vs S21b (P4t1 @ s5moto 960), descriptive
+  note: 'centralized ceiling for the S21b configuration; pushed 2026-11-01.'

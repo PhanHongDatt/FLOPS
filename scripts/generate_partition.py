@@ -187,6 +187,7 @@ def _dispatch_pooled(config: dict[str, Any], label_dir: Path, output_dir: Path) 
         label_dir=label_dir,
         seed=int(config["seed"]),
         partition_id=str(config["partition_id"]),
+        num_clients=int(config["num_clients"]) if "num_clients" in config else None,
     )
 
 
