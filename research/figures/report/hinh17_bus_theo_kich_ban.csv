@@ -1,0 +1,55 @@
+﻿method,scenario,seed,metric,value
+FedAvg,Lý tưởng (0/5),42,AP50_bus,0.4136
+FedAvg,Lý tưởng (0/5),123,AP50_bus,0.4145
+FedAvg,Lý tưởng (0/5),2024,AP50_bus,0.4173
+FedAvg,Thiếu bus 3/5,42,AP50_bus,0.3822
+FedAvg,Thiếu bus 3/5,123,AP50_bus,0.3781
+FedAvg,Thiếu bus 3/5,2024,AP50_bus,0.3994
+FedAvg,Thiếu bus 4/5,42,AP50_bus,0.3729
+FedAvg,Thiếu bus 4/5,123,AP50_bus,0.3611
+FedAvg,Thiếu bus 4/5,2024,AP50_bus,0.3590
+Công thức cải tiến,Lý tưởng (0/5),42,AP50_bus,0.5432
+Công thức cải tiến,Lý tưởng (0/5),123,AP50_bus,0.5425
+Công thức cải tiến,Lý tưởng (0/5),2024,AP50_bus,0.5385
+Công thức cải tiến,Thiếu bus 3/5,42,AP50_bus,0.4874
+Công thức cải tiến,Thiếu bus 3/5,123,AP50_bus,0.5021
+Công thức cải tiến,Thiếu bus 3/5,2024,AP50_bus,0.4853
+Công thức cải tiến,Thiếu bus 4/5,42,AP50_bus,0.4640
+Công thức cải tiến,Thiếu bus 4/5,123,AP50_bus,0.4739
+Công thức cải tiến,Thiếu bus 4/5,2024,AP50_bus,0.4759
+FedAvg,Lý tưởng (0/5),42,recall_at025_bus,0.3441
+FedAvg,Lý tưởng (0/5),123,recall_at025_bus,0.3666
+FedAvg,Lý tưởng (0/5),2024,recall_at025_bus,0.3416
+FedAvg,Thiếu bus 3/5,42,recall_at025_bus,0.1318
+FedAvg,Thiếu bus 3/5,123,recall_at025_bus,0.1021
+FedAvg,Thiếu bus 3/5,2024,recall_at025_bus,0.1459
+FedAvg,Thiếu bus 4/5,42,recall_at025_bus,0.0244
+FedAvg,Thiếu bus 4/5,123,recall_at025_bus,0.0470
+FedAvg,Thiếu bus 4/5,2024,recall_at025_bus,0.0432
+Công thức cải tiến,Lý tưởng (0/5),42,recall_at025_bus,0.4709
+Công thức cải tiến,Lý tưởng (0/5),123,recall_at025_bus,0.4859
+Công thức cải tiến,Lý tưởng (0/5),2024,recall_at025_bus,0.4750
+Công thức cải tiến,Thiếu bus 3/5,42,recall_at025_bus,0.2502
+Công thức cải tiến,Thiếu bus 3/5,123,recall_at025_bus,0.2098
+Công thức cải tiến,Thiếu bus 3/5,2024,recall_at025_bus,0.2414
+Công thức cải tiến,Thiếu bus 4/5,42,recall_at025_bus,0.0874
+Công thức cải tiến,Thiếu bus 4/5,123,recall_at025_bus,0.1168
+Công thức cải tiến,Thiếu bus 4/5,2024,recall_at025_bus,0.0858
+FedAvg,Lý tưởng (0/5),42,precision_at025_bus,0.4060
+FedAvg,Lý tưởng (0/5),123,precision_at025_bus,0.3862
+FedAvg,Lý tưởng (0/5),2024,precision_at025_bus,0.4082
+FedAvg,Thiếu bus 3/5,42,precision_at025_bus,0.6957
+FedAvg,Thiếu bus 3/5,123,precision_at025_bus,0.7587
+FedAvg,Thiếu bus 3/5,2024,precision_at025_bus,0.7654
+FedAvg,Thiếu bus 4/5,42,precision_at025_bus,0.7326
+FedAvg,Thiếu bus 4/5,123,precision_at025_bus,0.7317
+FedAvg,Thiếu bus 4/5,2024,precision_at025_bus,0.8039
+Công thức cải tiến,Lý tưởng (0/5),42,precision_at025_bus,0.4948
+Công thức cải tiến,Lý tưởng (0/5),123,precision_at025_bus,0.4857
+Công thức cải tiến,Lý tưởng (0/5),2024,precision_at025_bus,0.4823
+Công thức cải tiến,Thiếu bus 3/5,42,precision_at025_bus,0.7626
+Công thức cải tiến,Thiếu bus 3/5,123,precision_at025_bus,0.8081
+Công thức cải tiến,Thiếu bus 3/5,2024,precision_at025_bus,0.7815
+Công thức cải tiến,Thiếu bus 4/5,42,precision_at025_bus,0.8388
+Công thức cải tiến,Thiếu bus 4/5,123,precision_at025_bus,0.8639
+Công thức cải tiến,Thiếu bus 4/5,2024,precision_at025_bus,0.8226

@@ -614,6 +614,42 @@ def hinh16_40_vong(registry: Path, out: Path) -> None:
     _save(fig, out, "hinh16_40_vong", ["run", "round", *(k for k, _, _ in series)], rows)
 
 
+def hinh17_bus_theo_kich_ban(runs: list[Run], out: Path) -> None:
+    """AP50 bus vs recall/precision of bus at conf 0.25 across the severity sweep (already registered metrics)."""
+    ms = [m for m in ("A0c", "P4noKD") if all(by_seed(runs, m, sc, "recall_at025_bus") for sc in SCEN)]
+    if not ms:
+        return
+    panels = (("AP50_bus", "AP50 bus"), ("recall_at025_bus", "Recall bus @ conf 0,25"),
+              ("precision_at025_bus", "Precision bus @ conf 0,25"))
+    fig, axes = plt.subplots(1, len(panels), figsize=(11.5, 3.7), sharey=True)
+    rows = []
+    for ax, (key, title) in zip(axes, panels):
+        for m in ms:
+            mus = []
+            for x, sc in enumerate(SCEN):
+                vals = by_seed(runs, m, sc, key)
+                mus.append(_dots_and_mean(ax, x, vals, m, jitter=0.07, size=20))
+                rows += [[NAME[m], SCEN_NAME[sc], s, key, f"{v:.4f}"] for s, v in vals.items()]
+            ax.plot(range(len(SCEN)), mus, marker=MARKER[m], ms=6.5, color=COLOR[m], mec=SURFACE, mew=1,
+                    label=f"{NAME[m]} (n = 3 seed)")
+            dy = 9 if m == "P4noKD" else -9                   # keep the two labels apart where lines meet
+            for x, mu in enumerate(mus):
+                ax.annotate(f"{mu:.2f}", (x, mu), xytext=(8, dy), textcoords="offset points", va="center",
+                            fontsize=7.5, color=INK2)
+        ax.set_xticks(range(len(SCEN)), [SCEN_X[s] for s in SCEN])
+        ax.set_xlim(-0.3, len(SCEN) - 0.45)
+        ax.set_ylim(0, 1.0)
+        ax.set_title(title)
+        ax.grid(axis="x", visible=False)
+    axes[1].set_xlabel(f"Số client không có ảnh bus (trên 5) · {RULE}")
+    axes[0].set_ylabel("Giá trị")
+    axes[0].legend(loc="upper right", fontsize=7.5)
+    _suptitle(fig, "AP50 bus đổi ít giữa các kịch bản, recall bus ở ngưỡng 0,25 giảm mạnh "
+                   "(chấm mờ = từng seed, cùng 15.000 ảnh)")
+    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    _save(fig, out, "hinh17_bus_theo_kich_ban", ["method", "scenario", "seed", "metric", "value"], rows)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--registry", type=Path, default=_REPO_ROOT / "research" / "experiment_registry" / "registry.yaml")
@@ -639,6 +675,7 @@ def main() -> None:
     hinh14_thoi_gian(args.out)
     hinh15_motorcycle(runs, args.out)
     hinh16_40_vong(args.registry, args.out)
+    hinh17_bus_theo_kich_ban(runs, args.out)
 
 
 if __name__ == "__main__":
