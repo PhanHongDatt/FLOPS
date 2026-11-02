@@ -1,0 +1,9 @@
+# Centralized ceiling on the rare-class-enriched data (ADR-027): the 15,000 images of s1b5_bus_3k_rare_seed42
+# in ONE client.
+partition_id: s1b5_central_3k_rare_seed42
+scenario: S1-Pooled-IID
+seed: 42
+num_clients: 1
+reference_manifest: s1b5_bus_3k_rare_seed42/manifest.yaml
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50

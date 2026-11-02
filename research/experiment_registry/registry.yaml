@@ -1621,3 +1621,13 @@ experiments:
     round_20: {mAP50: 0.6256, AP50_bus: 0.6156, AP50_car: 0.8063, AP50_truck: 0.5931, AP50_motorcycle: 0.4872, FN_bus: 729.0}
     rule_mean_r10_20: {mAP50: 0.6037, AP50_bus: 0.5891, AP50_car: 0.7983, AP50_truck: 0.5689, AP50_motorcycle: 0.4585, FN_bus: 800.5}
     pr_maxF1_r10_20: {precision_bus: 0.6607, recall_bus: 0.5094, precision_truck: 0.6268, recall_truck: 0.5183, precision_motorcycle: 0.5801, recall_motorcycle: 0.4655}
+- id: EXP-2026-11-03-S23b-P4t1-central-rare-y11s960-seed42
+  gate: 'G6 (upper bound with more rare-class data, ADR-027)'
+  scenario: S1b5-central-3k-rare (s1b5_bus_3k_rare in 1 client, bus/truck quotas 1,200/900), YOLO11s 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s23b-central-rare-960-s42
+  decision_rule: ADR-027, mean of rounds 10/20 AP50 per class vs the ADR-026 ceiling, descriptive
+  note: 'pushed 2026-11-03.'

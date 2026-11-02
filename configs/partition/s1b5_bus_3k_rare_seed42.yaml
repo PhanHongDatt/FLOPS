@@ -1,0 +1,22 @@
+# S1b5-3k-rare (ADR-027): s1b5_bus_3k_allmoto_seed42 with larger bus and truck quotas. Same 5 x 3,000 images,
+# same missing map (bus 0 on C0-C2, truck 0 on C3), every motorcycle image kept (quota 460, as allmoto);
+# a client's quota images are taken before the ordinary stream, so only the share of rare-class images rises.
+# Quotas are images per eligible client: bus on C3/C4 (2 x 1,200), truck on C0/C1/C2/C4 (4 x 900).
+# A quota BDD100K cannot fill is logged as "class_quota ... not reached"; report the manifest counts.
+partition_id: s1b5_bus_3k_rare_seed42
+scenario: S1
+seed: 42
+num_clients: 5
+per_client: 3000
+missing_map:
+  C0: [bus]
+  C1: [bus]
+  C2: [bus]
+  C3: [truck]
+  C4: []
+class_quota:
+  motorcycle: 460
+  bus: 1200
+  truck: 900
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50
