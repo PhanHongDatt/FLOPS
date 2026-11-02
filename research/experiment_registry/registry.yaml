@@ -1611,8 +1611,13 @@ experiments:
   scenario: S1b5-central-3k-allmoto (the 15,000 s5moto images in 1 client), YOLO11s 960 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s23a-central-ceiling-960-s42
   decision_rule: ADR-026, mean of rounds 10/20 per class vs S21b (P4t1 @ s5moto 960), descriptive
-  note: 'centralized ceiling for the S21b configuration; pushed 2026-11-01.'
+  note: 'centralized ceiling for the S21b configuration; pushed 2026-11-01. One session, 20 of 20 rounds (1 of 1 client, 0 failures), artifact check passed, wall 9.7 h on T4 x2 (one GPU used, ~25 min/round).'
+  results:
+    round_10: {mAP50: 0.5818, AP50_bus: 0.5625, AP50_car: 0.7903, AP50_truck: 0.5446, AP50_motorcycle: 0.4299, FN_bus: 872.0}
+    round_20: {mAP50: 0.6256, AP50_bus: 0.6156, AP50_car: 0.8063, AP50_truck: 0.5931, AP50_motorcycle: 0.4872, FN_bus: 729.0}
+    rule_mean_r10_20: {mAP50: 0.6037, AP50_bus: 0.5891, AP50_car: 0.7983, AP50_truck: 0.5689, AP50_motorcycle: 0.4585, FN_bus: 800.5}
+    pr_maxF1_r10_20: {precision_bus: 0.6607, recall_bus: 0.5094, precision_truck: 0.6268, recall_truck: 0.5183, precision_motorcycle: 0.5801, recall_motorcycle: 0.4655}

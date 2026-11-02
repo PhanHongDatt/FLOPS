@@ -24,3 +24,22 @@ already holds all 3,002 motorcycle boxes of BDD100K train.
   S21b arm (~9-10 h); cut at 9.6 h, a part 2 resumes from the last checkpoint as in ADR-025.
 - n = 1, descriptive. Precision/recall at another confidence threshold is an operating-point choice, reported
   separately and never as a model improvement.
+
+## Result (s23a_g, completed 2026-11-02)
+20 of 20 rounds, one session. Mean of rounds 10/20, same evaluator; precision/recall at the max-F1 confidence.
+
+| | mAP50 | car | bus | truck | motorcycle |
+|---|---:|---:|---:|---:|---:|
+| S21b federated (5 clients, bus absent on 3) | 0.6095 | 0.7956 | 0.5650 | 0.5735 | 0.5039 |
+| S23 centralized ceiling (1 client) | 0.6037 | 0.7983 | 0.5891 | 0.5689 | 0.4585 |
+| ceiling − federated | -0.006 | +0.003 | +0.024 | -0.005 | -0.045 |
+
+Bus is the only class the centralized run clearly does better: recall 0.446 -> 0.509, FN 1,031 -> 801
+(precision 0.707 -> 0.661). Motorcycle is lower centralized (RFS t=1 computed on one pooled client repeats
+motorcycle images less than on five clients; not tested separately).
+
+Reading (rule fixed above): the ceiling is **below 0.70 on all three rare classes** (bus 0.589, truck 0.569,
+motorcycle 0.459). With this data, model and resolution, AP50 0.70 cannot be reached by changing the FL method;
+it needs more data (bus/truck images; motorcycle has none left in BDD100K train) or a larger model (own ADR).
+The federated P4t1 is within 0.006 mAP50 of its centralized ceiling; the remaining Missing-Class cost is on bus
+(-0.024 AP50, -0.063 recall). n = 1, descriptive.
