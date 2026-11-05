@@ -1636,3 +1636,23 @@ experiments:
     round_20: {mAP50: 0.6308, AP50_bus: 0.6260, AP50_car: 0.8075, AP50_truck: 0.5947, AP50_motorcycle: 0.4950, FN_bus: 709.0}
     rule_mean_r10_20: {mAP50: 0.6125, AP50_bus: 0.6027, AP50_car: 0.7974, AP50_truck: 0.5865, AP50_motorcycle: 0.4635, FN_bus: 752.5}
     pr_maxF1_r10_20: {precision_bus: 0.6604, recall_bus: 0.5382, precision_truck: 0.6480, recall_truck: 0.5282, precision_motorcycle: 0.5794, recall_motorcycle: 0.4880}
+- id: EXP-2026-11-05-S24-P4t1AKadd-s5moto-y11s960-smoke-seed42
+  gate: 'G6 (B1 of docs/Solution.md, ADR-028), smoke'
+  scenario: S1b5-allmoto-3k, YOLO11s 960 px, 2 rounds, eval round 2
+  method: P4t1AKadd (P4t1 + absent-class KD on confusable anchors, not-true KD kept)
+  run_class: smoke
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s24-smoke-b1-m123-960
+  decision_rule: correctness only (ADR-028); not comparable with 20-round runs
+  note: 'pushed 2026-11-05 at commit c3fd8bc.'
+- id: EXP-2026-11-05-S24-P4t1M123-s5moto-y11s960-smoke-seed42
+  gate: 'G6 (M1-M3 of docs/Solution.md, ADR-029), smoke'
+  scenario: S1b5-allmoto-3k, YOLO11s 960 px, 2 rounds, eval round 2
+  method: P4t1M123 (P4t1 + scale 0.25 / mosaic off last 5 rounds + own-data motorcycle copy-paste + NWD in TAL)
+  run_class: smoke
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s24-smoke-b1-m123-960
+  decision_rule: correctness only (ADR-029); not comparable with 20-round runs
+  note: 'pushed 2026-11-05 at commit c3fd8bc.'
