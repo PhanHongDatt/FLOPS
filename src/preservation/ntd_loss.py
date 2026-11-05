@@ -96,7 +96,7 @@ def head_scores(feats: list[torch.Tensor], no: int, reg_max: int, nc: int) -> to
 class _TeacherCriterion:
     """Wraps the detection criterion: the teacher scores each batch before the loss runs."""
 
-    def __init__(self, criterion: Any, teacher: torch.nn.Module, bce: _NTDBCE) -> None:
+    def __init__(self, criterion: Any, teacher: torch.nn.Module, bce: torch.nn.Module) -> None:
         self.criterion = criterion
         self.teacher = teacher
         self.bce = bce
@@ -120,26 +120,30 @@ class _TeacherCriterion:
 
 class NotTrueDistillation:
     """Ultralytics callbacks for A5 (teacher = received global model) and P1/P2 (ADR-015:
-    teacher = a FIXED model loaded from ``teacher_path``). beta = 0 disables it.
+    teacher = a FIXED model loaded from ``teacher_path``). beta = 0 disables the distillation;
+    ``absent`` adds B1 (ADR-028, src/preservation/absent_kd.py) on the same teacher forward,
+    with (B1_add) or without (B1_replace, beta = 0) the not-true distillation.
 
     ``class_weights`` (P2) additionally scales each class's ordinary BCE term, i.e. the
     A2b rho weighting (rho_loss.py) underneath the distillation.
     """
 
     def __init__(self, beta: float = 1.0, tau: float = 1.0, teacher_path: str | Path | None = None,
-                 class_weights: list[float] | None = None) -> None:
+                 class_weights: list[float] | None = None, absent: dict[str, Any] | None = None) -> None:
         if beta < 0 or tau <= 0:
             raise ValueError(f"need beta >= 0 and tau > 0, got beta={beta}, tau={tau}")
         self.beta, self.tau = float(beta), float(tau)
         self.teacher_path = Path(teacher_path) if teacher_path else None
         self.class_weights = [float(w) for w in class_weights] if class_weights else None
+        # B1 (ADR-028): {"missing": [ids], "confusable": {c: [d, ...]}, "lam", "q_max", "scope"}
+        self.absent = dict(absent) if absent and absent.get("missing") else None
         self._model: Any = None
         self._criterion: Any = None
         self._original_bce: Any = None
 
     @property
     def active(self) -> bool:
-        return self.beta > 0
+        return self.beta > 0 or self.absent is not None
 
     def on_train_start(self, trainer: Any) -> None:
         if not self.active:
@@ -160,7 +164,12 @@ class NotTrueDistillation:
         if self.class_weights is not None and any(w != 1.0 for w in self.class_weights):
             from src.preservation.rho_loss import _WeightedBCE
             base = _WeightedBCE(base, self.class_weights)
-        bce = _NTDBCE(base, self.beta, self.tau)
+        bce: torch.nn.Module = _NTDBCE(base, self.beta, self.tau) if self.beta > 0 else base
+        if self.absent is not None:   # B1 (ADR-028): rewrites the targets, then NTD (B1_add) or plain BCE
+            from src.preservation.absent_kd import AbsentKDBCE
+            a = self.absent
+            bce = AbsentKDBCE(bce, a["missing"], a["confusable"], float(a["lam"]), float(a["q_max"]),
+                              str(a.get("scope", "confusable")))
         self._model, self._criterion, self._original_bce = model, crit, crit.bce
         crit.bce = bce
         model.criterion = _TeacherCriterion(crit, teacher, bce)

@@ -305,3 +305,32 @@ class TeacherKDRhoClient(TeacherKDClient):
         metrics["rho"] = float(self.rho)
         metrics["missing_classes"] = json.dumps(self.missing_classes)
         return params, n, metrics
+
+
+class AbsentKDClient(TeacherKDClient):
+    """B1 (ADR-028): the P4t1 teacher additionally supplies soft targets for this client's
+    locally absent classes on confusable foreground anchors (src/preservation/absent_kd.py).
+    ``train_config["absent_kd"]`` holds the resolved config; ``train_config["kd_beta"]`` is
+    the not-true distillation weight (0 = B1_replace, 1 = B1_add). Needs the COCO head: the
+    missing classes are mapped to COCO ids. The missing list never leaves the client."""
+
+    def _loss_spec(self) -> dict[str, Any]:
+        from src.model.yolo_wrapper import COCO_IDS
+        cfg = self.train_config.get("absent_kd")
+        if not cfg or not cfg.get("enabled"):
+            raise ValueError(f"{type(self).__name__} needs an enabled train_config['absent_kd']")
+        spec = {**super()._loss_spec(), "beta": float(self.train_config.get("kd_beta", 1.0))}
+        missing = [COCO_IDS[c] for c in self.missing_classes]
+        if missing:
+            spec["absent"] = {"missing": missing, "confusable": cfg["confusable"], "lam": cfg["lam"],
+                              "q_max": cfg["q_max"], "scope": cfg["scope"]}
+        return spec
+
+    def fit(
+        self,
+        parameters: NDArrays,
+        config: dict[str, Scalar],
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
+        params, n, metrics = super().fit(parameters, config)
+        metrics["missing_classes"] = json.dumps(self.missing_classes)
+        return params, n, metrics

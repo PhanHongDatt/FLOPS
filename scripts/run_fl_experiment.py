@@ -42,6 +42,7 @@ from src.data.partitioner import load_partition_manifest
 from src.experiments.runner import prepare_run, finalize_run
 from src.federated.client import YOLOFlowerClient
 from src.federated.client_variants import (
+    AbsentKDClient,
     EFLClient,
     FedNovaClient,
     FedProxClient,
@@ -74,7 +75,7 @@ _CLASS_AWARE_STRATEGIES = ("ClassAwareAgg", "ClassCountFedAvg")
 
 # ── Client mechanisms ─────────────────────────────────────────────────────
 _MECHANISMS = ("none", "preservation_param", "preservation_loss", "ntd", "efl", "focal",
-               "kd_teacher", "kd_teacher_rho")
+               "kd_teacher", "kd_teacher_rho", "kd_teacher_absent")
 
 # Mechanisms parameterised by rho (H2). The loss variants carry their own
 # literature defaults (ADR-012/013) and take no rho.
@@ -88,6 +89,7 @@ _MECHANISM_CLIENTS = {
     "focal": FocalClient,                         # A6c (ADR-013)
     "kd_teacher": TeacherKDClient,                # P1  (ADR-015)
     "kd_teacher_rho": TeacherKDRhoClient,         # P2  (ADR-015)
+    "kd_teacher_absent": AbsentKDClient,          # B1 of docs/Solution.md (ADR-028)
 }
 
 # Strategy-specific clients used when mechanism == "none".
@@ -98,6 +100,9 @@ _STRATEGY_CLIENTS = {
 }
 
 # ── Ablation presets (plan.md §7.1) ───────────────────────────────────────
+_P4T1_B1: dict[str, object] = {"algorithm": "FedAvg", "mechanism": "kd_teacher_absent", "coco_head": True,
+                               "teacher_from_init": True, "lr_cosine": True, "rfs_t": 1.0,
+                               "absent_kd": {"enabled": True}}
 _ABLATIONS: dict[str, dict[str, object]] = {
     "A0":  {"algorithm": "FedAvg",           "mechanism": "none"},
     "A1":  {"algorithm": "ClassCountFedAvg", "mechanism": "none"},
@@ -131,6 +136,13 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     # ADR-023 idea 4: P4 (with KD) and a stronger repeat-factor threshold for the rare motorcycle class
     "P4t1": {"algorithm": "FedAvg", "mechanism": "kd_teacher", "coco_head": True, "teacher_from_init": True,
              "lr_cosine": True, "rfs_t": 1.0},
+    # ADR-028 (docs/Solution.md B1): P4t1 + absent-class distillation on confusable anchors.
+    # AK = B1_replace (not-true KD off, main run); AKadd = B1_add keeps it; the rest are seed-42 ablations.
+    "P4t1AK":    {**_P4T1_B1, "kd_beta": 0.0},
+    "P4t1AKadd": {**_P4T1_B1, "kd_beta": 1.0},
+    "P4t1AKall": {**_P4T1_B1, "kd_beta": 0.0, "absent_kd": {"enabled": True, "scope": "all_anchors"}},
+    "P4t1AKq1":  {**_P4T1_B1, "kd_beta": 0.0, "absent_kd": {"enabled": True, "q_max": 1.0}},
+    "P4t1AKl05": {**_P4T1_B1, "kd_beta": 0.0, "absent_kd": {"enabled": True, "lam": 0.5}},
     # ADR-020 N2: P4noKD with the class conv of every Detect level frozen at COCO values (FedBABU-style)
     "P5f": {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr_cosine": True, "rfs_t": 0.5,
             "freeze_cls_head": True},
@@ -442,7 +454,11 @@ def main() -> None:
         if not teacher_npz.exists():
             np.savez(teacher_npz, *get_parameters(build_model(config["model"]["weights"])))
         args.teacher_params = teacher_npz
-    if mechanism in ("kd_teacher", "kd_teacher_rho"):
+    if preset.get("absent_kd"):   # ADR-028: config file + the arm's overrides
+        from src.preservation.absent_kd import load_absent_kd_config
+        train_config["absent_kd"] = load_absent_kd_config(preset["absent_kd"])
+        train_config["kd_beta"] = float(preset.get("kd_beta", 1.0))
+    if mechanism in ("kd_teacher", "kd_teacher_rho", "kd_teacher_absent"):
         if args.teacher_params is None:
             raise SystemExit(f"--client-mechanism {mechanism} needs --teacher-params")
         train_config["teacher_params"] = str(args.teacher_params.resolve())

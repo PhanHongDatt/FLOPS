@@ -1,0 +1,11 @@
+# B1 — absent-class distillation on confusable foreground anchors (ADR-028, docs/Solution.md §3.4).
+# Off unless an arm preset (scripts/run_fl_experiment.py, P4t1AK*) switches it on; the preset may
+# override lam / q_max / scope for the seed-42 ablations. Class ids are COCO head ids.
+absent_kd:
+  enabled: false
+  lam: 1.0              # ablation: 0.5
+  q_max: 0.5            # ablation: 1.0 (no cap)
+  confusable:
+    5: [7, 2]           # bus   -> truck, car
+    7: [5, 2]           # truck -> bus, car
+  scope: confusable     # ablation: all_anchors

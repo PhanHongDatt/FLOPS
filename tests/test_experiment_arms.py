@@ -48,7 +48,8 @@ def _args(**kw) -> argparse.Namespace:
 # ── ablation presets ──────────────────────────────────────────────────────
 def test_every_plan_arm_has_a_preset():
     assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c",
-                               "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD", "P4t1", "P5f", "A1c", "FedProxc"}
+                               "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD", "P4t1", "P5f", "A1c", "FedProxc",
+                               "P4t1AK", "P4t1AKadd", "P4t1AKall", "P4t1AKq1", "P4t1AKl05"}
 
 
 def test_coco_head_arms():
@@ -283,3 +284,15 @@ def test_coco_baselines_are_a0c_with_another_server_or_client_algorithm():
     for name, algo in (("A1c", "ClassCountFedAvg"), ("FedProxc", "FedProx")):
         p = dict(_ABLATIONS[name])
         assert p.pop("algorithm") == algo and p == {k: v for k, v in a0c.items() if k != "algorithm"}
+
+
+def test_absent_kd_arms():
+    """ADR-028 (docs/Solution.md B1): P4t1 + absent-class KD; AK replaces not-true KD, AKadd keeps it."""
+    from src.federated.client_variants import AbsentKDClient
+    for arm in ("P4t1AK", "P4t1AKadd", "P4t1AKall", "P4t1AKq1", "P4t1AKl05"):
+        algo, m, r = _resolve_arms(_args(ablation=arm))
+        assert (algo, m) == ("FedAvg", "kd_teacher_absent") and _pick_client_class(algo, m) is AbsentKDClient
+        assert exp_id_for_arm(arm, m, r) == arm
+        p = _ABLATIONS[arm]
+        assert {k: p[k] for k in ("coco_head", "teacher_from_init", "lr_cosine", "rfs_t")} ==             {"coco_head": True, "teacher_from_init": True, "lr_cosine": True, "rfs_t": 1.0}   # = P4t1
+    assert _ABLATIONS["P4t1AK"]["kd_beta"] == 0.0 and _ABLATIONS["P4t1AKadd"]["kd_beta"] == 1.0
