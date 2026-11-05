@@ -1626,8 +1626,13 @@ experiments:
   scenario: S1b5-central-3k-rare (s1b5_bus_3k_rare in 1 client, bus/truck quotas 1,200/900), YOLO11s 960 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s23b-central-rare-960-s42
   decision_rule: ADR-027, mean of rounds 10/20 AP50 per class vs the ADR-026 ceiling, descriptive
-  note: 'pushed 2026-11-03.'
+  note: 'pushed 2026-11-03. Partition: bus/truck quotas filled (no warning); boxes car 154,949, bus 3,635 (+37 % vs s5moto 2,657), truck 7,884 (+22 % vs 6,450), motorcycle 3,002; missing map held. One session, 20 of 20 rounds, 0 failures, artifact check passed.'
+  results:
+    round_10: {mAP50: 0.5943, AP50_bus: 0.5794, AP50_car: 0.7873, AP50_truck: 0.5783, AP50_motorcycle: 0.4321, FN_bus: 796.0}
+    round_20: {mAP50: 0.6308, AP50_bus: 0.6260, AP50_car: 0.8075, AP50_truck: 0.5947, AP50_motorcycle: 0.4950, FN_bus: 709.0}
+    rule_mean_r10_20: {mAP50: 0.6125, AP50_bus: 0.6027, AP50_car: 0.7974, AP50_truck: 0.5865, AP50_motorcycle: 0.4635, FN_bus: 752.5}
+    pr_maxF1_r10_20: {precision_bus: 0.6604, recall_bus: 0.5382, precision_truck: 0.6480, recall_truck: 0.5282, precision_motorcycle: 0.5794, recall_motorcycle: 0.4880}
