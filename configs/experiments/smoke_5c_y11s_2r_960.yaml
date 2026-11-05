@@ -1,0 +1,14 @@
+# Smoke (correctness only) for ADR-028 / ADR-029: convergence_5c_y11s_20r_960 cut to 2 rounds, evaluated at
+# round 2. Results are not comparable with 20-round runs and are not used for any decision.
+run_class: smoke
+model:
+  name: yolo11s
+  weights: yolo11s.pt
+  image_size: 960
+train:
+  batch_size: 16
+federated:
+  num_clients: 5
+  num_rounds: 2
+  eval_rounds: [2]
+  fraction_evaluate: 0.0
