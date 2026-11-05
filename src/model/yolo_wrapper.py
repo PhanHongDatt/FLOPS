@@ -210,6 +210,8 @@ def train_one_round(
     proximal_mu: float = 0.0,
     cls_loss_weights: list[float] | None = None,
     cls_loss: dict[str, Any] | None = None,
+    moto_copy_paste: dict[str, Any] | None = None,
+    nwd_assign: dict[str, Any] | None = None,
 ) -> dict[str, float]:
     """One round of local training.
 
@@ -282,6 +284,20 @@ def train_one_round(
             )
 
     model.add_callback("on_train_epoch_end", _snapshot_final_ema)
+    # M2 / M3 (ADR-029): motorcycle copy-paste in the client's own images; NWD in TAL assignment
+    added: list[tuple[str, Any]] = []
+    paster = nwd = None
+    if moto_copy_paste:
+        from src.data.moto_paste import MotoCopyPaste, PasteConfig
+        paster = MotoCopyPaste(PasteConfig(**moto_copy_paste))
+        added.append(("on_pretrain_routine_start", paster.on_pretrain_routine_start))
+    if nwd_assign:
+        from src.model.nwd_assign import NWDAssign
+        nwd = NWDAssign(alpha=float(nwd_assign.get("alpha", 0.5)), c=nwd_assign.get("C"),
+                        class_id=int(nwd_assign.get("class_id", 3)))
+        added += [("on_train_start", nwd.on_train_start), ("on_train_end", nwd.on_train_end)]
+    for event, fn in added:
+        model.add_callback(event, fn)
     # FedProx: mu * (w - w_global) added to every gradient (src/federated/proximal.py)
     from src.federated.proximal import ProximalTerm
     prox = ProximalTerm(proximal_mu)
@@ -302,6 +318,10 @@ def train_one_round(
     finally:
         # callbacks live on the YOLO object and would pile up across FL rounds
         model.callbacks["on_train_epoch_end"].remove(_snapshot_final_ema)
+        for event, fn in added:
+            model.callbacks[event].remove(fn)
+        if nwd is not None:
+            nwd.on_train_end(None)
         if rho_loss.active:
             model.callbacks["on_train_start"].remove(rho_loss.on_train_start)
             model.callbacks["on_train_end"].remove(rho_loss.on_train_end)
@@ -327,6 +347,10 @@ def train_one_round(
                 metrics[k] = float(v)
             except (TypeError, ValueError):
                 continue
+    if paster is not None:
+        metrics["paste_bank_size"] = float(paster.bank_size)
+    if nwd is not None and nwd.c_used is not None:
+        metrics["nwd_C"] = nwd.c_used
     return metrics
 
 

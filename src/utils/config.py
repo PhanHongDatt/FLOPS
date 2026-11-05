@@ -94,3 +94,24 @@ def build_centralized_train_kwargs(config: dict[str, Any], seed: int) -> dict[st
         "deterministic": bool(train.get("deterministic", True)),
         "nbs": train.get("nbs"),
     }
+
+
+SMALL_OBJECTS_CONFIG = Path(__file__).resolve().parents[2] / "configs" / "methods" / "small_objects.yaml"
+
+
+def load_small_objects_config(overrides: dict[str, dict[str, Any]],
+                              path: Path = SMALL_OBJECTS_CONFIG) -> dict[str, dict[str, Any]]:
+    """ADR-029: the enabled blocks of configs/methods/small_objects.yaml (M1 ``small_obj_aug``, M2
+    ``moto_copy_paste``, M3 ``nwd_assign``) with an arm's overrides; disabled blocks are left out, so a
+    train config without them trains exactly as before. ``enabled`` is dropped from M2/M3 blocks."""
+    with open(path, encoding="utf-8") as f:
+        base = yaml.safe_load(f)
+    unknown = set(overrides) - set(base)
+    if unknown:
+        raise ValueError(f"unknown small-object blocks {sorted(unknown)}; expected {sorted(base)}")
+    out: dict[str, dict[str, Any]] = {}
+    for name, block in base.items():
+        merged = {**block, **overrides.get(name, {})}
+        if merged.pop("enabled", False):
+            out[name] = merged if name != "small_obj_aug" else {**merged, "enabled": True}
+    return out

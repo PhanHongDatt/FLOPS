@@ -100,6 +100,8 @@ _STRATEGY_CLIENTS = {
 }
 
 # ── Ablation presets (plan.md §7.1) ───────────────────────────────────────
+_P4T1: dict[str, object] = {"algorithm": "FedAvg", "mechanism": "kd_teacher", "coco_head": True,
+                            "teacher_from_init": True, "lr_cosine": True, "rfs_t": 1.0}
 _P4T1_B1: dict[str, object] = {"algorithm": "FedAvg", "mechanism": "kd_teacher_absent", "coco_head": True,
                                "teacher_from_init": True, "lr_cosine": True, "rfs_t": 1.0,
                                "absent_kd": {"enabled": True}}
@@ -143,6 +145,13 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     "P4t1AKall": {**_P4T1_B1, "kd_beta": 0.0, "absent_kd": {"enabled": True, "scope": "all_anchors"}},
     "P4t1AKq1":  {**_P4T1_B1, "kd_beta": 0.0, "absent_kd": {"enabled": True, "q_max": 1.0}},
     "P4t1AKl05": {**_P4T1_B1, "kd_beta": 0.0, "absent_kd": {"enabled": True, "lam": 0.5}},
+    # ADR-029 (docs/Solution.md M1-M3): P4t1 + motorcycle small-object methods, blocks of
+    # configs/methods/small_objects.yaml switched on per arm.
+    "P4t1M1":   {**_P4T1, "small_objects": {"small_obj_aug": {"enabled": True}}},
+    "P4t1M2":   {**_P4T1, "small_objects": {"moto_copy_paste": {"enabled": True}}},
+    "P4t1M12":  {**_P4T1, "small_objects": {"small_obj_aug": {"enabled": True}, "moto_copy_paste": {"enabled": True}}},
+    "P4t1M123": {**_P4T1, "small_objects": {"small_obj_aug": {"enabled": True}, "moto_copy_paste": {"enabled": True},
+                                            "nwd_assign": {"enabled": True}}},
     # ADR-020 N2: P4noKD with the class conv of every Detect level frozen at COCO values (FedBABU-style)
     "P5f": {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr_cosine": True, "rfs_t": 0.5,
             "freeze_cls_head": True},
@@ -454,6 +463,10 @@ def main() -> None:
         if not teacher_npz.exists():
             np.savez(teacher_npz, *get_parameters(build_model(config["model"]["weights"])))
         args.teacher_params = teacher_npz
+    train_config["num_rounds"] = int(fed["num_rounds"])
+    if preset.get("small_objects"):   # ADR-029: config file blocks + the arm's overrides
+        from src.utils.config import load_small_objects_config
+        train_config.update(load_small_objects_config(preset["small_objects"]))
     if preset.get("absent_kd"):   # ADR-028: config file + the arm's overrides
         from src.preservation.absent_kd import load_absent_kd_config
         train_config["absent_kd"] = load_absent_kd_config(preset["absent_kd"])

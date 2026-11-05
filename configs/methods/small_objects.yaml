@@ -1,0 +1,20 @@
+# M1-M3 for motorcycle (rare on every client, small): docs/Solution.md §4, ADR-029.
+# Off unless an arm preset (scripts/run_fl_experiment.py, P4t1M*) switches a block on.
+small_obj_aug:            # M1
+  enabled: false
+  scale: 0.25             # Ultralytics default 0.5; ablation 0.2, 0.3
+  mosaic_off_last_rounds: 5
+moto_copy_paste:          # M2, crops of the client's own motorcycle boxes, never shared
+  enabled: false
+  p: 0.5
+  n_max: 3
+  min_y_frac: 0.5
+  max_iou: 0.05
+  feather_px: 3
+  class_id: 3             # COCO id of motorcycle
+  debug: true             # 20 annotated pasted images per client, round 1 only (visual check)
+nwd_assign:               # M3
+  enabled: false
+  alpha: 0.5              # alpha * IoU + (1 - alpha) * NWD; 1.0 = original assigner
+  C: null                 # null: mean sqrt(w*h) of the client's motorcycle boxes at imgsz, logged as nwd_C
+  class_id: 3

@@ -49,7 +49,8 @@ def _args(**kw) -> argparse.Namespace:
 def test_every_plan_arm_has_a_preset():
     assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c",
                                "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD", "P4t1", "P5f", "A1c", "FedProxc",
-                               "P4t1AK", "P4t1AKadd", "P4t1AKall", "P4t1AKq1", "P4t1AKl05"}
+                               "P4t1AK", "P4t1AKadd", "P4t1AKall", "P4t1AKq1", "P4t1AKl05",
+                               "P4t1M1", "P4t1M2", "P4t1M12", "P4t1M123"}
 
 
 def test_coco_head_arms():
@@ -296,3 +297,12 @@ def test_absent_kd_arms():
         p = _ABLATIONS[arm]
         assert {k: p[k] for k in ("coco_head", "teacher_from_init", "lr_cosine", "rfs_t")} ==             {"coco_head": True, "teacher_from_init": True, "lr_cosine": True, "rfs_t": 1.0}   # = P4t1
     assert _ABLATIONS["P4t1AK"]["kd_beta"] == 0.0 and _ABLATIONS["P4t1AKadd"]["kd_beta"] == 1.0
+
+
+def test_small_object_arms_are_p4t1_plus_blocks():
+    """ADR-029: P4t1M* = P4t1 + the named blocks of configs/methods/small_objects.yaml."""
+    for arm, blocks in (("P4t1M1", {"small_obj_aug"}), ("P4t1M2", {"moto_copy_paste"}),
+                        ("P4t1M12", {"small_obj_aug", "moto_copy_paste"}),
+                        ("P4t1M123", {"small_obj_aug", "moto_copy_paste", "nwd_assign"})):
+        p = dict(_ABLATIONS[arm])
+        assert set(p.pop("small_objects")) == blocks and p == _ABLATIONS["P4t1"]

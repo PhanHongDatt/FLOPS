@@ -46,6 +46,25 @@ def cosine_round_lr(server_round: int, num_rounds: int, lr0: float, lr_min: floa
     return lr_min + 0.5 * (lr0 - lr_min) * (1.0 + math.cos(math.pi * x))
 
 
+def small_object_overrides(cfg: dict[str, Any] | None, server_round: int, num_rounds: int | None) -> dict[str, float]:
+    """ADR-029 M1: Ultralytics ``scale`` for every round and ``mosaic = 0`` in the last K rounds.
+
+    ``close_mosaic`` counts local epochs, and a round has one, so the switch has to come from the round
+    number. Values are [ENGINEERING] choices of docs/Solution.md, fixed in ADR-029."""
+    if not cfg or not cfg.get("enabled"):
+        return {}
+    out = {"scale": float(cfg["scale"])}
+    k = int(cfg.get("mosaic_off_last_rounds", 0))
+    if k > 0:
+        if not num_rounds:
+            raise ValueError("small_obj_aug.mosaic_off_last_rounds needs train_config['num_rounds']")
+        if server_round > int(num_rounds) - k:
+            out["mosaic"] = 0.0
+        else:
+            out["mosaic"] = 1.0                              # = the Ultralytics default, logged explicitly
+    return out
+
+
 class YOLOFlowerClient(fl.client.NumPyClient):
     def __init__(
         self,
@@ -98,10 +117,21 @@ class YOLOFlowerClient(fl.client.NumPyClient):
             from src.preservation.rfs import rfs_data_yaml
             data_yaml = rfs_data_yaml(data_yaml, self.run_dir / "clients" / self.client_id / f"rfs_round_{self._round}",
                                       float(cfg["rfs_t"]), seed)
-        extra = None
+        extra: dict[str, Any] = {}
         if cfg.get("freeze_cls_head"):                     # ADR-020 N2: classifier stays at its initial values
             from src.model.yolo_wrapper import cls_head_freeze_list
-            extra = {"freeze": cls_head_freeze_list(self.model)}
+            extra["freeze"] = cls_head_freeze_list(self.model)
+        self._aug = small_object_overrides(cfg.get("small_obj_aug"), self._round, cfg.get("num_rounds"))
+        extra.update(self._aug)                            # ADR-029 M1
+        optional: dict[str, Any] = {}
+        if cfg.get("moto_copy_paste"):                     # ADR-029 M2; debug images in round 1 only
+            mcp = dict(cfg["moto_copy_paste"])
+            debug = mcp.pop("debug", False)
+            mcp["debug_dir"] = (str(self.run_dir / "clients" / self.client_id / "paste_debug")
+                                if debug and self._round == 1 else None)
+            optional["moto_copy_paste"] = mcp
+        if cfg.get("nwd_assign"):                          # ADR-029 M3
+            optional["nwd_assign"] = dict(cfg["nwd_assign"])
         return dict(
             data_yaml=data_yaml,
             epochs=cfg["local_epochs"],
@@ -118,7 +148,8 @@ class YOLOFlowerClient(fl.client.NumPyClient):
             run_val=bool(cfg.get("client_run_val", False)),
             deterministic=bool(cfg.get("deterministic", True)),
             nbs=cfg.get("nbs"),
-            extra_overrides=extra,
+            extra_overrides=extra or None,
+            **optional,
         )
 
     def _fit_metrics(self, train_metrics: dict[str, float]) -> dict[str, Scalar]:
@@ -134,6 +165,8 @@ class YOLOFlowerClient(fl.client.NumPyClient):
         metrics["class_counts_json"] = json.dumps(self.class_counts)
         metrics["client_id"] = self.client_id
         metrics["n_train"] = int(self.num_train_examples)
+        for k, v in getattr(self, "_aug", {}).items():     # M1: the values local training actually used
+            metrics[f"aug_{k}"] = float(v)
         return metrics
 
     # ── Flower API ────────────────────────────────────────────────────────
