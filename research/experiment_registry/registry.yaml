@@ -1669,4 +1669,4 @@ experiments:
   seed: 42
   kaggle_kernel: goshihayashi/flops-s25-b1-akadd-960-s42
   decision_rule: 'ADR-028 rules 2-4 vs S21b (P4t1, same config), mean of rounds 10/20; seed 42 only, so descriptive and cannot pass the rule; rule 1 needs the ideal-scenario runs'
-  note: 'estimated 6.1 h on T4 x2 (S21b).'
+  note: 'pushed 2026-11-06 at commit 3b92761; estimated 6.1 h on T4 x2 (S21b).'
