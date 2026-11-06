@@ -45,4 +45,13 @@ are finite, `aug_*` / `paste_bank_size` / `nwd_C` are logged, the debug images l
 and K = 5, mosaic is off in both rounds (the switch itself is unit-tested). Not used for any decision.
 
 ## Result
-Not run.
+Smoke s24_g (`P4t1M123`, 2 rounds, seed 42): completed, 5/5 clients each round, losses finite; scale 0.25 and
+mosaic 0 confirmed in every client's args.yaml; bank 3,002 crops in total (every motorcycle box); `nwd_C`
+46.5-53.6 px. Issues found before any main run:
+1. `aug_*` fit metrics reach the server but no artifact stores them (logging gap).
+2. Paste placement: "lower half" includes the ego-vehicle hood/dashboard and parked cars
+   (`research/figures/debug_copy_paste/s24_paste_grid_C0_C3.jpg`); a placement bound below the hood line
+   would need a new pre-registered value.
+3. Descriptive only: round-2 motorcycle AP50 0.258 (round 0: 0.317), FP_motorcycle 528 vs 162 and FP_car
+   2.1x the `P4t1AKadd` smoke arm. Mosaic was off in both rounds and M1-M3 share one arm, so nothing is
+   attributed; a per-method run (M1, M2, M3 separately) is needed to locate the FP rise.

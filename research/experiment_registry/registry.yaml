@@ -1641,18 +1641,22 @@ experiments:
   scenario: S1b5-allmoto-3k, YOLO11s 960 px, 2 rounds, eval round 2
   method: P4t1AKadd (P4t1 + absent-class KD on confusable anchors, not-true KD kept)
   run_class: smoke
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s24-smoke-b1-m123-960
   decision_rule: correctness only (ADR-028); not comparable with 20-round runs
-  note: 'pushed 2026-11-05 at commit c3fd8bc.'
+  note: 'pushed 2026-11-05 at commit c3fd8bc. 2 of 2 rounds, 5 results / 0 failures each, losses finite. Round-1 train losses of C4 (no absent class) equal S21b P4t1 C4 round 1 to every printed digit (box 1.33925, cls 2.05581, dfl 1.10437): the baseline-loss rule of ADR-028 holds on GPU; C0-C2 (bus absent) and C3 (truck absent) differ in cls loss (C0 2.18172 vs 2.16958, C3 2.13225 vs 2.08982), so B1 acts only there. Round 2 is not comparable with S21b (cosine LR over 2 rounds).'
+  results:
+    round_2: {mAP50: 0.5358, AP50_bus: 0.4914, AP50_car: 0.7511, AP50_truck: 0.4894, AP50_motorcycle: 0.4115, FP_bus: 501.0, FP_motorcycle: 162.0, precision_motorcycle: 0.5403, recall_motorcycle: 0.3894}
 - id: EXP-2026-11-05-S24-P4t1M123-s5moto-y11s960-smoke-seed42
   gate: 'G6 (M1-M3 of docs/Solution.md, ADR-029), smoke'
   scenario: S1b5-allmoto-3k, YOLO11s 960 px, 2 rounds, eval round 2
   method: P4t1M123 (P4t1 + scale 0.25 / mosaic off last 5 rounds + own-data motorcycle copy-paste + NWD in TAL)
   run_class: smoke
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s24-smoke-b1-m123-960
   decision_rule: correctness only (ADR-029); not comparable with 20-round runs
-  note: 'pushed 2026-11-05 at commit c3fd8bc.'
+  note: 'pushed 2026-11-05 at commit c3fd8bc. 2 of 2 rounds, 5 results / 0 failures each, losses finite. args.yaml of every client: scale 0.25, mosaic 0.0 in both rounds (as planned for 2 rounds, K = 5). paste_bank_size per client 589 / 581 / 625 / 612 / 595 = 3,002 = every motorcycle box; nwd_C 46.5-53.6 px. aug_* reach the server but are not written to any artifact (no fit-metrics aggregation): logging gap, values confirmed from args.yaml. Debug images: crops land in the lower half as specified, but several sit on the ego-vehicle hood/dashboard and some on parked cars (IoU < 0.05 with a large car box); large close-up crops look out of place at night. Round 2 versus the P4t1AKadd smoke arm (same 2-round schedule, different method): motorcycle AP50 0.258 (below round 0, 0.317), FP_motorcycle 528 vs 162, FP_car 34,548 vs 16,492; mosaic off in both rounds makes this M1 setting unlike the 20-round one, and M1-M3 are confounded in one arm, so no attribution.'
+  results:
+    round_2: {mAP50: 0.4791, AP50_bus: 0.4524, AP50_car: 0.7436, AP50_truck: 0.4620, AP50_motorcycle: 0.2582, FP_bus: 340.0, FP_car: 34548.0, FP_motorcycle: 528.0, precision_motorcycle: 0.2783, recall_motorcycle: 0.3827}

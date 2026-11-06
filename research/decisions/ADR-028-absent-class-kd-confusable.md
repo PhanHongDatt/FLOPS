@@ -70,4 +70,7 @@ forward (it reuses the teacher pass), so a B1 arm ≈ 6.1 h.
 The weekly quota is 30 h per GPU account (two accounts), so the full spec is about three weeks of quota.
 
 ## Result
-Not run.
+Smoke s24_g (2 rounds, seed 42, `P4t1AKadd` @ s5moto 960 px): completed, 5/5 clients aggregated each round,
+losses finite. C4 (no absent class) round-1 train losses equal S21b P4t1 C4 round 1 to every printed digit,
+so the baseline-loss rule holds on GPU; C0-C3 differ in cls loss only where a class is absent. Round-2
+mAP50 0.536 is not comparable with 20-round runs. No decision; main runs need the author's approval.
