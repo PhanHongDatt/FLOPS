@@ -1684,4 +1684,4 @@ experiments:
   seed: 42
   kaggle_kernel: goshihayashi/flops-s26-p4t1-y11m-960-s42
   decision_rule: 'ADR-030, descriptive: mean of rounds 10/20 per class vs S21b (P4t1, YOLO11s)'
-  note: 'estimated 12-18 h on T4 x2; part 2 resumes if part 1 is cut at 11 h.'
+  note: 'pushed 2026-11-07 at commit e0ee63e; estimated 12-18 h on T4 x2; part 2 resumes if part 1 is cut at 11 h.'
