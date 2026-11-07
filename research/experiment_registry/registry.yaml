@@ -1665,8 +1665,13 @@ experiments:
   scenario: S1b5-allmoto-3k, YOLO11s 960 px, 20 rounds, eval 10/20
   method: P4t1AKadd (P4t1 + absent-class KD on confusable anchors, not-true KD kept)
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s25-b1-akadd-960-s42
   decision_rule: 'ADR-028 rules 2-4 vs S21b (P4t1, same config), mean of rounds 10/20; seed 42 only, so descriptive and cannot pass the rule; rule 1 needs the ideal-scenario runs'
-  note: 'pushed 2026-11-06 at commit 3b92761; estimated 6.1 h on T4 x2 (S21b).'
+  note: 'pushed 2026-11-06 at commit 3b92761. 20 of 20 rounds, 5 results / 0 failures each, wall 4.6 h on T4 x2. Versus S21b (mean r10/20): every AP50 within 0.005 (mAP50 -0.002, bus -0.001, motorcycle -0.005), inside seed noise; bus TP +30.5 / FN -30.5 but FP_bus +133.5 (+21.5 %, all FP, not only background) and FP_truck +306.5 (+12.5 %); car recall -0.013, precision +0.014. Rule 4 holds for seed 42; rules 2-3 need D1 on both checkpoints (not run, GPU); rule 1 needs the ideal runs.'
+  results:
+    round_10: {mAP50: 0.5940, AP50_bus: 0.5424, AP50_car: 0.7896, AP50_truck: 0.5586, AP50_motorcycle: 0.4852, FN_bus: 1025.0, FP_bus: 768.0}
+    round_20: {mAP50: 0.6211, AP50_bus: 0.5857, AP50_car: 0.8006, AP50_truck: 0.5848, AP50_motorcycle: 0.5133, FN_bus: 975.0, FP_bus: 738.0}
+    rule_mean_r10_20: {mAP50: 0.6075, AP50_bus: 0.5641, AP50_car: 0.7951, AP50_truck: 0.5717, AP50_motorcycle: 0.4993, FN_bus: 1000.0, FP_bus: 753.0, FP_truck: 2762.0}
+    delta_vs_S21b_r10_20: {mAP50: -0.0020, AP50_bus: -0.0010, AP50_car: -0.0004, AP50_truck: -0.0018, AP50_motorcycle: -0.0047, precision_bus: -0.0266, recall_bus: +0.0200, FN_bus: -30.5, FP_bus: +133.5, FP_truck: +306.5}

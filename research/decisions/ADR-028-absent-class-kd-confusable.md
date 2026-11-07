@@ -74,3 +74,10 @@ Smoke s24_g (2 rounds, seed 42, `P4t1AKadd` @ s5moto 960 px): completed, 5/5 cli
 losses finite. C4 (no absent class) round-1 train losses equal S21b P4t1 C4 round 1 to every printed digit,
 so the baseline-loss rule holds on GPU; C0-C3 differ in cls loss only where a class is absent. Round-2
 mAP50 0.536 is not comparable with 20-round runs. No decision; main runs need the author's approval.
+
+Run s25_g (`P4t1AKadd` @ s5moto 960 px, 20 rounds, seed 42, paired with S21b), mean of rounds 10/20:
+mAP50 0.6075 (−0.002), AP50 bus 0.5641 (−0.001), truck −0.002, car −0.000, motorcycle −0.005; bus recall
++0.020 and precision −0.027, bus TP +30.5 / FN −30.5, FP_bus +133.5 (+21.5 %), FP_truck +306.5 (+12.5 %).
+Observation: B1 moves the bus/truck operating point (more detections, right and wrong) without changing AP.
+Rule 4 holds for seed 42; rules 2-3 need D1 on both round-10/20 checkpoints; rule 1 needs the ideal runs.
+Seed 42 only, descriptive. No improvement is visible that would justify the 3-seed runs.
