@@ -1675,3 +1675,13 @@ experiments:
     round_20: {mAP50: 0.6211, AP50_bus: 0.5857, AP50_car: 0.8006, AP50_truck: 0.5848, AP50_motorcycle: 0.5133, FN_bus: 975.0, FP_bus: 738.0}
     rule_mean_r10_20: {mAP50: 0.6075, AP50_bus: 0.5641, AP50_car: 0.7951, AP50_truck: 0.5717, AP50_motorcycle: 0.4993, FN_bus: 1000.0, FP_bus: 753.0, FP_truck: 2762.0}
     delta_vs_S21b_r10_20: {mAP50: -0.0020, AP50_bus: -0.0010, AP50_car: -0.0004, AP50_truck: -0.0018, AP50_motorcycle: -0.0047, precision_bus: -0.0266, recall_bus: +0.0200, FN_bus: -30.5, FP_bus: +133.5, FP_truck: +306.5}
+- id: EXP-2026-11-07-S26-P4t1-s5moto-y11m960-seed42
+  gate: 'G6 (model capacity, ADR-030)'
+  scenario: S1b5-allmoto-3k, YOLO11m 960 px, batch 8, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s26-p4t1-y11m-960-s42
+  decision_rule: 'ADR-030, descriptive: mean of rounds 10/20 per class vs S21b (P4t1, YOLO11s)'
+  note: 'estimated 12-18 h on T4 x2; part 2 resumes if part 1 is cut at 11 h.'
