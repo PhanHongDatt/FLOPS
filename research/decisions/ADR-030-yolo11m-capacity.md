@@ -32,4 +32,12 @@ YOLO11s at 960: 4.6-6.1 h on T4 x 2. YOLO11m has ~3.2x the GFLOPs (68.0 vs 21.5,
 the arm at 11 h and keeps its checkpoints; part 2 restores the run and resumes (ADR-024/025 mechanism).
 
 ## Result
-Not run.
+s26_g: one session, 20 of 20 rounds, no OOM at batch 8, wall 10.0 h on T4 x 2 (1.6x S21b, not 3x).
+Mean of rounds 10/20 vs S21b (P4t1, YOLO11s): mAP50 0.6422 (+0.033), bus 0.6020 (+0.037), truck 0.6224 (+0.049),
+car 0.8211 (+0.026), motorcycle 0.5234 (+0.019). Every class is higher at both round 10 and round 20; precision
+and recall rise for every class except truck precision (+0.007) and motorcycle recall (+0.002); FP_truck +251.5.
+The federated YOLO11m run is above the YOLO11s centralized ceiling (ADR-026: bus 0.589, motorcycle 0.459).
+Observation, seed 42: the gains exceed the usual seed spread (±0.01-0.02) and are consistent across classes and
+rounds, so capacity is a plausible limit; not attributable to size alone (teacher, batch) and not yet replicated.
+Bus and motorcycle remain below the author's 0.70 target. Whether the missing-class gap (ideal − missing) shrinks
+is unknown without an ideal-scenario YOLO11m run.

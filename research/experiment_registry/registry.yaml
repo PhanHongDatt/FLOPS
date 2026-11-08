@@ -1680,8 +1680,13 @@ experiments:
   scenario: S1b5-allmoto-3k, YOLO11m 960 px, batch 8, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s26-p4t1-y11m-960-s42
   decision_rule: 'ADR-030, descriptive: mean of rounds 10/20 per class vs S21b (P4t1, YOLO11s)'
-  note: 'pushed 2026-11-07 at commit e0ee63e; estimated 12-18 h on T4 x2; part 2 resumes if part 1 is cut at 11 h.'
+  note: 'pushed 2026-11-07 at commit e0ee63e. One session, 20 of 20 rounds, 5 results / 0 failures each, no OOM at batch 8, wall 10.0 h on T4 x2 (S21b 6.1 h). Versus S21b (mean r10/20) every class AP50 higher in both rounds: mAP50 +0.033, bus +0.037, truck +0.049, car +0.026, motorcycle +0.019; precision and recall higher for every class except truck precision (+0.007) and motorcycle recall (+0.002); FP_truck +251.5. Above the YOLO11s centralized ceiling (S23a: mAP50 0.6037, bus 0.5891, motorcycle 0.4585). Gain = model size + COCO YOLO11m teacher + batch 8 together; seed 42 only.'
+  results:
+    round_10: {mAP50: 0.6288, AP50_bus: 0.5821, AP50_car: 0.8144, AP50_truck: 0.6132, AP50_motorcycle: 0.5057, FN_bus: 1047.0}
+    round_20: {mAP50: 0.6556, AP50_bus: 0.6220, AP50_car: 0.8278, AP50_truck: 0.6315, AP50_motorcycle: 0.5410, FN_bus: 933.0}
+    rule_mean_r10_20: {mAP50: 0.6422, AP50_bus: 0.6020, AP50_car: 0.8211, AP50_truck: 0.6224, AP50_motorcycle: 0.5234, FN_bus: 990.0, FP_bus: 587.0}
+    delta_vs_S21b_r10_20: {mAP50: +0.0327, AP50_bus: +0.0370, AP50_car: +0.0255, AP50_truck: +0.0489, AP50_motorcycle: +0.0194, precision_bus: +0.0415, recall_bus: +0.0228, precision_motorcycle: +0.0736, recall_motorcycle: +0.0022, FP_truck: +251.5}
