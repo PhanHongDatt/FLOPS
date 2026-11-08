@@ -1699,4 +1699,4 @@ experiments:
   seed: 42
   kaggle_kernel: goshihayashi/flops-s27-p4t1-y11m-ideal-960-s42
   decision_rule: 'ADR-030 amendment 1, descriptive: per-class AP50 gap ideal minus S26 (s5moto), mean of rounds 10/20'
-  note: 'estimated 10 h on T4 x2 (as S26).'
+  note: 'pushed 2026-11-09 at commit 85ec54f; estimated 10 h on T4 x2 (as S26).'
