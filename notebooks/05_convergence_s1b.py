@@ -85,6 +85,7 @@ for cfg in ("s1b_bus_2k_seed42", "s1_control_matched_2k_seed42",   # matched + p
             "s1b5_bus_3k_moto_seed42", "s1b5_pooled_3k_moto_seed42",   # 5-client scenario (ADR-017)
             "s1b5_bus_3k_allmoto_seed42",                                # every motorcycle image (ADR-023)
             "s1b5_central_3k_allmoto_seed42",                            # same images in 1 client (ADR-026)
+            "s1b5_pooled_3k_allmoto_seed42",                             # same images, even over 5 (ADR-030)
             "s1b5_bus_3k_rare_seed42", "s1b5_central_3k_rare_seed42",    # more bus/truck images (ADR-027)
             "s9_bus8_3k_moto_seed42"):                                   # 9 clients, bus on 1 (ADR-024)
     subprocess.check_call([
@@ -104,6 +105,7 @@ S1B5BUS1 = PARTITIONS_DIR / "s1b5_bus1_3k_moto_seed42"   # severity sweep (ADR-0
 S1B5MOTO = PARTITIONS_DIR / "s1b5_bus_3k_allmoto_seed42"  # ADR-023 idea 2: all 3,002 motorcycle boxes
 S9BUS8 = PARTITIONS_DIR / "s9_bus8_3k_moto_seed42"   # ADR-024: 9 clients, bus absent on 8, truck on 3
 CENTRAL = PARTITIONS_DIR / "s1b5_central_3k_allmoto_seed42"   # ADR-026: centralized ceiling, 1 client
+POOLED5MOTO = PARTITIONS_DIR / "s1b5_pooled_3k_allmoto_seed42"   # ADR-030: ideal scenario for s5moto
 S1B5RARE = PARTITIONS_DIR / "s1b5_bus_3k_rare_seed42"          # ADR-027: larger bus/truck quotas
 CENTRALRARE = PARTITIONS_DIR / "s1b5_central_3k_rare_seed42"   # ADR-027: the same images in 1 client
 try:   # never block the other scenarios: an infeasible re-deal only fails the arms that use it
@@ -145,6 +147,10 @@ print("S1b5-3k-allmoto (ADR-023):", s5moto["class_counts"])
 central = yaml.safe_load((CENTRAL / "manifest.yaml").read_text())
 assert sorted(central["client_assignments"]["C0"]) == sorted(sum(s5moto["client_assignments"].values(), [])),     "central must hold exactly the S1b5-allmoto images"
 print("central ceiling (ADR-026):", central["class_counts"])
+p5moto = yaml.safe_load((POOLED5MOTO / "manifest.yaml").read_text())
+assert sorted(sum(p5moto["client_assignments"].values(), [])) == sorted(sum(s5moto["client_assignments"].values(), [])),     "pooled allmoto must hold exactly the S1b5-allmoto images"
+assert all(v[c] > 0 for v in p5moto["class_counts"].values() for c in ("car", "bus", "truck", "motorcycle")),     "ideal scenario: every client holds every class"
+print("pooled allmoto (ADR-030):", p5moto["class_counts"])
 s5rare = yaml.safe_load((S1B5RARE / "manifest.yaml").read_text())
 for cid in ("C0", "C1", "C2"):
     assert s5rare["class_counts"][cid]["bus"] == 0, f"S1b5-rare {cid} must have zero bus"
@@ -287,7 +293,7 @@ SESSION_BUDGET_H = 11.0
 ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override
 
 PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5, "s5bus1": S1B5BUS1,
-              "s5moto": S1B5MOTO, "s9bus8": S9BUS8, "central": CENTRAL,
+              "s5moto": S1B5MOTO, "s5motopooled": POOLED5MOTO, "s9bus8": S9BUS8, "central": CENTRAL,
               "s5rare": S1B5RARE, "centralrare": CENTRALRARE}
 EXP_CFG_9C = REPO_ROOT / "configs" / "experiments" / "convergence_9c_y11s_20r_960.yaml"   # ADR-024
 EXP_CFG_1C = REPO_ROOT / "configs" / "experiments" / "central_1c_y11s_20r_960.yaml"   # ADR-026

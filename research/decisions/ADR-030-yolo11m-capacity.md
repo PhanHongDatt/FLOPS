@@ -41,3 +41,13 @@ Observation, seed 42: the gains exceed the usual seed spread (±0.01-0.02) and a
 rounds, so capacity is a plausible limit; not attributable to size alone (teacher, batch) and not yet replicated.
 Bus and motorcycle remain below the author's 0.70 target. Whether the missing-class gap (ideal − missing) shrinks
 is unknown without an ideal-scenario YOLO11m run.
+
+## Amendment 1 (2026-11-09): ideal scenario with YOLO11m (s27_g)
+Question: how much AP50 does the missing-class partition cost YOLO11m? New partition
+`s1b5_pooled_3k_allmoto_seed42` (the 15,000 s5moto images re-dealt evenly over the same 5 clients, every class on
+every client; the notebook asserts identical images and no missing class); arm `P4t1@s5motopooled`, same YOLO11m
+config, seed 42. Measure, mean of rounds 10/20: gap_c = AP50_c(ideal) − AP50_c(s5moto) per class, bus first.
+Descriptive only. No YOLO11s run exists on this partition, so whether the gap is smaller than with YOLO11s
+cannot be read from these runs; the older YOLO11s 640 px pooled-vs-S1b5 gap (different data and resolution) is
+context, not a paired comparison. Estimated 10 h (as s26_g).
+
