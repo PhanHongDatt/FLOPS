@@ -51,3 +51,11 @@ Descriptive only. No YOLO11s run exists on this partition, so whether the gap is
 cannot be read from these runs; the older YOLO11s 640 px pooled-vs-S1b5 gap (different data and resolution) is
 context, not a paired comparison. Estimated 10 h (as s26_g).
 
+Result (s27_g, 10.1 h, 20 of 20 rounds, partition check passed): mean of rounds 10/20, ideal minus s5moto (S26):
+bus AP50 0.6377 vs 0.6020, gap +0.036 (+0.041 at round 10, +0.030 at round 20); truck +0.011, motorcycle +0.007,
+car +0.001, mAP50 +0.014. The bus gap comes from recall: +0.078 (TP +262, FN −262) against precision −0.045
+(FP +122). Observation, seed 42: with YOLO11m the missing-class partition still costs bus about 0.036 AP50 and
+0.08 recall, i.e. the bus deficit is a missed-detection problem rather than a false-alarm one; the larger model
+did not remove the missing-class effect. Its size relative to YOLO11s is unknown (no YOLO11s run on this
+partition).
+

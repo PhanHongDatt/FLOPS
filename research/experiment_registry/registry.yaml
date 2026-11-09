@@ -1695,8 +1695,13 @@ experiments:
   scenario: S1b5-pooled-allmoto-3k (s5moto images re-dealt evenly, no missing class), YOLO11m 960 px, batch 8, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s27-p4t1-y11m-ideal-960-s42
   decision_rule: 'ADR-030 amendment 1, descriptive: per-class AP50 gap ideal minus S26 (s5moto), mean of rounds 10/20'
-  note: 'pushed 2026-11-09 at commit 85ec54f; estimated 10 h on T4 x2 (as S26).'
+  note: 'pushed 2026-11-09 at commit 85ec54f. Partition check passed (every client 519-542 bus, 1,269-1,314 truck boxes). One session, 20 of 20 rounds, 5 results / 0 failures each, wall 10.1 h. Gap ideal minus S26 (s5moto), mean r10/20: bus AP50 +0.036 (recall +0.078, precision -0.045, TP +262, FP +122), truck +0.011, motorcycle +0.007, car +0.001, mAP50 +0.014; bus gap positive at both rounds (+0.041, +0.030).'
+  results:
+    round_10: {mAP50: 0.6424, AP50_bus: 0.6233, AP50_car: 0.8149, AP50_truck: 0.6234, AP50_motorcycle: 0.5080, FN_bus: 761.0}
+    round_20: {mAP50: 0.6693, AP50_bus: 0.6521, AP50_car: 0.8298, AP50_truck: 0.6432, AP50_motorcycle: 0.5521, FN_bus: 695.0}
+    rule_mean_r10_20: {mAP50: 0.6559, AP50_bus: 0.6377, AP50_car: 0.8224, AP50_truck: 0.6333, AP50_motorcycle: 0.5301, FN_bus: 728.0, FP_bus: 709.0}
+    gap_ideal_minus_S26_r10_20: {mAP50: +0.0137, AP50_bus: +0.0357, AP50_car: +0.0013, AP50_truck: +0.0109, AP50_motorcycle: +0.0067, precision_bus: -0.0446, recall_bus: +0.0784, TP_bus: +262.0, FP_bus: +122.0}
