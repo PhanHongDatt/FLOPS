@@ -59,3 +59,9 @@ car +0.001, mAP50 +0.014. The bus gap comes from recall: +0.078 (TP +262, FN −
 did not remove the missing-class effect. Its size relative to YOLO11s is unknown (no YOLO11s run on this
 partition).
 
+## Amendment 2 (2026-11-09): YOLO11s on the ideal partition (s28)
+Same arm and partition as s27_g with the YOLO11s config (`convergence_5c_y11s_20r_960.yaml`, batch 16), seed 42,
+run on phdatt. Pairs with S21b to give the YOLO11s gap gap_c = AP50_c(ideal) − AP50_c(s5moto), compared with
+the YOLO11m gap (bus +0.036). Descriptive, one seed: a difference in gaps below ~0.02 is within seed spread.
+Estimated 6 h.
+

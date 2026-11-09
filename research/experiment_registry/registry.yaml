@@ -1705,3 +1705,13 @@ experiments:
     round_20: {mAP50: 0.6693, AP50_bus: 0.6521, AP50_car: 0.8298, AP50_truck: 0.6432, AP50_motorcycle: 0.5521, FN_bus: 695.0}
     rule_mean_r10_20: {mAP50: 0.6559, AP50_bus: 0.6377, AP50_car: 0.8224, AP50_truck: 0.6333, AP50_motorcycle: 0.5301, FN_bus: 728.0, FP_bus: 709.0}
     gap_ideal_minus_S26_r10_20: {mAP50: +0.0137, AP50_bus: +0.0357, AP50_car: +0.0013, AP50_truck: +0.0109, AP50_motorcycle: +0.0067, precision_bus: -0.0446, recall_bus: +0.0784, TP_bus: +262.0, FP_bus: +122.0}
+- id: EXP-2026-11-09-S28-P4t1-s5motopooled-y11s960-seed42
+  gate: 'G6 (model capacity, ideal scenario, ADR-030 amendment 2)'
+  scenario: S1b5-pooled-allmoto-3k (s5moto images re-dealt evenly, no missing class), YOLO11s 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s28-p4t1-y11s-ideal-960-s42
+  decision_rule: 'ADR-030 amendment 2, descriptive: per-class AP50 gap ideal minus S21b, compared with the YOLO11m gap (S27 minus S26)'
+  note: 'estimated 6 h on T4 x2.'
