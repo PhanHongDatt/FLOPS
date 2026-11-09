@@ -1714,4 +1714,4 @@ experiments:
   seed: 42
   kaggle_kernel: phdatt/flops-s28-p4t1-y11s-ideal-960-s42
   decision_rule: 'ADR-030 amendment 2, descriptive: per-class AP50 gap ideal minus S21b, compared with the YOLO11m gap (S27 minus S26)'
-  note: 'estimated 6 h on T4 x2.'
+  note: 'pushed 2026-11-09 at commit a935535; estimated 6 h on T4 x2.'
