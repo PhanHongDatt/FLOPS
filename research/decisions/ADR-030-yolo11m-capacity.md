@@ -65,3 +65,20 @@ run on phdatt. Pairs with S21b to give the YOLO11s gap gap_c = AP50_c(ideal) −
 the YOLO11m gap (bus +0.036). Descriptive, one seed: a difference in gaps below ~0.02 is within seed spread.
 Estimated 6 h.
 
+Result (s28, 5.8 h, 20 of 20 rounds). Model x scenario, seed 42, mean of rounds 10/20, AP50:
+
+| | s5moto (missing) | ideal | gap |
+|---|---:|---:|---:|
+| YOLO11s bus | 0.5650 | 0.6034 | +0.038 |
+| YOLO11m bus | 0.6020 | 0.6377 | +0.036 |
+| YOLO11s truck | 0.5735 | 0.5939 | +0.020 |
+| YOLO11m truck | 0.6224 | 0.6333 | +0.011 |
+| YOLO11s mAP50 | 0.6095 | 0.6246 | +0.015 |
+| YOLO11m mAP50 | 0.6422 | 0.6559 | +0.014 |
+
+Observation: the bus gap is the same for both sizes (0.038 vs 0.036, and in both it is a recall loss of about
+0.08 with ~262 extra missed buses). YOLO11m raises the level by ~0.035 in both scenarios but does not shrink the
+missing-class effect on bus; YOLO11m under missing classes ≈ YOLO11s ideal (0.602 vs 0.603). The truck gap
+halves (0.020 → 0.011) but one seed cannot separate 0.009 from seed spread. Per-round bus gaps vary (YOLO11s
+0.054 / 0.022), so 3 seeds are needed before the gaps are reported as estimates.
+

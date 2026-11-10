@@ -1710,8 +1710,13 @@ experiments:
   scenario: S1b5-pooled-allmoto-3k (s5moto images re-dealt evenly, no missing class), YOLO11s 960 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s28-p4t1-y11s-ideal-960-s42
   decision_rule: 'ADR-030 amendment 2, descriptive: per-class AP50 gap ideal minus S21b, compared with the YOLO11m gap (S27 minus S26)'
-  note: 'pushed 2026-11-09 at commit a935535; estimated 6 h on T4 x2.'
+  note: 'pushed 2026-11-09 at commit a935535. One session, 20 of 20 rounds, 5 results / 0 failures each, wall 5.8 h. YOLO11s gap ideal minus S21b, mean r10/20: bus AP50 +0.038 (YOLO11m +0.036), truck +0.020 (YOLO11m +0.011), motorcycle +0.001, car +0.001, mAP50 +0.015 (+0.014); bus recall +0.085 (+0.078), TP_bus +263.5 (+262). Per round the bus gap is +0.054 / +0.022 (YOLO11m +0.041 / +0.030).'
+  results:
+    round_10: {mAP50: 0.6155, AP50_bus: 0.5941, AP50_car: 0.7900, AP50_truck: 0.5899, AP50_motorcycle: 0.4882, FN_bus: 753.0}
+    round_20: {mAP50: 0.6336, AP50_bus: 0.6127, AP50_car: 0.8025, AP50_truck: 0.5978, AP50_motorcycle: 0.5213, FN_bus: 781.0}
+    rule_mean_r10_20: {mAP50: 0.6246, AP50_bus: 0.6034, AP50_car: 0.7963, AP50_truck: 0.5939, AP50_motorcycle: 0.5047, FN_bus: 767.0}
+    gap_ideal_minus_S21b_r10_20: {mAP50: +0.0151, AP50_bus: +0.0384, AP50_car: +0.0007, AP50_truck: +0.0204, AP50_motorcycle: +0.0008, recall_bus: +0.0854, precision_bus: -0.0504, TP_bus: +263.5}
