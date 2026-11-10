@@ -66,6 +66,29 @@ def save_json(data: Any, path: Path) -> None:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
+def append_csv_rows(csv_path: Path, rows: list[dict[str, Any]], first: str = "round") -> None:
+    """Append rows to a CSV, rebuilding the header so late-appearing keys are kept.
+
+    Columns: ``first`` then the remaining keys sorted. Earlier rows get blanks for new keys.
+    """
+    import csv
+
+    existing: list[dict[str, Any]] = []
+    if csv_path.exists():
+        with csv_path.open("r", newline="", encoding="utf-8") as f:
+            existing = list(csv.DictReader(f))
+    existing.extend(dict(r) for r in rows)
+    keys: set[str] = set()
+    for r in existing:
+        keys.update(r.keys())
+    fieldnames = ([first] if first in keys else []) + sorted(k for k in keys if k != first)
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    with csv_path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(existing)
+
+
 def save_environment(run_dir: Path, env: dict[str, Any]) -> None:
     save_json({**env, "saved_at": datetime.utcnow().isoformat()}, run_dir / "environment.json")
 

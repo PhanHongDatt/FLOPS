@@ -1,0 +1,63 @@
+# CI (ADR-031): lint for error-class problems, unit tests on the pinned CPU stack, MLflow image.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      MLFLOW_TRACKING_URI: none        # unit tests never talk to a tracking server
+      YOLO_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"       # environment.lock: Python 3.12
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install pinned CPU PyTorch (ADR-001, ADR-002-A2)
+        run: pip install torch==2.7.1 torchvision==0.22.1 --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install project requirements
+        run: |
+          pip install -r requirements.txt
+          pip install ruff==0.6.9
+          pip install --no-deps -e .
+
+      - name: Lint (syntax errors and undefined names only)
+        run: ruff check --select E9,F63,F7,F82 src scripts tests viz
+
+      - name: Unit tests (slow = real YOLO training, excluded)
+        run: python -m pytest -m "not slow" -q -p no:cacheprovider
+
+  mlflow-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build MLflow server image
+        run: docker build -f docker/Dockerfile.mlflow -t flops-mlflow:ci docker
+      - name: Health check
+        run: |
+          mkdir -p /tmp/mlflow/db /tmp/mlflow/artifacts
+          docker run -d --name mlflow -p 5000:5000 \
+            -v /tmp/mlflow/db:/mlflow/db -v /tmp/mlflow/artifacts:/mlflow/artifacts flops-mlflow:ci
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:5000/health && exit 0
+            sleep 2
+          done
+          docker logs mlflow
+          exit 1

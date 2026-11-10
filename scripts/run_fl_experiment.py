@@ -25,11 +25,15 @@ Usage:
 
   # resume an interrupted run (same --run-id / same default id)
   python scripts/run_fl_experiment.py ... --ablation A3 --resume
+
+  # MLOps (ADR-031): track on the compose MLflow server and register the final model
+  python scripts/run_fl_experiment.py ... --mlflow-uri http://localhost:5000 --register-model
 """
 from __future__ import annotations
 
 import argparse
 import faulthandler
+import json
 import os
 import random
 from pathlib import Path
@@ -55,6 +59,8 @@ from src.federated.client_variants import (
     TeacherKDRhoClient,
 )
 from src.federated.server import run_fl_server
+from src.mlops.model_card import write_eval_protocol
+from src.mlops.tracking import default_tracking_uri, start_tracking
 from src.utils.config import build_local_train_config, load_experiment_config
 from src.utils.logger import get_logger
 
@@ -371,8 +377,16 @@ def main() -> None:
                     help="Override federated.fraction_evaluate. 0.0 skips client-side "
                          "evaluation; the reporting path is the server's centralized "
                          "evaluate_fn either way (CLAUDE.md §14).")
-    ap.add_argument("--mlflow-uri", default="http://mlflow:5000")
+    ap.add_argument("--mlflow-uri", default=default_tracking_uri(),
+                    help="MLflow tracking URI; 'none' disables tracking (ADR-031). "
+                         "Default: $MLFLOW_TRACKING_URI, else http://localhost:5000")
     ap.add_argument("--mlflow-experiment", default="G3-federated")
+    ap.add_argument("--mlflow-required", action="store_true",
+                    help="fail instead of continuing untracked when MLflow is unavailable")
+    ap.add_argument("--register-model", action="store_true",
+                    help="after a completed run, log the model package and register it in the MLflow "
+                         "model registry (alias 'candidate'); promotion stays a separate step "
+                         "(scripts/mlops_registry.py promote)")
     ap.add_argument(
         "--global-data-yaml",
         type=Path,
@@ -439,6 +453,7 @@ def main() -> None:
         raise SystemExit(f"config federated.num_clients={fed['num_clients']} but partition "
                          f"{manifest.partition_id} has {manifest.num_clients} clients — use a matching exp config")
     train_config = build_local_train_config(config)
+    eval_data_yaml = args.global_data_yaml   # before the COCO-view rewrite: fingerprints the image set
     if preset.get("coco_head"):
         # ADR-018: same images through the COCO-id label view; model keeps the COCO head
         from src.data.coco_view import coco_data_yaml
@@ -475,6 +490,16 @@ def main() -> None:
         if args.teacher_params is None:
             raise SystemExit(f"--client-mechanism {mechanism} needs --teacher-params")
         train_config["teacher_params"] = str(args.teacher_params.resolve())
+
+    # ADR-031: the EFFECTIVE weights (config.yaml was saved before the coco: rewrite above)
+    write_eval_protocol(
+        run_dir,
+        model_weights=str(config["model"]["weights"]),
+        image_size=int(config["model"]["image_size"]),
+        eval_conf=float(config["evaluation"]["conf"]),
+        eval_iou=float(config["evaluation"]["iou"]),
+        eval_data_yaml=eval_data_yaml,
+    )
 
     client_cls = _pick_client_class(algorithm, mechanism)
     num_val_examples = _count_val_examples(args.global_data_yaml)
@@ -532,28 +557,74 @@ def main() -> None:
             from src.model.yolo_wrapper import COCO_IDS
             strategy_options.update(class_rows={c: int(COCO_IDS[c]) for c in COCO_IDS}, num_rows=80)
 
-    run_fl_server(
-        algorithm=algorithm,
-        fl_config=fl_config,
-        client_fn=client_fn,
-        run_dir=run_dir,
-        mlflow_experiment=args.mlflow_experiment,
-        mlflow_uri=args.mlflow_uri,
-        param_names=param_names,
-        global_data_yaml=args.global_data_yaml,
-        eval_config=eval_config if args.global_data_yaml else None,
-        strategy_options=strategy_options,
-        resume=args.resume,
-        init_params_path=args.teacher_params if preset.get("teacher_init") else None,
-        server_finetune=({"data_yaml": str(args.server_data_yaml), "epochs": 1, "seed": args.seed,
-                          "batch_size": train_config["batch_size"], "image_size": train_config["image_size"],
-                          "lr0": train_config["lr0"], "device": train_config["device"],
-                          "nbs": train_config.get("nbs")}
-                         if preset.get("server_ft") else None),
+    env = json.loads((run_dir / "environment.json").read_text(encoding="utf-8"))
+    tracker = start_tracking(
+        run_dir, args.mlflow_experiment, args.mlflow_uri, run_name=run_dir.name,
+        tags={"arm": arm_id, "algorithm": algorithm, "mechanism": mechanism, "rho": rho,
+              "seed": args.seed, "run_class": args.run_class, "partition_id": manifest.partition_id,
+              "exp_id": exp_id, "git_commit": env.get("git_commit", "unknown"), "run_dir": run_dir.name},
+        required=args.mlflow_required,
     )
+    if not tracker.resumed:      # MLflow params are immutable; a reopened run already has them
+        tracker.log_params({
+            "cli": {"arm": arm_id, "algorithm": algorithm, "mechanism": mechanism, "rho": rho,
+                    "tau_elig": args.tau_elig, "seed": args.seed, "run_class": args.run_class,
+                    "partition": str(args.partition), "partition_id": manifest.partition_id,
+                    "exp_config": str(args.exp_config)},
+            "effective": config,          # base + experiment override + arm rewrites
+            "fl": fl_config,
+        })
 
-    finalize_run(run_dir, algorithm=algorithm)
+    try:
+        _run_and_record(args, tracker, run_dir, algorithm, dict(
+            algorithm=algorithm,
+            fl_config=fl_config,
+            client_fn=client_fn,
+            run_dir=run_dir,
+            tracker=tracker,
+            param_names=param_names,
+            global_data_yaml=args.global_data_yaml,
+            eval_config=eval_config if args.global_data_yaml else None,
+            strategy_options=strategy_options,
+            resume=args.resume,
+            init_params_path=args.teacher_params if preset.get("teacher_init") else None,
+            server_finetune=({"data_yaml": str(args.server_data_yaml), "epochs": 1, "seed": args.seed,
+                              "batch_size": train_config["batch_size"], "image_size": train_config["image_size"],
+                              "lr0": train_config["lr0"], "device": train_config["device"],
+                              "nbs": train_config.get("nbs")}
+                             if preset.get("server_ft") else None),
+        ))
+    except BaseException:
+        tracker.log_run_artifacts(run_dir)      # whatever exists: a failed run stays inspectable
+        tracker.end("FAILED")
+        raise
+    tracker.end()
     logger.info("FL run complete: arm=%s / seed=%d / %s", arm_id, args.seed, run_dir.name)
+
+
+def _run_and_record(args: argparse.Namespace, tracker, run_dir: Path, algorithm: str,
+                    server_kwargs: dict) -> None:
+    """Run the FL server, check §21 artifacts, then log them (and the model) to MLflow (ADR-031)."""
+    run_fl_server(**server_kwargs)
+    finalize_run(run_dir, algorithm=algorithm)
+    logged = tracker.log_run_artifacts(run_dir)
+    if tracker.enabled:
+        logger.info("MLflow artifacts logged: %s", logged)
+    if not args.register_model:
+        return
+    if not tracker.enabled:
+        logger.warning("--register-model: MLflow tracking is disabled, model NOT registered. Register later "
+                       "with: python scripts/mlops_registry.py register --run-dir %s", run_dir)
+        return
+    if not (run_dir / "checkpoint" / "final_params.npz").is_file():
+        logger.warning("--register-model: no checkpoint/final_params.npz (run incomplete), model NOT registered")
+        return
+    from src.mlops.model_card import build_model_card
+    from src.mlops.registry import load_policy, register_run
+    policy = load_policy()
+    version = register_run(tracker, run_dir, build_model_card(run_dir), policy)
+    logger.info("Registered %s version %s (alias %s). Promote with: python scripts/mlops_registry.py "
+                "check --version %s", policy.model_name, version, policy.candidate_alias, version)
 
 
 if __name__ == "__main__":

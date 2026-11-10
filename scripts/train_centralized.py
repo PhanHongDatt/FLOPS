@@ -21,9 +21,11 @@ import torch
 import yaml
 
 from src.experiments.runner import prepare_run, finalize_run
-from src.model.yolo_wrapper import build_model, evaluate, train_one_round
+from src.mlops.model_card import build_model_card, write_eval_protocol
+from src.mlops.tracking import default_tracking_uri, start_tracking
+from src.model.yolo_wrapper import build_model, evaluate, get_parameters, train_one_round
 from src.utils.config import build_centralized_train_kwargs, load_experiment_config
-from src.utils.logger import get_logger, setup_mlflow, log_metrics, log_params, end_run
+from src.utils.logger import get_logger
 from src.utils.artifacts import save_yaml
 from src.evaluation.metrics import (
     flatten_per_class_metrics,
@@ -48,8 +50,12 @@ def main() -> None:
                     help="Experiment override config (e.g. configs/experiments/smoke.yaml)")
     ap.add_argument("--run-class", choices=["smoke", "feasibility", "main"], required=True)
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--mlflow-uri", default="http://mlflow:5000")
+    ap.add_argument("--mlflow-uri", default=default_tracking_uri(),
+                    help="'none' disables tracking (ADR-031)")
     ap.add_argument("--mlflow-experiment", default="G2-centralized")
+    ap.add_argument("--mlflow-required", action="store_true")
+    ap.add_argument("--register-model", action="store_true",
+                    help="register the final model in the MLflow registry (alias 'candidate')")
     args = ap.parse_args()
 
     _set_seed(args.seed)
@@ -67,8 +73,17 @@ def main() -> None:
         partition_id="centralized",
     )
 
-    run_id = setup_mlflow(args.mlflow_experiment, args.mlflow_uri, run_name=f"seed_{args.seed}")
-    log_params({
+    write_eval_protocol(
+        run_dir, model_weights=str(config["model"]["weights"]),
+        image_size=int(config["model"]["image_size"]), eval_conf=float(config["evaluation"]["conf"]),
+        eval_iou=float(config["evaluation"]["iou"]), eval_data_yaml=args.data_yaml,
+    )
+    tracker = start_tracking(run_dir, args.mlflow_experiment, args.mlflow_uri, run_name=f"seed_{args.seed}",
+                             tags={"seed": args.seed, "run_class": args.run_class, "exp_id": "G2-centralized",
+                                   "run_dir": run_dir.name},
+                             required=args.mlflow_required)
+    tracker.log_params({"effective": config})
+    tracker.log_params({
         "seed": args.seed,
         "run_class": args.run_class,
         "model": config["model"]["name"],
@@ -90,7 +105,7 @@ def main() -> None:
         name="train",
         **build_centralized_train_kwargs(config, seed=args.seed),
     )
-    log_metrics({f"train_{k}": v for k, v in train_metrics.items()})
+    tracker.log_metrics({f"train_{k}": v for k, v in train_metrics.items()})
 
     eval_metrics = evaluate(
         model=model,
@@ -100,7 +115,7 @@ def main() -> None:
         iou=config["evaluation"]["iou"],
         device=config["train"]["device"],
     )
-    log_metrics(eval_metrics)
+    tracker.log_metrics({f"eval/{k}": v for k, v in eval_metrics.items()})
 
     save_summary_metrics(eval_metrics, run_dir / "metrics.csv")
     save_per_class_metrics(
@@ -108,9 +123,19 @@ def main() -> None:
         run_dir / "per_class_metrics.csv",
     )
     save_yaml({**train_metrics, **eval_metrics}, run_dir / "final_metrics.yaml")
+    # ADR-031: same package format as FL runs (ordered state_dict of the evaluated model)
+    np.savez(run_dir / "checkpoint" / "final_params.npz", *get_parameters(model))
 
-    end_run()
     finalize_run(run_dir, run_type="centralized")
+    tracker.log_run_artifacts(run_dir)
+    if args.register_model:
+        if tracker.enabled:
+            from src.mlops.registry import load_policy, register_run
+            version = register_run(tracker, run_dir, build_model_card(run_dir), load_policy())
+            logger.info("Registered model version %s (alias candidate)", version)
+        else:
+            logger.warning("--register-model: MLflow tracking is disabled, model NOT registered")
+    tracker.end()
     logger.info("Centralized run complete. Metrics: %s", eval_metrics)
 
 
