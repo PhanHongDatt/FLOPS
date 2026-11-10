@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import csv
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -10,7 +9,9 @@ from flwr.common import NDArrays, Scalar
 from flwr.server import ServerConfig
 
 from src.federated.strategies.fedavg import build_fedavg
-from src.utils.logger import get_logger, log_metrics, setup_mlflow, end_run
+from src.mlops.fit_tracking import FitTracker
+from src.utils.artifacts import append_csv_rows
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -67,22 +68,7 @@ def _append_round_row(csv_path: Path, row: dict[str, Any]) -> None:
     Rebuild header on every call so late-appearing keys (e.g. AP50_bus that
     only exists after class detected) are captured without losing prior rows.
     """
-    existing_rows: list[dict[str, Any]] = []
-    if csv_path.exists():
-        with csv_path.open("r", newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            existing_rows = list(reader)
-
-    existing_rows.append({k: v for k, v in row.items()})
-    all_keys: set[str] = set()
-    for r in existing_rows:
-        all_keys.update(r.keys())
-    fieldnames = ["round"] + sorted(k for k in all_keys if k != "round")
-
-    with csv_path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(existing_rows)
+    append_csv_rows(csv_path, [row], first="round")
 
 
 def _build_centralized_evaluate_fn(
@@ -94,6 +80,7 @@ def _build_centralized_evaluate_fn(
     round_offset: int = 0,
     keep_last_checkpoints: int = 2,
     prune_client_weights: bool = True,
+    tracker: Any = None,
 ) -> Callable[[int, NDArrays, dict[str, Scalar]], Optional[tuple[float, dict[str, Scalar]]]]:
     """Build a Flower centralized evaluate_fn that runs per-class eval on the
     global val set after each round and persists per_class_metrics.csv +
@@ -194,10 +181,8 @@ def _build_centralized_evaluate_fn(
                 run_dir / "round_metrics.csv",
                 {"round": abs_round, **{k: float(v) for k, v in metrics.items()}},
             )
-            try:
-                log_metrics({k: float(v) for k, v in metrics.items()}, step=abs_round)
-            except Exception as exc:  # MLflow optional / offline
-                logger.debug("MLflow log_metrics failed at round %d: %s", abs_round, exc)
+            if tracker is not None:      # ADR-031: never raises; CSV above is the record
+                tracker.log_metrics({f"eval/{k}": v for k, v in metrics.items()}, step=abs_round)
 
         if not is_initial_eval and abs_round >= num_rounds:
             save_per_class_metrics(
@@ -290,9 +275,7 @@ def run_fl_server(
     fl_config: dict[str, Any],
     client_fn,
     run_dir: Path,
-    mlflow_experiment: str,
-    mlflow_uri: str = "http://mlflow:5000",
-    server_address: str = "0.0.0.0:8080",
+    tracker: Any = None,
     param_names: list[str] | None = None,
     global_data_yaml: Path | None = None,
     eval_config: dict[str, Any] | None = None,
@@ -304,9 +287,6 @@ def run_fl_server(
     from flwr.common import ndarrays_to_parameters
 
     from src.experiments.checkpoint import find_latest_checkpoint, load_global_checkpoint
-
-    run_id = setup_mlflow(mlflow_experiment, mlflow_uri, run_name=algorithm)
-    logger.info("MLflow run_id: %s", run_id)
 
     total_rounds = int(fl_config["num_rounds"])
 
@@ -328,7 +308,6 @@ def run_fl_server(
                 "Run already completed %d/%d rounds — nothing to do.",
                 done_round, total_rounds,
             )
-            end_run()
             return
         round_offset = done_round
         initial_params = load_global_checkpoint(ckpt_path)
@@ -391,6 +370,7 @@ def run_fl_server(
             round_offset=round_offset,
             keep_last_checkpoints=int(fl_config.get("keep_last_checkpoints", 2)),
             prune_client_weights=bool(fl_config.get("prune_client_weights", True)),
+            tracker=tracker,
         )
     else:
         logger.warning(
@@ -404,6 +384,9 @@ def run_fl_server(
     if server_finetune:
         _wrap_server_finetune(strategy, server_finetune, run_dir, round_offset,
                               weights=str((eval_config or {}).get("weights", "yolov8n.pt")))
+    # Outermost wrapper (ADR-031): sees the client results and times the whole aggregation,
+    # including the B2 server fine-tune. Writes fit_metrics.csv (fit loss, bytes, timing).
+    FitTracker(run_dir, tracker=tracker, round_offset=round_offset).wrap(strategy)
 
     # Default num_gpus=1.0 serialises clients onto the GPU. The previous default
     # of 0.25 let Ray place 4 YOLOv8n trainings on one device concurrently:
@@ -426,5 +409,4 @@ def run_fl_server(
         client_resources=client_resources,
     )
 
-    end_run()
     logger.info("FL run complete. Artifacts in %s", run_dir)

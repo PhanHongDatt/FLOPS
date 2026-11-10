@@ -138,6 +138,25 @@ python scripts/extract_report_data.py     # số box theo client, thời gian m�
 python scripts/plot_report_figures.py     # research/figures/report/hinhNN_*
 ```
 
+### MLOps: tracking, model registry, CI ([ADR-031](research/decisions/ADR-031-mlops-tracking-registry-ci.md))
+```bash
+docker compose -f docker/docker-compose.yml up -d mlflow          # MLflow 2.22.5 → http://localhost:5000
+
+# FL run: tracking (params, eval/fit/comm metrics, artifact §21) + đăng ký model (alias candidate)
+python scripts/run_fl_experiment.py ... --mlflow-uri http://localhost:5000 --register-model
+
+# Đăng ký run đã chạy trên Kaggle (backfill), xem / kiểm tra / promote lên champion
+python scripts/mlops_registry.py register --run-dir <run_dir> --eval-data-yaml <YOLO_ROOT>/data.yaml --weights coco:yolo11s.pt
+python scripts/mlops_registry.py list
+python scripts/mlops_registry.py check   --version 2
+python scripts/mlops_registry.py promote --version 2              # chỉ khi qua luật configs/mlops/registry.yaml
+python scripts/mlops_registry.py download --ref champion --dst artifacts/deploy/champion
+```
+* `--mlflow-uri none` tắt tracking; MLflow lỗi/không truy cập được **không** làm dừng run (CSV vẫn là số liệu gốc).
+* Run mới có thêm `fit_metrics.csv` (loss train, bytes uplink/downlink, thời gian mỗi round, theo client) và `eval_protocol.json`.
+* Luật promote (cấu hình trước): run `main`, cùng protocol đánh giá (image size, conf, iou, tập val), mAP50 cao hơn champion và không lớp nào giảm AP50. Ép promote phải có `--force-reason`; lý do được ghi vào tag của version.
+* CI: [.github/workflows/ci.yml](.github/workflows/ci.yml) — ruff (lỗi nghiêm trọng), `pytest -m "not slow"`, build + health check image MLflow.
+
 ### Đọc số liệu thực nghiệm
 ```python
 import pandas as pd

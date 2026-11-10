@@ -1,0 +1,16 @@
+# MLflow tracking + model registry server (ADR-031).
+# Same MLflow version as the clients (environment.lock: mlflow==2.22.5). MLflow 3.x is not an
+# option: flwr==1.21.0 pins protobuf<5, which mlflow>=3 cannot satisfy (ADR-002-A1).
+FROM python:3.12-slim
+
+RUN pip install --no-cache-dir mlflow==2.22.5
+
+EXPOSE 5000
+
+# Backend: SQLite (the model registry needs a database-backed store).
+# Artifacts: stored and SERVED by this server, so clients outside the container upload over HTTP
+# instead of writing to a server-local path.
+CMD ["mlflow", "server", \
+     "--host", "0.0.0.0", "--port", "5000", \
+     "--backend-store-uri", "sqlite:////mlflow/db/mlflow.db", \
+     "--artifacts-destination", "/mlflow/artifacts"]

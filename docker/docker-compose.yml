@@ -1,5 +1,6 @@
-# PROPOSED — pending ADR-001 approval
-# Versions from thesis Chapter 3: Flower 1.21.0, MLflow 3.4.0, Ultralytics 8.3.253
+# Flower services: PROPOSED — pending ADR-001 approval (not runnable: no ServerApp/ClientApp yet).
+# mlflow service: accepted (ADR-031), MLflow 2.22.5 — ADR-002-A1 superseded the thesis' 3.4.0.
+# Versions from thesis Chapter 3: Flower 1.21.0, Ultralytics 8.3.253
 # Client count: 4 (confirmed from thesis)
 # GPU: all containers share the host GPU (single-GPU host assumption).
 # For multi-GPU: assign device_ids per service.
@@ -23,14 +24,26 @@ services:
 
   # ── EXPERIMENT TRACKING ──────────────────────────────────────────────────
 
+  # ADR-031 (accepted): this service is usable on its own —
+  #   docker compose -f docker/docker-compose.yml up -d mlflow     -> http://localhost:5000
+  # mlflow==2.22.5 matches the client pin; SQLite backend for the model registry.
+  # The Flower services below are still NOT functional (the repo defines no ServerApp/ClientApp).
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v3.4.0
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    image: flops-mlflow:2.22.5
     ports:
       - "5000:5000"
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri /mlflow/mlruns --default-artifact-root /mlflow/artifacts
     volumes:
-      - ../artifacts/mlruns:/mlflow/mlruns
-      - ../artifacts/mlflow-artifacts:/mlflow/artifacts
+      - ../artifacts/mlruns:/mlflow/db                  # mlflow.db (runs, registry)
+      - ../artifacts/mlflow-artifacts:/mlflow/artifacts # logged files, model packages
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     networks:
       - flwr-network
     restart: on-failure

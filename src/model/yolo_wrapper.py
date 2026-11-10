@@ -283,12 +283,21 @@ def train_one_round(
         plugin = build_loss_plugin(cls_loss)
 
     snapshot: dict[str, Any] = {}
+    train_loss: dict[str, float] = {}
 
     def _snapshot_final_ema(trainer: Any) -> None:
         if trainer.epoch + 1 >= trainer.epochs:
             snapshot.update(
                 {k: v.detach().clone() for k, v in trainer.ema.ema.state_dict().items()}
             )
+            # ADR-031: mean training loss of the last local epoch ("train/box_loss", ...), tracked
+            # through src/mlops/fit_tracking.py. [NEEDS-VERIFICATION] label_loss_items/tloss on the
+            # pinned 8.3.253 trainer; a missing attribute only drops these keys.
+            try:
+                items = trainer.label_loss_items(trainer.tloss, prefix="train")
+                train_loss.update({str(k): float(v) for k, v in (items or {}).items()})
+            except Exception:
+                pass
 
     model.add_callback("on_train_epoch_end", _snapshot_final_ema)
     # M2 / M3 (ADR-029): motorcycle copy-paste in the client's own images; NWD in TAL assignment
@@ -354,6 +363,7 @@ def train_one_round(
                 metrics[k] = float(v)
             except (TypeError, ValueError):
                 continue
+    metrics.update(train_loss)
     if paster is not None:
         metrics["paste_bank_size"] = float(paster.bank_size)
     if nwd is not None and nwd.c_used is not None:

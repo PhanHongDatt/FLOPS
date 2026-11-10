@@ -1,0 +1,19 @@
+# Model registry policy (ADR-031). [ENGINEERING] deployment policy — NOT a research decision rule.
+# Promotion to the champion alias is an explicit step (scripts/mlops_registry.py promote) and is
+# applied mechanically from these values. Changing them needs an ADR amendment.
+
+registered_model_name: flops-yolo-detector
+candidate_alias: candidate     # moved to every newly registered version
+champion_alias: champion       # the model a deployment would load
+
+promotion:
+  allowed_run_classes: [main]  # smoke / feasibility runs are never promoted without --force
+  primary_metric: mAP50
+  min_primary_gain: 0.0        # candidate must be strictly better than the champion by more than this
+  per_class_metric_prefix: AP50_
+  classes: [car, bus, truck, motorcycle]
+  per_class_max_drop: 0.0      # no target class may fall below the champion's value minus this
+  # Two models are only ranked when they were evaluated the same way (src/mlops/model_card.py).
+  # model_weights is deliberately absent: it says how to LOAD a package, so an architecture
+  # change (e.g. YOLO11s -> YOLO11m) can still be promoted when it scores better.
+  protocol_keys: [image_size, eval_conf, eval_iou, eval_set_id, class_names]
