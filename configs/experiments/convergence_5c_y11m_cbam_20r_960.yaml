@@ -1,0 +1,17 @@
+# ADR-032: convergence_5c_y11m_20r_960 with the gated-CBAM neck variant (src/model/arch.py); only the architecture changes.
+# batch 8 instead of 16: YOLO11m at 960 px plus the frozen teacher does not fit a 16 GB T4 at 16 [ENGINEERING];
+# Ultralytics accumulates gradients to nbs = 64 either way, so the effective batch and steps per round are unchanged.
+run_class: feasibility
+model:
+  name: yolo11m-cbam
+  weights: yolo11m.pt+cbam
+  image_size: 960
+train:
+  batch_size: 8
+federated:
+  num_clients: 5
+  num_rounds: 20
+  eval_rounds: [10, 20]
+  fraction_evaluate: 0.0
+notes: >
+  Exploratory, seed 42; architecture change requested by the author (2026-11-10, ADR-032).

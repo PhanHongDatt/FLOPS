@@ -94,10 +94,17 @@ def build_model(weights: str = "yolov8n.pt", init_seed: int = 0) -> "YOLO":
     from ultralytics.nn.tasks import DetectionModel
 
     _disable_ultralytics_mlflow()
+    from src.model.arch import build_cbam, register, split_arch
+    register()                                   # trainer rebuilds from model.yaml in this process
+    weights, arch = split_arch(weights)          # "coco:yolo11m.pt+cbam" -> ADR-032 variant
+    if arch is not None and not weights.startswith(COCO_PREFIX):
+        raise ValueError(f"architecture variants are built on the COCO head only, got {weights}+{arch}")
     if weights.startswith(COCO_PREFIX):          # keep the pretrained COCO head untouched
         model = YOLO(weights[len(COCO_PREFIX):])
         if model.model.model[-1].nc != 80:
             raise ValueError(f"{weights}: the coco: prefix needs an 80-class COCO checkpoint")
+        if arch == "cbam":
+            model.model = build_cbam(model.model)
         return model
     nc = len(TARGET_CLASSES)
     with torch.random.fork_rng():

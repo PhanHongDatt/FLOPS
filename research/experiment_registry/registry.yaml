@@ -1720,3 +1720,13 @@ experiments:
     round_20: {mAP50: 0.6336, AP50_bus: 0.6127, AP50_car: 0.8025, AP50_truck: 0.5978, AP50_motorcycle: 0.5213, FN_bus: 781.0}
     rule_mean_r10_20: {mAP50: 0.6246, AP50_bus: 0.6034, AP50_car: 0.7963, AP50_truck: 0.5939, AP50_motorcycle: 0.5047, FN_bus: 767.0}
     gap_ideal_minus_S21b_r10_20: {mAP50: +0.0151, AP50_bus: +0.0384, AP50_car: +0.0007, AP50_truck: +0.0204, AP50_motorcycle: +0.0008, recall_bus: +0.0854, precision_bus: -0.0504, TP_bus: +263.5}
+- id: EXP-2026-11-10-S29-P4t1-s5moto-y11mcbam960-seed42
+  gate: 'G6 (architecture change 1, ADR-032)'
+  scenario: S1b5-allmoto-3k, YOLO11m + gated CBAM on P3/P4/P5, 960 px, batch 8, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s29-p4t1-y11m-cbam-960-s42
+  decision_rule: 'ADR-032, vs S26 mean r10/20: motorcycle AP50 >= +0.010, small-motorcycle AP50 higher, car/bus/truck not lower by > 0.01; seed 42 descriptive'
+  note: 'estimated 10-11 h on T4 x2.'
