@@ -29,6 +29,8 @@ def main() -> None:
     ap.add_argument("--data-yaml", type=Path, required=True, help="global 4-class data.yaml")
     ap.add_argument("--view-dir", type=Path, default=Path("/kaggle/tmp/eval_view"))
     ap.add_argument("--device", default=0)
+    ap.add_argument("--imgsz", type=int, default=None, help="override the run's image size (ADR-034 P2)")
+    ap.add_argument("--only-targets", action="store_true", help="NMS over the four target classes only (ADR-034 P1)")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
@@ -38,13 +40,18 @@ def main() -> None:
 
     cfg = yaml.safe_load((args.run / "config.yaml").read_text(encoding="utf-8"))
     ev = cfg["evaluation"]
-    img_size = int(cfg["model"]["image_size"])
+    img_size = int(args.imgsz or cfg["model"]["image_size"])
     data_yaml = coco_data_yaml(args.data_yaml, args.view_dir) if args.weights.startswith("coco:") else args.data_yaml
     model = build_model(args.weights)
     set_parameters(model, load_global_checkpoint(args.run / "checkpoint" / f"global_round_{args.round:03d}.npz"))
+    if args.only_targets:
+        from src.model.class_filter import keep_only_classes
+        from src.model.yolo_wrapper import target_class_ids
+        keep_only_classes(model, list(target_class_ids(model).values()))
     metrics = evaluate(model=model, data_yaml=data_yaml, img_size=img_size, conf=float(ev["conf"]),
                        iou=float(ev["iou"]), device=args.device, workers=2)
-    row = {"run": args.run.name, "round": args.round, "img_size": img_size, "conf": ev["conf"], "iou": ev["iou"],
+    row = {"run": args.run.name, "round": args.round, "img_size": img_size, "only_targets": args.only_targets,
+           "conf": ev["conf"], "iou": ev["iou"],
            **{k: float(v) for k, v in metrics.items()}}
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(row, indent=1), encoding="utf-8")

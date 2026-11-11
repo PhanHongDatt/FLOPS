@@ -26,7 +26,7 @@ import yaml  # noqa: E402
 from analyze_errors import coco_to_target_map, find_runs, remap_predictions  # noqa: E402
 from src.data.bdd100k import TARGET_CLASSES  # noqa: E402
 from src.evaluation.error_analysis import yolo_labels_to_xyxy  # noqa: E402
-from src.evaluation.size_split import size_split  # noqa: E402
+from src.evaluation.size_split import AREA_RANGES, ap_from_flags, match_flags  # noqa: E402
 
 
 def multi_label_predictor():
@@ -82,6 +82,8 @@ def main() -> None:
     ap.add_argument("--imgsz", type=int, default=960)
     ap.add_argument("--batch", type=int, default=8)
     ap.add_argument("--device", default=0)
+    ap.add_argument("--only-targets", action="store_true", help="NMS over the four target classes only (ADR-034 P1)")
+    ap.add_argument("--dump", type=Path, default=None, help="save per-detection TP flags (npz) for bootstrap CIs")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--extract-to", type=Path, default=Path("/kaggle/tmp/size_ckpts"))
     args = ap.parse_args()
@@ -102,12 +104,26 @@ def main() -> None:
         for env, ckpt in runs:
             model = build_model(args.weights)
             set_parameters(model, load_global_checkpoint(ckpt))
+            if args.only_targets:
+                from src.model.class_filter import keep_only_classes
+                keep_only_classes(model, list(pred_map) if pred_map else list(range(len(TARGET_CLASSES))))
             dets, gts = collect(model, val_dir, label_dir, args.imgsz, args.device, args.batch, pred_map)
+            images = sorted(gts[0])
+            dump: dict[str, np.ndarray] = {"images": np.array(images)}
             for c, name in enumerate(TARGET_CLASSES):
-                for rng, r in size_split(dets[c], gts[c]).items():
+                for rng_name, rng in AREA_RANGES.items():
+                    m = match_flags(dets[c], gts[c], rng, images)
+                    ap50, recall = ap_from_flags(m.score, m.flag, int(m.n_gt.sum()))
                     rows.append({"run": ckpt.parent.parent.name, "exp_id": env.get("exp_id"),
                                  "partition_id": env.get("partition_id"), "seed": env.get("seed"), "round": rnd,
-                                 "class": name, "size": rng, "n_gt": r.n_gt, "AP50": r.ap50, "recall": r.recall})
+                                 "imgsz": args.imgsz, "only_targets": args.only_targets, "class": name,
+                                 "size": rng_name, "n_gt": int(m.n_gt.sum()), "AP50": ap50, "recall": recall})
+                    for field in ("img", "score", "flag", "n_gt"):
+                        dump[f"{name}/{rng_name}/{field}"] = getattr(m, field)
+            if args.dump is not None:
+                args.dump.mkdir(parents=True, exist_ok=True)
+                tag = f"{ckpt.parent.parent.name}_r{rnd}_{args.imgsz}{'_t4' if args.only_targets else ''}"
+                np.savez_compressed(args.dump / f"{tag}.npz", **dump)
             print(json.dumps([x for x in rows[-16:] if x["class"] == "motorcycle"]))
             args.out.parent.mkdir(parents=True, exist_ok=True)
             with args.out.open("w", newline="", encoding="utf-8") as f:   # rewrite: partial results survive

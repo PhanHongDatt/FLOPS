@@ -46,3 +46,28 @@ def test_each_gt_matched_once():
     gts = {"a": SMALL[None]}
     out = ap50_in_range([("a", 0.9, SMALL), ("a", 0.8, SMALL + 0.5)], gts, (0.0, float("inf")))
     assert out.recall == pytest.approx(1.0) and out.ap50 == pytest.approx(1.0)   # duplicate after TP
+
+
+def test_flags_reproduce_ap_and_unit_weights_reproduce_it():
+    from src.evaluation.size_split import ap_from_flags, bootstrap_ap, match_flags
+    rng = np.random.default_rng(1)
+    gts = {f"i{k}": np.hstack([xy := rng.uniform(0, 400, (3, 2)), xy + 30]) for k in range(20)}
+    dets = [(k, float(rng.uniform()), g + rng.normal(0, 1, 4)) for k, v in gts.items() for g in v[:2]]
+    dets += [(f"i{k}", 0.3, np.array([500.0, 500.0, 520.0, 520.0])) for k in range(5)]          # FPs
+    m = match_flags(dets, gts, (0.0, float("inf")))
+    ref = ap50_in_range(dets, gts, (0.0, float("inf")))
+    assert ap_from_flags(m.score, m.flag, int(m.n_gt.sum()))[0] == pytest.approx(ref.ap50)
+    assert bootstrap_ap(m, np.ones(len(m.n_gt), int)) == pytest.approx(ref.ap50)
+    assert m.n_gt.sum() == 60 and (m.flag == 1).sum() == 40
+
+
+def test_paired_bootstrap_identical_models_give_zero_interval():
+    from src.evaluation.size_split import match_flags, paired_bootstrap
+    gts = {f"i{k}": np.array([[10.0 * k, 0, 10.0 * k + 40, 40]]) for k in range(30)}
+    dets = [(k, 0.5 + 0.01 * i, v[0]) for i, (k, v) in enumerate(gts.items()) if i % 3]
+    m = match_flags(dets, gts, (0.0, float("inf")))
+    out = paired_bootstrap(m, m, n=50)
+    assert out["delta"] == 0.0 and out["ci_low"] == 0.0 and out["ci_high"] == 0.0
+    better = match_flags([(k, 0.9, v[0]) for k, v in gts.items()], gts, (0.0, float("inf")))
+    out = paired_bootstrap(m, better, n=200)
+    assert out["delta"] > 0 and out["ci_low"] > 0

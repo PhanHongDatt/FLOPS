@@ -604,3 +604,8 @@ sessions:
     slug: flops-s29e-eval-ckpts
     notebook: notebooks/06_eval_checkpoints.py
     dataset_sources: [solesensei/solesensei_bdd100k, phdatt/flops-ckpt-y11m-s26-s27-s29]
+
+  s30e:  # ADR-034: evaluation-protocol study (4-class NMS, 1280 px eval, size split, bootstrap dumps) on S26/S27/S29 round 20
+    slug: flops-s30e-eval-protocols
+    notebook: notebooks/07_eval_protocols.py
+    dataset_sources: [solesensei/solesensei_bdd100k, phdatt/flops-ckpt-y11m-s26-s27-s29]
