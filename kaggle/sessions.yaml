@@ -599,3 +599,8 @@ sessions:
       'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "mcbam960"'
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+  s29e:  # ADR-032: GPU eval only — s29 round-20 global eval (cut by the arm timeout) + AP50 by size for S26/S27/S29
+    slug: flops-s29e-eval-ckpts
+    notebook: notebooks/06_eval_checkpoints.py
+    dataset_sources: [solesensei/solesensei_bdd100k, phdatt/flops-ckpt-y11m-s26-s27-s29]
