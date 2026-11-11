@@ -185,19 +185,19 @@ def test_register_promote_refuse_and_force(tmp_path):
         return version
 
     v1 = register("one", 0.50, 0.50)
-    assert client.get_model_version_by_alias(POLICY.model_name, "candidate").version == v1
+    assert str(client.get_model_version_by_alias(POLICY.model_name, "candidate").version) == v1
     assert current_champion(POLICY, client) is None
     assert promote(v1, POLICY, client=client).ok
-    assert current_champion(POLICY, client).version == v1
+    assert str(current_champion(POLICY, client).version) == v1
 
     v2 = register("two", 0.45, 0.45)                                   # worse: refused
     assert not promote(v2, POLICY, client=client).ok
-    assert current_champion(POLICY, client).version == v1
+    assert str(current_champion(POLICY, client).version) == v1
 
     d = promote(v2, POLICY, client=client, force_reason="rollback drill")   # forced: audited
     assert not d.ok
     champ = current_champion(POLICY, client)
-    assert champ.version == v2
+    assert str(champ.version) == v2
     assert champ.tags["promotion.forced"] == "rollback drill"
     assert "primary_metric" in champ.tags["promotion.failed_checks"]
     assert champ.tags["promotion.previous_champion"] == v1
