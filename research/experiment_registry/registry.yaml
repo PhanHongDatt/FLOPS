@@ -1725,8 +1725,13 @@ experiments:
   scenario: S1b5-allmoto-3k, YOLO11m + gated CBAM on P3/P4/P5, 960 px, batch 8, 20 rounds, eval 10/20
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s29-p4t1-y11m-cbam-960-s42
   decision_rule: 'ADR-032, vs S26 mean r10/20: motorcycle AP50 >= +0.010, small-motorcycle AP50 higher, car/bus/truck not lower by > 0.01; seed 42 descriptive'
   note: 'pushed 2026-11-10 at commit 3135a64. Training completed 20 of 20 rounds (5 results / 0 failures each, 10.8 h); the round-20 global eval was cut by the 11 h arm timeout (outcome failed: TimeoutExpired, kernel ERROR); checkpoint round 20 saved. Round 0 equals S26 round 0 in every metric (gated CBAM is the identity at init, as designed). Round 10 vs S26: mAP50 +0.0065, motorcycle +0.016, bus +0.006, truck +0.005, car -0.000. Round-20 eval and size split in session s29e (checkpoints uploaded as private dataset phdatt/flops-ckpt-y11m-s26-s27-s29).'
+  results:
+    round_10: {mAP50: 0.6353, AP50_bus: 0.5876, AP50_car: 0.8142, AP50_truck: 0.6181, AP50_motorcycle: 0.5215}
+    round_20: {mAP50: 0.6600, AP50_bus: 0.6188, AP50_car: 0.8289, AP50_truck: 0.6346, AP50_motorcycle: 0.5578, FN_bus: 941.0, FP_bus: 565.0, source: 's29e, scripts/eval_global_checkpoint.py, same evaluator'}
+    rule_mean_r10_20: {mAP50: 0.6477, AP50_bus: 0.6032, AP50_car: 0.8215, AP50_truck: 0.6263, AP50_motorcycle: 0.5396}
+    delta_vs_S26_r10_20: {mAP50: +0.0055, AP50_bus: +0.0011, AP50_car: +0.0005, AP50_truck: +0.0040, AP50_motorcycle: +0.0163, precision_bus: +0.0198, recall_bus: -0.0094, recall_motorcycle: +0.0177}

@@ -29,12 +29,37 @@ from src.evaluation.error_analysis import yolo_labels_to_xyxy  # noqa: E402
 from src.evaluation.size_split import size_split  # noqa: E402
 
 
+def multi_label_predictor():
+    """DetectionPredictor whose NMS keeps every class above conf for a box (``multi_label=True``).
+
+    [YOLO-DOC] ultralytics 8.3.253: ``DetectionValidator.postprocess`` (the global evaluator) calls
+    ``non_max_suppression(..., multi_label=True)``; ``DetectionPredictor.postprocess`` does not, so ``predict()``
+    keeps only the top class of a box. A bus scored just below truck then disappears: with plain ``predict()``
+    the bus AP50 of S26 round 20 came out 0.536 against the evaluator's 0.622 (s29e)."""
+    import functools
+
+    from ultralytics.models.yolo.detect import DetectionPredictor
+    from ultralytics.utils import nms
+
+    class MultiLabelPredictor(DetectionPredictor):
+        def postprocess(self, preds, img, orig_imgs, **kwargs):
+            original = nms.non_max_suppression
+            nms.non_max_suppression = functools.partial(original, multi_label=True)
+            try:
+                return super().postprocess(preds, img, orig_imgs, **kwargs)
+            finally:
+                nms.non_max_suppression = original
+
+    return MultiLabelPredictor
+
+
 def collect(model, val_dir: Path, label_dir: Path, imgsz: int, device, batch: int, pred_map):
     """Per class: detections [(image, score, xyxy)] and ground truths {image: [N, 4]}, original pixels."""
     dets = {c: [] for c in range(len(TARGET_CLASSES))}
     gts = {c: {} for c in range(len(TARGET_CLASSES))}
     for res in model.predict(source=str(val_dir), conf=0.001, iou=0.7, max_det=300, imgsz=imgsz,
-                             device=device, batch=batch, stream=True, verbose=False):
+                             device=device, batch=batch, stream=True, verbose=False,
+                             predictor=multi_label_predictor()):
         h, w = res.orig_shape
         stem = Path(res.path).stem
         lf = label_dir / f"{stem}.txt"
