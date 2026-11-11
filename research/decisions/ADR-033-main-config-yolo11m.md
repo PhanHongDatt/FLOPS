@@ -1,6 +1,6 @@
-# ADR-031: main configuration = YOLO11m, 960 px, s5moto / ideal, 20 rounds
+# ADR-033: main configuration = YOLO11m, 960 px, s5moto / ideal, 20 rounds
 
-- Status: accepted (author's choice 2026-11-10: the goal is the highest attainable AP, so YOLO11m)
+- Status: accepted (renumbered from ADR-031, which the MLOps ADR also took, 2026-11-11; author's choice 2026-11-10: the goal is the highest attainable AP, so YOLO11m)
 - Related: ADR-023 (s5moto, 960 px), ADR-030 (YOLO11m: +0.035 AP50 over YOLO11s in both scenarios; same bus gap)
 
 ## Decision

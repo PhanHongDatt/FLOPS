@@ -2,7 +2,7 @@
 
 - Status: accepted for one exploratory run (author's request 2026-11-10: "đề xuất và thử nghiệm" architecture
   changes; CLAUDE.md §2 lists a new YOLO architecture as out of scope unless approved — approved here for this arm)
-- Related: ADR-031 (main config YOLO11m), ADR-030 (S26/S27), ADR-029 (rule 2 needs size-split AP)
+- Related: ADR-033 (main config YOLO11m), ADR-030 (S26/S27), ADR-029 (rule 2 needs size-split AP)
 
 ## Context
 The missing-class cost is bus recall (~0.036 AP50, ADR-030) and no architecture change targets it; the author's
