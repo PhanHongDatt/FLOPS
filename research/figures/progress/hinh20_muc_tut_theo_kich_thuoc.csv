@@ -1,0 +1,13 @@
+﻿class,size,n_gt,delta,ci_low,ci_high
+bus,all,1597,0.0318,0.0245,0.039
+bus,small,267,0.0203,-0.0029,0.0421
+bus,medium,658,0.0283,0.0135,0.0443
+bus,large,672,0.0152,0.006,0.0248
+truck,all,4245,0.0101,0.0056,0.0145
+truck,small,744,0.0009,-0.0108,0.0132
+truck,medium,1835,0.0188,0.0105,0.0264
+truck,large,1666,0.0081,0.0016,0.0136
+motorcycle,all,452,0.0061,-0.0149,0.0257
+motorcycle,small,135,0.0035,-0.0213,0.0361
+motorcycle,medium,223,0.0012,-0.0297,0.0274
+motorcycle,large,94,0.0213,-0.0201,0.07

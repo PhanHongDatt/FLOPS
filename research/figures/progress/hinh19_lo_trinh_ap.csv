@@ -1,0 +1,17 @@
+﻿configuration,class,AP50
+YOLO11s P4t1,car,0.7956
+YOLO11s + B1 (ADR-028),car,0.7951
+YOLO11m P4t1,car,0.8211
+YOLO11m + CBAM,car,0.8215
+YOLO11s P4t1,bus,0.565
+YOLO11s + B1 (ADR-028),bus,0.5641
+YOLO11m P4t1,bus,0.602
+YOLO11m + CBAM,bus,0.6032
+YOLO11s P4t1,truck,0.5735
+YOLO11s + B1 (ADR-028),truck,0.5717
+YOLO11m P4t1,truck,0.6224
+YOLO11m + CBAM,truck,0.6263
+YOLO11s P4t1,motorcycle,0.5039
+YOLO11s + B1 (ADR-028),motorcycle,0.4993
+YOLO11m P4t1,motorcycle,0.5234
+YOLO11m + CBAM,motorcycle,0.5396

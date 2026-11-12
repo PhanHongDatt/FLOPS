@@ -1,0 +1,17 @@
+﻿comparison,class,size,delta,ci_low,ci_high
+CBAM − YOLO11m (960),motorcycle,all,0.007,-0.0106,0.0259
+CBAM − YOLO11m (960),motorcycle,small,0.0111,-0.0187,0.0427
+CBAM − YOLO11m (960),motorcycle,medium,0.0071,-0.0182,0.0299
+CBAM − YOLO11m (960),motorcycle,large,0.0102,-0.0209,0.0441
+Đánh giá 1280 − 960 (YOLO11m),motorcycle,all,-0.0071,-0.034,0.0223
+Đánh giá 1280 − 960 (YOLO11m),motorcycle,small,0.0302,-0.0121,0.0824
+Đánh giá 1280 − 960 (YOLO11m),motorcycle,medium,-0.0123,-0.0513,0.0198
+Đánh giá 1280 − 960 (YOLO11m),motorcycle,large,-0.042,-0.0881,0.0124
+CBAM − YOLO11m (960),bus,all,0.001,-0.0035,0.006
+CBAM − YOLO11m (960),bus,small,-0.0094,-0.0245,0.0022
+CBAM − YOLO11m (960),bus,medium,0.0016,-0.0091,0.0113
+CBAM − YOLO11m (960),bus,large,-0.0006,-0.0066,0.0063
+Đánh giá 1280 − 960 (YOLO11m),bus,all,-0.0029,-0.0108,0.0058
+Đánh giá 1280 − 960 (YOLO11m),bus,small,0.0402,0.0088,0.0698
+Đánh giá 1280 − 960 (YOLO11m),bus,medium,0.0086,-0.0077,0.027
+Đánh giá 1280 − 960 (YOLO11m),bus,large,-0.0311,-0.0422,-0.0202
