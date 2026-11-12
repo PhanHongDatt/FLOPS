@@ -1754,7 +1754,7 @@ experiments:
   seed: 42
   kaggle_kernel: goshihayashi/flops-s31a-p4t1-y11s-q4-s5moto-s42
   decision_rule: 'ADR-035: bus gap (s31b - s31a) <= 0.023 and no class below S21b by > 0.01; seed 42 descriptive'
-  note: 'estimated ~6 h on T4 x2.'
+  note: 'pushed 2026-11-12 at commit d909f12; estimated ~6 h on T4 x2.'
 - id: EXP-2026-11-12-S31b-P4t1-s5motopooled-y11s960-q4-seed42
   gate: 'G6 (direction A, ADR-035)'
   scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11s 960 px, 1/4 local epoch per round, 80 rounds, eval 40/80
@@ -1764,4 +1764,4 @@ experiments:
   seed: 42
   kaggle_kernel: phdatt/flops-s31b-p4t1-y11s-q4-s5motopooled-s42
   decision_rule: 'ADR-035 (pair of s31a)'
-  note: 'estimated ~6 h on T4 x2.'
+  note: 'pushed 2026-11-12 at commit d909f12; estimated ~6 h on T4 x2.'
