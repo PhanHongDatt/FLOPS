@@ -1735,3 +1735,13 @@ experiments:
     round_20: {mAP50: 0.6600, AP50_bus: 0.6188, AP50_car: 0.8289, AP50_truck: 0.6346, AP50_motorcycle: 0.5578, FN_bus: 941.0, FP_bus: 565.0, source: 's29e, scripts/eval_global_checkpoint.py, same evaluator'}
     rule_mean_r10_20: {mAP50: 0.6477, AP50_bus: 0.6032, AP50_car: 0.8215, AP50_truck: 0.6263, AP50_motorcycle: 0.5396}
     delta_vs_S26_r10_20: {mAP50: +0.0055, AP50_bus: +0.0011, AP50_car: +0.0005, AP50_truck: +0.0040, AP50_motorcycle: +0.0163, precision_bus: +0.0198, recall_bus: -0.0094, recall_motorcycle: +0.0177}
+- id: EXP-2026-11-11-S30e-eval-protocols-y11m-r20
+  gate: 'evaluation protocol (ADR-034), no training'
+  scenario: round-20 checkpoints of S26 (YOLO11m missing), S27 (YOLO11m ideal), S29 (YOLO11m + CBAM missing)
+  method: evaluation only (P1 4-class NMS, P2 1280 px, size split, bootstrap dumps)
+  run_class: feasibility
+  status: completed
+  seed: 42
+  kaggle_kernel: phdatt/flops-s30e-eval-protocols
+  decision_rule: ADR-034 rules 1-4
+  note: 'pushed 2026-11-11 at commit 2dc17a6; 9 of 9 steps completed. P1 changes no AP50 by more than 0.0002 (P0 stays). P2 rule not met (small motorcycle +0.030 / +0.012, CIs include 0; large objects lose, mAP50 -0.005 / -0.008). CBAM - S26 motorcycle +0.007 [-0.011, +0.026] at round 20: within val-set noise. Bus gap ideal - missing +0.032 [+0.025, +0.039], present at every size. Summaries in research/feasibility/eval_protocols/.'

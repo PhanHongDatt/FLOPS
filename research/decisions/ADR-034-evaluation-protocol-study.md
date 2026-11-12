@@ -28,5 +28,24 @@ No training; session s30e (notebooks/07_eval_protocols.py), two T4 lanes, ~2.5 h
    This does not replace the 3-seed requirement.
 4. A5: the bus size split of S26 vs S27 (fixed script) gives the missing-class gap per size range; descriptive.
 
-## Result
-Not run.
+## Result (s30e, 2026-11-11, all 9 steps completed; files in research/feasibility/eval_protocols/)
+Fixed size-split script vs the evaluator, round 20 "all": S26 bus 0.617 vs 0.622, motorcycle 0.543 vs 0.541 — the
+multi-label fix holds on the full val set (remaining gap = COCO greedy vs Ultralytics matching).
+
+1. **P1 (4-class NMS): no effect.** |AP50(P1) − AP50(P0)| ≤ 0.0002 for every class on S26 and S29. Rule 1: P0 stays
+   the only protocol; `max_det` shared by 80 classes is not limiting (closes V7).
+2. **P2 (1280 px eval): rule not met.** Small-motorcycle AP50 +0.030 (S26, CI [−0.012, +0.082]) and +0.012 (S29,
+   CI [−0.027, +0.065]): below 0.02 for S29 and neither CI excludes 0. Evaluating at 1280 helps small boxes (small
+   bus +0.040 / +0.061, CIs exclude 0) but costs large ones (large bus −0.031 / −0.026, large truck −0.037 / −0.031,
+   CIs exclude 0), so mAP50 falls (−0.005 / −0.008). Per the rule the next motorcycle step is the P2 head, not a
+   1280 training run. Caveat recorded: the large-object loss is a train/test scale mismatch (trained at 960), so this
+   result does not show that training at 1280 would fail.
+3. **CBAM − S26, round 20, val-set CI:** motorcycle +0.007 [−0.011, +0.026], bus +0.001 [−0.004, +0.006], truck
+   +0.0035 [+0.0006, +0.0064]. Only the truck difference excludes 0. The motorcycle gain (+0.016 on the mean of rounds
+   10/20, +0.017 at round 20 with the Ultralytics evaluator) is not distinguishable from val-set sampling noise.
+   ADR-032's "promising" stays descriptive; seeds 123 / 2024 are needed before any claim.
+4. **Missing-class bus gap by size (S27 ideal − S26 missing, YOLO11m):** all +0.032 [+0.025, +0.039], small +0.020
+   [−0.003, +0.042], medium +0.028 [+0.014, +0.044], large +0.015 [+0.006, +0.025]. The gap is present at every
+   size and largest for medium buses: the missing-class effect is not a small-object effect. Truck gap +0.010
+   [+0.006, +0.015]; motorcycle +0.006 [−0.015, +0.026] (motorcycle is on every client in both scenarios).
+   These CIs cover val-set sampling only, not training seeds.

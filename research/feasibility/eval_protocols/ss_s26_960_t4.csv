@@ -1,0 +1,17 @@
+run,exp_id,partition_id,seed,round,imgsz,only_targets,class,size,n_gt,AP50,recall
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,car,all,102506,0.8212839720266183,0.9291651220416366
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,car,small,44907,0.6391943059018931,0.8471507782751019
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,car,medium,38493,0.9087138994462554,0.9907255864702673
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,car,large,19106,0.9780497426665219,0.9987438500994452
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,bus,all,1597,0.6167441754499843,0.9355040701314965
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,bus,small,267,0.21509243000968045,0.7865168539325843
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,bus,medium,658,0.533867269512919,0.9422492401215805
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,bus,large,672,0.8349132807145159,0.9880952380952381
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,truck,all,4245,0.6291476745892817,0.9566548881036514
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,truck,small,744,0.31887235602084907,0.8481182795698925
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,truck,medium,1835,0.5804396651685686,0.9689373297002725
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,truck,large,1666,0.8153912354331542,0.9915966386554622
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,motorcycle,all,452,0.5431133079065413,0.8584070796460177
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,motorcycle,small,135,0.27636345164797493,0.6222222222222222
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,motorcycle,medium,223,0.6143948773784669,0.9506726457399103
+P4t1m960_feasibility_seed42_s1b5_bus_3k_allmoto_seed42,P4t1,s1b5_bus_3k_allmoto_seed42,42,20,960,True,motorcycle,large,94,0.7552742672340964,0.9787234042553191
