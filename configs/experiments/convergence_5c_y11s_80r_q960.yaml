@@ -1,0 +1,18 @@
+# ADR-035 direction A: convergence_5c_y11s_20r_960 with 1/4 of a local epoch per round and 4x the rounds.
+# Same total local steps and images seen as 20 rounds x 1 epoch; aggregation 4x as often. Eval at rounds 40 / 80
+# (= epoch-equivalents 10 / 20 of the baseline runs S21b / S28). Cosine round LR spans the 80 rounds.
+run_class: feasibility
+model:
+  name: yolo11s
+  weights: yolo11s.pt
+  image_size: 960
+train:
+  batch_size: 16
+  local_fraction: 0.25
+federated:
+  num_clients: 5
+  num_rounds: 80
+  eval_rounds: [40, 80]
+  fraction_evaluate: 0.0
+notes: >
+  Exploratory, seed 42; local-step reduction requested by the author (2026-11-12, ADR-035).

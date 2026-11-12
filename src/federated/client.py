@@ -113,6 +113,10 @@ class YOLOFlowerClient(fl.client.NumPyClient):
         if sched:                                          # ADR-019 component ②
             lr0 = cosine_round_lr(self._round, int(sched["rounds"]), lr0, float(sched["lr_min"]))
         data_yaml = self.data_yaml
+        if float(cfg.get("local_fraction", 1.0)) < 1.0:     # ADR-035 direction A: 1/k epoch per round
+            from src.federated.local_fraction import fraction_data_yaml
+            data_yaml = fraction_data_yaml(data_yaml, self.run_dir / "clients" / self.client_id / f"part_round_{self._round}",
+                                           float(cfg["local_fraction"]), self._round, self.base_seed, self.client_id)
         if cfg.get("rfs_t"):                               # ADR-019 component ③
             from src.preservation.rfs import rfs_data_yaml
             data_yaml = rfs_data_yaml(data_yaml, self.run_dir / "clients" / self.client_id / f"rfs_round_{self._round}",

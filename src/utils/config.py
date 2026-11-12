@@ -70,6 +70,7 @@ def build_local_train_config(config: dict[str, Any]) -> dict[str, Any]:
         "client_run_val": train.get("client_run_val", False),
         "deterministic": train.get("deterministic", True),
         "nbs": train.get("nbs"),
+        "local_fraction": float(train.get("local_fraction", 1.0)),   # ADR-035 direction A
     }
 
 
