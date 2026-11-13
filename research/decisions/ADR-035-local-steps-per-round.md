@@ -38,4 +38,25 @@ estimated ~30 s): ~6 h per run vs 4.6-6.1 h at k = 1, 2 runs in parallel on the 
 volume x4 (simulation; reported as communication cost).
 
 ## Result
-Not run.
+**Fail (rules 1 and 2) -> negative result, the k-curve and 3-seed follow-up are not run.** Seed 42, descriptive.
+Both runs 80 of 80 rounds, 5 results / 0 failures each, artifact check passed; wall 5.4 h (S31a) and 6.1 h (S31b).
+
+| mean r40/80 (k=4) vs r10/20 (k=1) | S21b | S31a | S28 | S31b | gap k=1 | gap k=4 |
+|---|---:|---:|---:|---:|---:|---:|
+| mAP50 | 0.6095 | 0.5990 | 0.6246 | 0.6096 | +0.015 | +0.011 |
+| AP50 bus | 0.5650 | 0.5623 | 0.6034 | 0.5987 | **+0.038** | **+0.036** |
+| AP50 truck | | | | | +0.020 | +0.005 |
+| recall bus / TP bus | | | | | +0.085 / +263.5 | +0.038 / +104.5 |
+| precision bus | | | | | -0.050 | +0.013 |
+
+1. Gap_bus(k=4) = +0.036 > 0.023: **fail** (k=1 +0.038; per round +0.057 / +0.016 vs +0.054 / +0.022).
+2. S31a vs S21b: motorcycle -0.022 (> 0.01): **fail**; truck -0.009, car -0.008, bus -0.003, mAP50 -0.011.
+   The ideal run also loses at k=4 (S31b vs S28: mAP50 -0.015, truck -0.024, motorcycle -0.026, FP_truck +407).
+3. Bootstrap not run (needs a GPU eval session with --dump); with rules 1-2 failed it cannot change the decision.
+
+Observations (not causal claims): at k=4 the bus recall gap halves (TP gap 263.5 -> 104.5) but the ideal run
+trades it for precision, so the AP50 gap is unchanged; the smaller truck gap comes from the ideal run getting
+worse, not from S31a getting better. k=4 is still ~94 local steps per round, far from the one-step limit of the
+hypothesis, so the hypothesis is not falsified, only shown to give no usable gain at affordable k; the 4x
+optimizer-state resets (a new Ultralytics trainer every round; warmup is 0) are a plausible cause of the
+across-the-board loss `[THESIS-HYPOTHESIS]`, untested.

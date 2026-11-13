@@ -1750,18 +1750,26 @@ experiments:
   scenario: S1b5-allmoto-3k (missing), YOLO11s 960 px, 1/4 local epoch per round, 80 rounds, eval 40/80
   method: P4t1
   run_class: feasibility
-  status: running
+  status: failed-valid
   seed: 42
   kaggle_kernel: goshihayashi/flops-s31a-p4t1-y11s-q4-s5moto-s42
   decision_rule: 'ADR-035: bus gap (s31b - s31a) <= 0.023 and no class below S21b by > 0.01; seed 42 descriptive'
-  note: 'pushed 2026-11-12 at commit d909f12; estimated ~6 h on T4 x2.'
+  note: 'pushed 2026-11-12 at commit d909f12. 80 of 80 rounds, 5 results / 0 failures each, artifact check passed, wall 5.4 h. ADR-035 fail: bus gap k=4 +0.036 (k=1 +0.038) > 0.023; motorcycle -0.022 vs S21b. Bus recall gap halved (TP +104.5 vs +263.5) but AP50 gap unchanged.'
+  results:
+    round_40: {mAP50: 0.5837, AP50_car: 0.7814, AP50_bus: 0.5374, AP50_truck: 0.5486, AP50_motorcycle: 0.4673}
+    round_80: {mAP50: 0.6144, AP50_car: 0.7933, AP50_bus: 0.5872, AP50_truck: 0.5811, AP50_motorcycle: 0.4958}
+    delta_vs_S21b_mean: {mAP50: -0.0105, AP50_car: -0.0082, AP50_bus: -0.0027, AP50_truck: -0.0087, AP50_motorcycle: -0.0224}
 - id: EXP-2026-11-12-S31b-P4t1-s5motopooled-y11s960-q4-seed42
   gate: 'G6 (direction A, ADR-035)'
   scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11s 960 px, 1/4 local epoch per round, 80 rounds, eval 40/80
   method: P4t1
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s31b-p4t1-y11s-q4-s5motopooled-s42
   decision_rule: 'ADR-035 (pair of s31a)'
-  note: 'pushed 2026-11-12 at commit d909f12; estimated ~6 h on T4 x2.'
+  note: 'pushed 2026-11-12 at commit d909f12. 80 of 80 rounds, 5 results / 0 failures each, artifact check passed, wall 6.1 h. Versus S28 (k=1 ideal) mAP50 -0.015, truck -0.024, motorcycle -0.026, FP_truck +407.'
+  results:
+    round_40: {mAP50: 0.5987, AP50_car: 0.7855, AP50_bus: 0.5941, AP50_truck: 0.5577, AP50_motorcycle: 0.4576}
+    round_80: {mAP50: 0.6204, AP50_car: 0.7964, AP50_bus: 0.6034, AP50_truck: 0.5814, AP50_motorcycle: 0.5006}
+    gap_ideal_minus_S31a_mean: {mAP50: +0.0106, AP50_car: +0.0036, AP50_bus: +0.0364, AP50_truck: +0.0047, AP50_motorcycle: -0.0025, recall_bus: +0.0382, precision_bus: +0.0127, TP_bus: +104.5}
