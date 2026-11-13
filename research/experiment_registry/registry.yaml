@@ -1773,3 +1773,23 @@ experiments:
     round_40: {mAP50: 0.5987, AP50_car: 0.7855, AP50_bus: 0.5941, AP50_truck: 0.5577, AP50_motorcycle: 0.4576}
     round_80: {mAP50: 0.6204, AP50_car: 0.7964, AP50_bus: 0.6034, AP50_truck: 0.5814, AP50_motorcycle: 0.5006}
     gap_ideal_minus_S31a_mean: {mAP50: +0.0106, AP50_car: +0.0036, AP50_bus: +0.0364, AP50_truck: +0.0047, AP50_motorcycle: -0.0025, recall_bus: +0.0382, precision_bus: +0.0127, TP_bus: +104.5}
+- id: EXP-2026-11-13-S32a-A0c-s5moto-y11m960-seed42
+  gate: 'G10 main matrix (ADR-033 order 1)'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A0c
+  run_class: main
+  status: running
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s32a-a0c-y11m-960-s5moto-s42
+  decision_rule: 'ADR-033: reference baseline; Delta AP of P4t1 (S26/S27) vs A0c and gap_c per arm, mean of rounds 10/20; seed 42 descriptive'
+  note: 'pushed 2026-11-13; estimated ~6 h on T4 x2 (no teacher forward).'
+- id: EXP-2026-11-13-S32b-A0c-s5motopooled-y11m960-seed42
+  gate: 'G10 main matrix (ADR-033 order 1)'
+  scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A0c
+  run_class: main
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s32b-a0c-y11m-960-s5motopooled-s42
+  decision_rule: 'ADR-033: reference baseline; Delta AP of P4t1 (S26/S27) vs A0c and gap_c per arm, mean of rounds 10/20; seed 42 descriptive'
+  note: 'pushed 2026-11-13; estimated ~6 h on T4 x2 (no teacher forward).'
