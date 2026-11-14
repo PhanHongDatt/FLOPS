@@ -663,3 +663,9 @@ sessions:
     owner: phdatt
     notebook: notebooks/08_probe_features.py
     dataset_sources: [solesensei/solesensei_bdd100k, phdatt/flops-ckpt-y11m-s26-s27-s29, phdatt/flops-ckpt-y11s-s21b-s28]
+
+  s34e:  # ADR-037: bus-row transplant (M, I, M+rowI, I+rowM) for S26/S27 (YOLO11m) and S21b/S28 (YOLO11s), round 20
+    slug: flops-s34e-row-transplant
+    owner: phdatt
+    notebook: notebooks/09_row_transplant.py
+    dataset_sources: [solesensei/solesensei_bdd100k, phdatt/flops-ckpt-y11m-s26-s27-s29, phdatt/flops-ckpt-y11s-s21b-s28]

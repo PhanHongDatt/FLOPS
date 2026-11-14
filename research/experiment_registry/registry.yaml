@@ -1812,3 +1812,13 @@ experiments:
     cv3_1_primary_delta: {y11m: -0.011, y11s: +0.045}
     readout_bus_score_delta: {y11m: +0.098, y11s: +0.069}
     readout_bus_score: {S26: 0.267, S27: 0.365, COCO11m: 0.264, S21b: 0.211, S28: 0.280, COCO11s: 0.202}
+- id: EXP-2026-11-14-S34e-bus-row-transplant
+  gate: 'G5 evidence (ADR-037, F2-style perturbation)'
+  scenario: round-20 checkpoints S26/S27 (YOLO11m) and S21b/S28 (YOLO11s); M, I, M+rowI, I+rowM (bus row of Detect.cv3[l][2])
+  method: evaluation only (no training)
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s34e-row-transplant
+  decision_rule: 'ADR-037: sufficiency R_s = (AP50_bus(M+rowI) - AP50_bus(M)) / gap >= 0.5 on both models (in-session gap >= 0.015), sanity other classes within 0.01'
+  note: 'pushed 2026-11-14; estimated 2-3 h on T4 x2.'
