@@ -1822,3 +1822,33 @@ experiments:
   kaggle_kernel: phdatt/flops-s34e-row-transplant
   decision_rule: 'ADR-037: sufficiency R_s = (AP50_bus(M+rowI) - AP50_bus(M)) / gap >= 0.5 on both models (in-session gap >= 0.015), sanity other classes within 0.01'
   note: 'pushed 2026-11-14; estimated 2-3 h on T4 x2.'
+- id: EXP-2026-11-14-S35a-P4t1-s5moto-y11m960-seed123
+  gate: 'G10 main matrix (ADR-033 order 2)'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: main
+  status: running
+  seed: 123
+  kaggle_kernel: goshihayashi/flops-s35a-p4t1-y11m-960-s5moto-s123
+  decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
+  note: 'pushed 2026-11-14; estimated ~10 h on T4 x2.'
+- id: EXP-2026-11-14-S35b-P4t1-s5motopooled-y11m960-seed123
+  gate: 'G10 main matrix (ADR-033 order 2)'
+  scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: main
+  status: running
+  seed: 123
+  kaggle_kernel: goshihayashi/flops-s35b-p4t1-y11m-960-s5motopooled-s123
+  decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
+  note: 'pushed 2026-11-14; estimated ~10 h on T4 x2.'
+- id: EXP-2026-11-14-S35c-A0c-s5moto-y11m960-seed123
+  gate: 'G10 main matrix (ADR-033 order 2)'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A0c
+  run_class: main
+  status: running
+  seed: 123
+  kaggle_kernel: phdatt/flops-s35c-a0c-y11m-960-s5moto-s123
+  decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
+  note: 'pushed 2026-11-14; estimated ~6 h on T4 x2.'

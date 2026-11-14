@@ -669,3 +669,42 @@ sessions:
     owner: phdatt
     notebook: notebooks/09_row_transplant.py
     dataset_sources: [solesensei/solesensei_bdd100k, phdatt/flops-ckpt-y11m-s26-s27-s29, phdatt/flops-ckpt-y11s-s21b-s28]
+
+  s35a:  # ADR-033 order 2: P4t1 @ s5moto, YOLO11m 960 px, seed 123
+    slug: flops-s35a-p4t1-y11m-960-s5moto-s123
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4t1@s5moto"]'
+      'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 123'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11m_20r_960.yaml"'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+  s35b:  # ADR-033 order 2: P4t1 @ s5motopooled, YOLO11m 960 px, seed 123
+    slug: flops-s35b-p4t1-y11m-960-s5motopooled-s123
+    owner: goshihayashi
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["P4t1@s5motopooled"]'
+      'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 123'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11m_20r_960.yaml"'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+  s35c:  # ADR-033 order 2: A0c @ s5moto, YOLO11m 960 px, seed 123
+    slug: flops-s35c-a0c-y11m-960-s5moto-s123
+    owner: phdatt
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0c@s5moto"]'
+      'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 123'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11m_20r_960.yaml"'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
