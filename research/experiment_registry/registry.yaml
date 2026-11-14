@@ -1778,18 +1778,22 @@ experiments:
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0c
   run_class: main
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: goshihayashi/flops-s32a-a0c-y11m-960-s5moto-s42
   decision_rule: 'ADR-033: reference baseline; Delta AP of P4t1 (S26/S27) vs A0c and gap_c per arm, mean of rounds 10/20; seed 42 descriptive'
-  note: 'pushed 2026-11-13; estimated ~6 h on T4 x2 (no teacher forward).'
+  note: 'pushed 2026-11-13 at commit 06c2214. 20 of 20 rounds, 5 results / 0 failures each, artifact check passed, wall 5.7 h. P4t1 (S26) minus A0c: mAP50 +0.118, bus +0.123, truck +0.112, motorcycle +0.198, car +0.040. Bus suppressed: recall 0.18 at precision 0.88.'
+  results:
+    mean_r10_20: {mAP50: 0.5239, AP50_car: 0.7808, AP50_bus: 0.4793, AP50_truck: 0.5101, AP50_motorcycle: 0.3253, precision_bus: 0.8762, recall_bus: 0.1825}
 - id: EXP-2026-11-13-S32b-A0c-s5motopooled-y11m960-seed42
   gate: 'G10 main matrix (ADR-033 order 1)'
   scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0c
   run_class: main
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s32b-a0c-y11m-960-s5motopooled-s42
   decision_rule: 'ADR-033: reference baseline; Delta AP of P4t1 (S26/S27) vs A0c and gap_c per arm, mean of rounds 10/20; seed 42 descriptive'
-  note: 'pushed 2026-11-13; estimated ~6 h on T4 x2 (no teacher forward).'
+  note: 'pushed 2026-11-13 at commit 06c2214. 20 of 20 rounds, 5 results / 0 failures each, artifact check passed, wall 4.8 h. P4t1 (S27) minus A0c: mAP50 +0.111, bus +0.132. A0c gap ideal minus S32a: bus +0.026, truck +0.024, motorcycle +0.026 (P4t1 +0.036 / +0.011 / +0.007).'
+  results:
+    mean_r10_20: {mAP50: 0.5445, AP50_car: 0.7869, AP50_bus: 0.5055, AP50_truck: 0.5344, AP50_motorcycle: 0.3511, precision_bus: 0.6442, recall_bus: 0.4377}

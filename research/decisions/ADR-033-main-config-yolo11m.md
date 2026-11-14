@@ -32,3 +32,26 @@ P4t1 YOLO11m measured 10.0-10.1 h per run on T4 x 2 (S26/S27); A0c has no teache
 1. A0c seed 42, missing and ideal (one per account, in parallel): baseline and ΔAP of P4t1 at seed 42.
 2. P4t1 and A0c seeds 123 / 2024.
 3. Proposed method (ADR first), 3 seeds × 2 scenarios.
+
+## Result, order 1 (A0c seed 42: S32a missing, S32b ideal), mean of rounds 10/20, descriptive
+Both 20 of 20 rounds, 5 results / 0 failures each, artifact check passed; wall 5.7 h (S32a) and 4.8 h (S32b),
+so the ~6 h estimate holds.
+
+| AP50 | A0c missing | P4t1 missing (S26) | ΔP4t1 | A0c ideal | P4t1 ideal (S27) | ΔP4t1 |
+|---|---:|---:|---:|---:|---:|---:|
+| mAP50 | 0.5239 | 0.6422 | +0.118 | 0.5445 | 0.6559 | +0.111 |
+| car | 0.7808 | 0.8211 | +0.040 | 0.7869 | 0.8224 | +0.036 |
+| bus | 0.4793 | 0.6020 | +0.123 | 0.5055 | 0.6377 | +0.132 |
+| truck | 0.5101 | 0.6224 | +0.112 | 0.5344 | 0.6333 | +0.099 |
+| motorcycle | 0.3253 | 0.5234 | +0.198 | 0.3511 | 0.5301 | +0.179 |
+
+gap_c (ideal − missing): A0c bus +0.026, truck +0.024, motorcycle +0.026, mAP50 +0.021;
+P4t1 bus +0.036, truck +0.011, motorcycle +0.007, mAP50 +0.014.
+
+Observations (seed 42, not causal claims):
+- A0c on YOLO11m barely moves from the zero-shot COCO model (round 0 mAP50 0.486, bus 0.477, motorcycle 0.379):
+  missing-scenario motorcycle falls below zero-shot (0.347 / 0.303 at rounds 10 / 20).
+- Under A0c the missing scenario suppresses bus: recall 0.18 at precision 0.88 (ideal 0.44 / 0.64), TP_bus gap
+  +506 vs +262 for P4t1. P4t1 roughly halves the bus recall gap; the bus AP50 gap is larger for P4t1 (+0.036 vs
+  +0.026) only because both A0c AP50 values are low.
+- ΔP4t1 is the joint effect of KD + cosine LR + RFS 1.0; it does not isolate KD (ADR-018 rule needs P3 vs A0c).
