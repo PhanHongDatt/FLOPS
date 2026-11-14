@@ -1797,3 +1797,13 @@ experiments:
   note: 'pushed 2026-11-13 at commit 06c2214. 20 of 20 rounds, 5 results / 0 failures each, artifact check passed, wall 4.8 h. P4t1 (S27) minus A0c: mAP50 +0.111, bus +0.132. A0c gap ideal minus S32a: bus +0.026, truck +0.024, motorcycle +0.026 (P4t1 +0.036 / +0.011 / +0.007).'
   results:
     mean_r10_20: {mAP50: 0.5445, AP50_car: 0.7869, AP50_bus: 0.5055, AP50_truck: 0.5344, AP50_motorcycle: 0.3511, precision_bus: 0.6442, recall_bus: 0.4377}
+- id: EXP-2026-11-14-S33e-probe-degradation-localisation
+  gate: 'G5 evidence (ADR-036)'
+  scenario: BDD100K val box-centre features of round-20 checkpoints S26/S27 (YOLO11m), S21b/S28 (YOLO11s) and the COCO initial models
+  method: evaluation only (linear probes on neck and cv3[l][1], head readout)
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s33e-probe-features
+  decision_rule: 'ADR-036: ideal - missing probe bus recall (primary level) >= 0.03 with 95 % CI excluding 0 on both YOLO11m and YOLO11s, checked in order neck, cv3[l][1], readout'
+  note: 'pushed 2026-11-14 at commit cfae888; estimated 1-1.5 GPU-h.'
