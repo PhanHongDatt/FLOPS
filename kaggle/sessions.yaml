@@ -657,3 +657,9 @@ sessions:
       'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+  s33e:  # ADR-036: degradation-localisation probe features (COCO / S26 / S27 YOLO11m, COCO / S21b / S28 YOLO11s, round 20)
+    slug: flops-s33e-probe-features
+    owner: phdatt
+    notebook: notebooks/08_probe_features.py
+    dataset_sources: [solesensei/solesensei_bdd100k, phdatt/flops-ckpt-y11m-s26-s27-s29, phdatt/flops-ckpt-y11s-s21b-s28]

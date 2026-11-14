@@ -74,5 +74,19 @@ ROI-align pooling (extra parameters), TAL-assigned anchors (differ between check
 ## Related
 ADR-020 (D1, CCVR, P5f), ADR-028 (B1), ADR-030/033 (S26/S27), ADR-035 (direction A local steps).
 
+## Implementation (2026-11-14, fixed before the run)
+- Code: `src/evaluation/probe.py` (pure helpers, `tests/test_probe.py`), `scripts/extract_probe_features.py`
+  (GPU), `scripts/probe_degradation.py` (CPU), `notebooks/08_probe_features.py`, session `s33e` (phdatt; datasets
+  `phdatt/flops-ckpt-y11m-s26-s27-s29` and private `phdatt/flops-ckpt-y11s-s21b-s28`).
+- Val boxes: car 102,506, bus 1,597, truck 4,245. Car boxes are sampled before extraction by a seeded hash of
+  (image, box index), 78 per mille (~8,000), independent of any model; bus and truck boxes are all kept.
+- Letterbox: long side 960, short side padded to a multiple of 32, centred (the evaluator's rect batch shape
+  for 1280x720 frames, 960x544).
+- Primary-level probe: one probe per level, trained on the half-0 boxes whose primary level it is (feature width
+  differs per level), predictions pooled over levels. Readout metrics use the primary level, all boxes.
+- The bootstrap resamples half-1 images with the probe fixed (it is not refitted per resample).
+- Smoke 2026-11-14 (CPU, 200 images, S26/S27/COCO YOLO11m): pipeline end to end; at the box-centre cell the
+  readout argmax equals the GT class for 87 % of boxes (coordinates aligned). Smoke numbers are not results.
+
 ## Result
 Not run.
