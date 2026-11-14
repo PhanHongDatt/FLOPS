@@ -1802,8 +1802,13 @@ experiments:
   scenario: BDD100K val box-centre features of round-20 checkpoints S26/S27 (YOLO11m), S21b/S28 (YOLO11s) and the COCO initial models
   method: evaluation only (linear probes on neck and cv3[l][1], head readout)
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s33e-probe-features
   decision_rule: 'ADR-036: ideal - missing probe bus recall (primary level) >= 0.03 with 95 % CI excluding 0 on both YOLO11m and YOLO11s, checked in order neck, cv3[l][1], readout'
-  note: 'pushed 2026-11-14 at commit cfae888; estimated 1-1.5 GPU-h.'
+  note: 'pushed 2026-11-14 at commit cfae888. 6 of 6 extractions on the same 13,877 boxes. Decision: not replicated (11m readout shifted, 11s head body degraded). Neck no difference on either model; readout bus score lower in the missing run on both (11m +0.098, 11s +0.069 ideal - missing, CIs excluding 0), missing stays at the COCO starting score.'
+  results:
+    neck_primary_delta: {y11m: +0.003, y11s: +0.018}
+    cv3_1_primary_delta: {y11m: -0.011, y11s: +0.045}
+    readout_bus_score_delta: {y11m: +0.098, y11s: +0.069}
+    readout_bus_score: {S26: 0.267, S27: 0.365, COCO11m: 0.264, S21b: 0.211, S28: 0.280, COCO11s: 0.202}

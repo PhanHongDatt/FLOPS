@@ -1,0 +1,64 @@
+{
+  "decision": "not replicated: 11m: readout shifted; 11s: head body degraded",
+  "rule": "ADR-036",
+  "per_model": {
+    "11m": {
+      "neck": {
+        "model": "11m",
+        "depth": "neck",
+        "level": "primary",
+        "n_bus": 797,
+        "delta": 0.002509410288582183,
+        "ci_low": -0.028445669861858435,
+        "ci_high": 0.032029161953184226
+      },
+      "cv3_1": {
+        "model": "11m",
+        "depth": "cv3_1",
+        "level": "primary",
+        "n_bus": 797,
+        "delta": -0.011292346298619825,
+        "ci_low": -0.04036526067166463,
+        "ci_high": 0.020636763654773956
+      },
+      "readout": {
+        "model": "11m",
+        "depth": "readout",
+        "level": "primary",
+        "n_bus": 1597,
+        "delta": 0.09824262264130217,
+        "ci_low": 0.09233950661890337,
+        "ci_high": 0.10483252622037764
+      }
+    },
+    "11s": {
+      "neck": {
+        "model": "11s",
+        "depth": "neck",
+        "level": "primary",
+        "n_bus": 797,
+        "delta": 0.01756587202007528,
+        "ci_low": -0.013670885413395305,
+        "ci_high": 0.04744515783841626
+      },
+      "cv3_1": {
+        "model": "11s",
+        "depth": "cv3_1",
+        "level": "primary",
+        "n_bus": 797,
+        "delta": 0.0451693851944793,
+        "ci_low": 0.015642335606376217,
+        "ci_high": 0.07437042527564162
+      },
+      "readout": {
+        "model": "11s",
+        "depth": "readout",
+        "level": "primary",
+        "n_bus": 1597,
+        "delta": 0.06852329355086308,
+        "ci_low": 0.06336122570285861,
+        "ci_high": 0.07384705565492372
+      }
+    }
+  }
+}

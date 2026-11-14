@@ -1,7 +1,7 @@
 # ADR-036: locate the missing-class degradation (features vs head readout) before choosing a method
 
 **Date:** 2026-11-14
-**Status:** proposed (pre-registration; not run)
+**Status:** accepted (run 2026-11-14, s33e)
 **Scope:** feasibility-gate (G5 evidence) · diagnostics
 
 ## Context
@@ -88,5 +88,32 @@ ADR-020 (D1, CCVR, P5f), ADR-028 (B1), ADR-030/033 (S26/S27), ADR-035 (direction
 - Smoke 2026-11-14 (CPU, 200 images, S26/S27/COCO YOLO11m): pipeline end to end; at the box-centre cell the
   readout argmax equals the GT class for 87 % of boxes (coordinates aligned). Smoke numbers are not results.
 
-## Result
-Not run.
+## Result (s33e, completed 2026-11-14)
+All six extractions completed on the same 13,877 boxes (car 8,035, bus 1,597, truck 4,245); 797 bus boxes in
+the evaluation half. Artifacts: `kaggle/output/s33e/flops_export/probe/` (features not committed).
+
+**Formal decision (rule above): not replicated -> no method is triggered.** YOLO11m: readout shifted;
+YOLO11s: head body degraded (cv3[l][1] met on 11s only).
+
+Δ = ideal − missing at the primary level (95 % CI):
+| Depth | YOLO11m (S27 − S26) | YOLO11s (S28 − S21b) |
+|---|---|---|
+| neck, probe bus recall | +0.003 [−0.028, +0.032] | +0.018 [−0.014, +0.047] |
+| cv3[l][1], probe bus recall | −0.011 [−0.040, +0.021] | **+0.045 [+0.016, +0.074]** |
+| readout, mean bus score at bus boxes | **+0.098 [+0.092, +0.105]** | **+0.069 [+0.063, +0.074]** |
+| readout, share of bus boxes where bus beats car and truck | +0.138 [+0.122, +0.156] | +0.118 [+0.101, +0.136] |
+
+Per checkpoint (primary level): probe bus recall neck / cv3[l][1]: S26 0.685 / 0.745, S27 0.688 / 0.734,
+S21b 0.669 / 0.691, S28 0.686 / 0.737; COCO 11m 0.645 / 0.670, COCO 11s 0.622 / 0.664. Mean bus score:
+S26 0.267, S27 0.365, COCO 11m 0.264; S21b 0.211, S28 0.280, COCO 11s 0.202.
+
+Observations (descriptive, not part of the rule):
+- Neck: no difference on either model; a linear probe recovers bus from the missing-scenario features as well
+  as from the ideal ones. Per-level results outside the primary level are mixed and not consistent between the
+  models (11m P5 +0.040, 11s P4 +0.056, each with CI excluding 0).
+- Readout: the one effect present on both models, with the largest size and narrowest CI. In the missing
+  scenario the bus score at bus boxes stays at the COCO starting value (0.267 vs 0.264; 0.211 vs 0.202), while
+  the ideal run raises it. This matches a recall-driven gap and the earlier P5f null (freezing cv3[l][2] at COCO
+  values keeps the score where the missing run already is).
+- Any method aimed at the readout (bus row of cv3[l][2] / its bias) is a post-hoc hypothesis from this result and
+  needs its own ADR and pre-registered rule; this ADR does not trigger it. One training seed per scenario.
