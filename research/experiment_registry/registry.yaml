@@ -1887,8 +1887,8 @@ experiments:
   scenario: round-20 checkpoints S26/S27 (YOLO11m) and S21b/S28 (YOLO11s); Detect.cv3 retrained on the 15,000 pooled images (s1b5_central_3k_allmoto); A0c S32a/S32b readout
   method: evaluation + head-only retraining (2 epochs, recipe fixed in ADR-038)
   run_class: feasibility
-  status: planned
+  status: running
   seed: 42
   kaggle_kernel: goshihayashi/flops-s37e-cls-retrain
   decision_rule: 'ADR-038: gap_rt = AP50_bus(I_rt) - AP50_bus(M_rt) <= 0.5 x gap0 on both models; car/truck/motorcycle of M_rt within 0.01 of M'
-  note: 'prepared 2026-11-15; estimated 3.5-4 h on T4 x2.'
+  note: 'pushed 2026-11-15 at commit 4e00bbd; estimated 3.5-4 h on T4 x2.'
