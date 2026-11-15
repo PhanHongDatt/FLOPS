@@ -747,3 +747,9 @@ sessions:
       'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+  s37e:  # ADR-038: ceiling test 1a (retrain Detect.cv3 on pooled data) for S26/S27 and S21b/S28, + A0c readout
+    slug: flops-s37e-cls-retrain
+    owner: goshihayashi
+    notebook: notebooks/10_cls_retrain.py
+    dataset_sources: [solesensei/solesensei_bdd100k, goshihayashi/flops-ckpt-r20-pairs]

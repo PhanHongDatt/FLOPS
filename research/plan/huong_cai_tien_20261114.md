@@ -138,3 +138,23 @@ Các thay đổi này **không** nhằm thu hẹp mức suy giảm. Báo cáo ph
   thành truck được đếm cả vào FN_bus lẫn FP_truck.
 - Số ảnh train chưa dùng, số bus trong đó, và việc không trùng tập val: xem Bước 1.
 - Hai cặp run của Bước 0 chỉ khác nhau ở cách chia dữ liệu: xem Bước 0.
+
+---
+
+## Cập nhật 15/11/2026 (sau ADR-036, ADR-037)
+
+- **ADR-036:** đặc trưng neck không suy giảm; phần đọc ra bị lệch trên cả 11m và 11s. Hướng A (học tương phản ở đặc trưng) bị loại.
+- **ADR-037:** ghép hàng bus của cv3[l][2] chỉ phục hồi 14 % (11m) và 24 % (11s) mức tụt: lệch nằm trên toàn nhánh cv3. Hiệu chỉnh bias hoặc riêng hàng bus bị loại (AP không đổi khi dịch đều logit).
+- **Seed 123** xác nhận mức tụt bus của P4t1: 0,041 (seed 42: 0,036).
+
+Thứ tự mới:
+
+| Bước | Việc | Cần thầy duyệt |
+|---|---|---|
+| 1 | **ADR-038 – thí nghiệm trần 1a:** huấn luyện lại toàn bộ cv3 trên đặc trưng thật, có nhãn của 15.000 ảnh, cho cả mô hình thiếu lớp M và lý tưởng I; đạt nếu mức tụt sau huấn luyện lại ≤ 50 % mức tụt ban đầu trên cả 11m và 11s. Kèm đo phần đọc ra trên A0c (giả thuyết KD neo điểm bus ở mức COCO). | Không |
+| 2 | SAHI trên checkpoint có sẵn cho moto nhỏ (ADR riêng) | Không |
+| 3 | Nếu 1a đạt: 1b – huấn luyện lại cv3 ở server từ thống kê đặc trưng do client gửi (mảng quanh tâm box, đúng tỷ lệ nền, L2-SP). Nếu 1a trượt: bỏ mọi hướng hiệu chỉnh head. | Chia sẻ thống kê đặc trưng |
+| 4 | Hướng B (chưng cất đầu ra ở server) | Ảnh không nhãn ở server |
+| 5 | Head P2 / M1–M3 cho moto, nếu SAHI cho thấy tiềm năng | Không |
+
+Không ưu tiên: hiệu chỉnh bias/hàng bus, che gradient lớp vắng (kiểu FedRS), học tương phản ở đặc trưng.
