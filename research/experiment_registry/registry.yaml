@@ -1852,3 +1852,33 @@ experiments:
   kaggle_kernel: phdatt/flops-s35c-a0c-y11m-960-s5moto-s123
   decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
   note: 'pushed 2026-11-14 at commit 2021bd0. 20 of 20 rounds, 5 / 0 each, artifact check passed, wall 5.4 h. Mean r10/20: mAP50 0.5313, bus 0.4979, truck 0.5231, motorcycle 0.3227. P4t1 (S35a) minus A0c: mAP50 +0.112, bus +0.103.'
+- id: EXP-2026-11-15-S36A-A0c-s5motopooled-y11m960-seed123
+  gate: 'G10 main matrix (ADR-033 order 2)'
+  scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A0c
+  run_class: main
+  status: running
+  seed: 123
+  kaggle_kernel: phdatt/flops-s36a-a0c-y11m-960-s5motopooled-s123
+  decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
+  note: 'pushed 2026-11-15; estimated ~5-5.5 h on T4 x2.'
+- id: EXP-2026-11-15-S36B-A0c-s5moto-y11m960-seed2024
+  gate: 'G10 main matrix (ADR-033 order 2)'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A0c
+  run_class: main
+  status: running
+  seed: 2024
+  kaggle_kernel: phdatt/flops-s36b-a0c-y11m-960-s5moto-s2024
+  decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
+  note: 'pushed 2026-11-15; estimated ~5-5.5 h on T4 x2.'
+- id: EXP-2026-11-15-S36C-A0c-s5motopooled-y11m960-seed2024
+  gate: 'G10 main matrix (ADR-033 order 2)'
+  scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A0c
+  run_class: main
+  status: running
+  seed: 2024
+  kaggle_kernel: goshihayashi/flops-s36c-a0c-y11m-960-s5motopooled-s2024
+  decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
+  note: 'pushed 2026-11-15; estimated ~5-5.5 h on T4 x2.'
