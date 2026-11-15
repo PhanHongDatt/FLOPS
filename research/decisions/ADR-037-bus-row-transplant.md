@@ -1,7 +1,7 @@
 # ADR-037: is the missing-class gap held in the bus row of the final classification conv? (row transplant)
 
 **Date:** 2026-11-14
-**Status:** proposed (pre-registration; not run)
+**Status:** accepted (run 2026-11-15, s34e)
 **Scope:** feasibility-gate (G5, F2-style controlled perturbation)
 
 ## Context
@@ -51,5 +51,25 @@ R_n is reported with R_s; it decides nothing alone. A model that is not conclusi
 ## Related
 ADR-020 (P5f, CCVR), ADR-021 (A1c), ADR-028 (B1), ADR-036 (probe).
 
-## Result
-Not run.
+## Result (s34e, completed 2026-11-15)
+All 8 global evals, both size-split dumps and the bootstrap completed. The identity copies reproduce the runs'
+own round-20 values (S26 bus 0.6220, S27 0.6521, S21b 0.5903, S28 0.6127), so the in-session gaps are 0.030
+(11m) and 0.022 (11s): both models conclusive.
+
+| AP50 bus (round 20) | M | M+rowI | I+rowM | I | R_s | R_n |
+|---|---:|---:|---:|---:|---:|---:|
+| YOLO11m (S26 / S27) | 0.6220 | 0.6261 | 0.6442 | 0.6521 | **0.14** | 0.26 |
+| YOLO11s (S21b / S28) | 0.5903 | 0.5956 | 0.6040 | 0.6127 | **0.24** | 0.39 |
+
+Paired bootstrap (bus, all sizes, 1,000 resamples): M+rowI − M +0.005 [+0.003, +0.006] (11m),
++0.008 [+0.005, +0.012] (11s); I − I+rowM +0.008 [+0.006, +0.010], +0.010 [+0.008, +0.013];
+I − M +0.032 [+0.024, +0.039], +0.018 [+0.011, +0.025]. Sanity holds: car / truck / motorcycle AP50 of every
+transplanted model equal its recipient to 4 decimals.
+
+**Decision (rule above): R_s < 0.5 and R_n < 0.5 on both models -> the gap is not held in the bus row alone;
+row and head body shifted jointly -> output-level method (direction B).**
+
+Observations: the transplant moves the bus operating point more than AP. M+rowI raises bus recall
+(0.486 → 0.536 on 11m, 0.452 → 0.530 on 11s) and lowers precision (0.768 → 0.689, 0.742 → 0.650); I+rowM does the
+reverse. The row accounts for a real but small part of the gap (14-24 % sufficiency, 26-39 % necessity, CIs
+excluding 0); the rest needs the body the row was trained with. One training seed per scenario.

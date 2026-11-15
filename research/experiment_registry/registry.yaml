@@ -1817,38 +1817,38 @@ experiments:
   scenario: round-20 checkpoints S26/S27 (YOLO11m) and S21b/S28 (YOLO11s); M, I, M+rowI, I+rowM (bus row of Detect.cv3[l][2])
   method: evaluation only (no training)
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s34e-row-transplant
   decision_rule: 'ADR-037: sufficiency R_s = (AP50_bus(M+rowI) - AP50_bus(M)) / gap >= 0.5 on both models (in-session gap >= 0.015), sanity other classes within 0.01'
-  note: 'pushed 2026-11-14; estimated 2-3 h on T4 x2.'
+  note: 'pushed 2026-11-14 at commit ae9388b. 8 of 8 evals + dumps + bootstrap. Identity copies reproduce the run values. R_s 0.14 (11m) / 0.24 (11s), R_n 0.26 / 0.39: below 0.5 on both -> not in the bus row alone; direction B. Transplant shifts bus recall up / precision down.'
 - id: EXP-2026-11-14-S35a-P4t1-s5moto-y11m960-seed123
   gate: 'G10 main matrix (ADR-033 order 2)'
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: main
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: goshihayashi/flops-s35a-p4t1-y11m-960-s5moto-s123
   decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
-  note: 'pushed 2026-11-14; estimated ~10 h on T4 x2.'
+  note: 'pushed 2026-11-14 at commit 2021bd0. 20 of 20 rounds, 5 / 0 each, artifact check passed, wall 9.9 h. Mean r10/20: mAP50 0.6429, bus 0.6011, truck 0.6224, motorcycle 0.5265, car 0.8214 (seed 42: 0.6422 / 0.6020 / 0.6224 / 0.5234 / 0.8211).'
 - id: EXP-2026-11-14-S35b-P4t1-s5motopooled-y11m960-seed123
   gate: 'G10 main matrix (ADR-033 order 2)'
   scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: main
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: goshihayashi/flops-s35b-p4t1-y11m-960-s5motopooled-s123
   decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
-  note: 'pushed 2026-11-14; estimated ~10 h on T4 x2.'
+  note: 'pushed 2026-11-14 at commit 2021bd0. 20 of 20 rounds, 5 / 0 each, artifact check passed, wall 9.8 h. Mean r10/20: mAP50 0.6562, bus 0.6418. Bus gap vs S35a +0.041 (seed 42 +0.036), recall gap +0.108, TP_bus +299.5.'
 - id: EXP-2026-11-14-S35c-A0c-s5moto-y11m960-seed123
   gate: 'G10 main matrix (ADR-033 order 2)'
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0c
   run_class: main
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: phdatt/flops-s35c-a0c-y11m-960-s5moto-s123
   decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
-  note: 'pushed 2026-11-14; estimated ~6 h on T4 x2.'
+  note: 'pushed 2026-11-14 at commit 2021bd0. 20 of 20 rounds, 5 / 0 each, artifact check passed, wall 5.4 h. Mean r10/20: mAP50 0.5313, bus 0.4979, truck 0.5231, motorcycle 0.3227. P4t1 (S35a) minus A0c: mAP50 +0.112, bus +0.103.'

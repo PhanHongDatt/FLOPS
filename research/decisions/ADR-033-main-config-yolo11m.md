@@ -55,3 +55,19 @@ Observations (seed 42, not causal claims):
   +506 vs +262 for P4t1. P4t1 roughly halves the bus recall gap; the bus AP50 gap is larger for P4t1 (+0.036 vs
   +0.026) only because both A0c AP50 values are low.
 - ΔP4t1 is the joint effect of KD + cosine LR + RFS 1.0; it does not isolate KD (ADR-018 rule needs P3 vs A0c).
+
+## Result, order 2 part 1 (seed 123: S35a P4t1 missing, S35b P4t1 ideal, S35c A0c missing), mean of rounds 10/20
+All three 20 of 20 rounds, 5 results / 0 failures each, artifact check passed.
+
+| AP50 | P4t1 missing s42 / s123 | P4t1 ideal s42 / s123 | A0c missing s42 / s123 |
+|---|---|---|---|
+| mAP50 | 0.6422 / 0.6429 | 0.6559 / 0.6562 | 0.5239 / 0.5313 |
+| bus | 0.6020 / 0.6011 | 0.6377 / 0.6418 | 0.4793 / 0.4979 |
+| truck | 0.6224 / 0.6224 | 0.6333 / 0.6319 | 0.5101 / 0.5231 |
+| motorcycle | 0.5234 / 0.5265 | 0.5301 / 0.5283 | 0.3253 / 0.3227 |
+| car | 0.8211 / 0.8214 | 0.8224 / 0.8227 | 0.7808 / 0.7816 |
+
+P4t1 bus gap (ideal − missing): +0.036 (seed 42), +0.041 (seed 123); per round +0.041 / +0.030 and
++0.045 / +0.036; bus recall gap +0.078 / +0.108, TP_bus +262 / +299.5. P4t1 − A0c (missing): mAP50 +0.118 / +0.112,
+bus +0.123 / +0.103. P4t1 seed-to-seed spread is ≤ 0.004 AP50 on every class. Still pending: A0c ideal seed 123,
+all seed-2024 runs.
