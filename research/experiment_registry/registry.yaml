@@ -1857,31 +1857,31 @@ experiments:
   scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0c
   run_class: main
-  status: running
+  status: completed
   seed: 123
   kaggle_kernel: phdatt/flops-s36a-a0c-y11m-960-s5motopooled-s123
   decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
-  note: 'pushed 2026-11-15; estimated ~5-5.5 h on T4 x2.'
+  note: 'pushed 2026-11-15 at commit 8fec888. 20 of 20 rounds, 5 / 0 each, artifact check passed, wall 5.6 h. Mean r10/20: mAP50 0.5387, bus 0.5079, truck 0.5309, motorcycle 0.3285.'
 - id: EXP-2026-11-15-S36B-A0c-s5moto-y11m960-seed2024
   gate: 'G10 main matrix (ADR-033 order 2)'
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0c
   run_class: main
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: phdatt/flops-s36b-a0c-y11m-960-s5moto-s2024
   decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
-  note: 'pushed 2026-11-15; estimated ~5-5.5 h on T4 x2.'
+  note: 'pushed 2026-11-15 at commit 8fec888. 20 of 20 rounds, 5 / 0 each, artifact check passed, wall 5.2 h. Mean r10/20: mAP50 0.5251, bus 0.4976, truck 0.5043, motorcycle 0.3148, bus recall 0.149.'
 - id: EXP-2026-11-15-S36C-A0c-s5motopooled-y11m960-seed2024
   gate: 'G10 main matrix (ADR-033 order 2)'
   scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0c
   run_class: main
-  status: running
+  status: completed
   seed: 2024
   kaggle_kernel: goshihayashi/flops-s36c-a0c-y11m-960-s5motopooled-s2024
   decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
-  note: 'pushed 2026-11-15; estimated ~5-5.5 h on T4 x2.'
+  note: 'pushed 2026-11-15 at commit 8fec888. 20 of 20 rounds, 5 / 0 each, artifact check passed, wall 5.1 h. Mean r10/20: mAP50 0.5447, bus 0.5128, truck 0.5299, motorcycle 0.3488.'
 - id: EXP-2026-11-15-S37e-cls-branch-retrain-ceiling
   gate: 'G5 evidence (ADR-038, ceiling test 1a)'
   scenario: round-20 checkpoints S26/S27 (YOLO11m) and S21b/S28 (YOLO11s); Detect.cv3 retrained on the 15,000 pooled images (s1b5_central_3k_allmoto); A0c S32a/S32b readout
@@ -1891,4 +1891,4 @@ experiments:
   seed: 42
   kaggle_kernel: goshihayashi/flops-s37e-cls-retrain
   decision_rule: 'ADR-038: gap_rt = AP50_bus(I_rt) - AP50_bus(M_rt) <= 0.5 x gap0 on both models; car/truck/motorcycle of M_rt within 0.01 of M'
-  note: 'pushed 2026-11-15 at commit 4e00bbd; estimated 3.5-4 h on T4 x2.'
+  note: 'first push 2026-11-15 (4e00bbd) failed-technical after 7 min: generate_partition for the central re-deal needs the s1b5_bus_3k_allmoto manifest first (notebook 10 did not build it). Fixed in 7d2ca79 (build order + assert central = union of client images), re-pushed 2026-11-17; estimated 3.5-4 h.'

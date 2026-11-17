@@ -71,3 +71,19 @@ P4t1 bus gap (ideal − missing): +0.036 (seed 42), +0.041 (seed 123); per round
 +0.045 / +0.036; bus recall gap +0.078 / +0.108, TP_bus +262 / +299.5. P4t1 − A0c (missing): mAP50 +0.118 / +0.112,
 bus +0.123 / +0.103. P4t1 seed-to-seed spread is ≤ 0.004 AP50 on every class. Still pending: A0c ideal seed 123,
 all seed-2024 runs.
+
+## Result, order 2 part 2 (A0c complete: S36a ideal s123, S36b missing s2024, S36c ideal s2024), mean of r10/20
+All 20 of 20 rounds, 5 results / 0 failures each, artifact check passed.
+
+| A0c, mean ± std over seeds 42 / 123 / 2024 | missing | ideal | gap (ideal − missing) |
+|---|---|---|---|
+| mAP50 | 0.527 ± 0.004 | 0.543 ± 0.003 | +0.016 ± 0.007 |
+| bus | 0.492 ± 0.011 | 0.509 ± 0.004 | +0.017 ± 0.008 (per seed +0.026 / +0.010 / +0.015) |
+| truck | 0.513 ± 0.010 | 0.532 ± 0.002 | +0.019 ± 0.010 |
+| motorcycle | 0.321 ± 0.006 | 0.343 ± 0.012 | +0.022 ± 0.015 |
+| bus recall | 0.182 ± 0.032 | 0.450 ± 0.011 | +0.268 ± 0.031 |
+
+P4t1 (seeds 42 / 123, seed 2024 pending): bus gap +0.038 ± 0.004, recall gap +0.093 ± 0.021; truck +0.010,
+motorcycle +0.004. Reading (descriptive): under A0c the missing scenario cuts bus recall far more (0.45 → 0.18) but
+AP50 less, because both A0c AP50 values are low; P4t1 removes most of the truck / motorcycle gap and two thirds of
+the bus recall gap, while its bus AP50 gap is about twice A0c's. Pending: P4t1 seed 2024 (missing and ideal).
