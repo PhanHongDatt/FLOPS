@@ -1,7 +1,7 @@
 # ADR-038: ceiling test 1a, retrain the classification branch on pooled labelled data
 
 **Date:** 2026-11-15
-**Status:** proposed (pre-registration; not run)
+**Status:** accepted (run 2026-11-17, s37e; outcome: not viable)
 **Scope:** feasibility-gate (G5) · decides whether head-level calibration (CCVR-like, plan step 1b) is worth building
 
 ## Context
@@ -64,4 +64,28 @@ below the COCO 0.264. Reported, not a rule.
 ADR-020 (CCVR attempt, P5f), ADR-036, ADR-037.
 
 ## Result
-Not run.
+s37e (goshihayashi/flops-s37e-cls-retrain, commit 7d2ca79), round 20, global evaluator, AP50:
+
+| Model | M | I | M_rt | I_rt | gap0 | gap_rt | gap_rt / gap0 | recovery |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 11m bus | 0.6220 | 0.6521 | 0.6367 | 0.6561 | 0.0301 | 0.0194 | 0.64 | 0.49 |
+| 11s bus | 0.5903 | 0.6127 | 0.6066 | 0.6213 | 0.0224 | 0.0147 | 0.66 | 0.73 |
+
+Non-target, M_rt − M: 11m car +0.003, truck +0.022, motorcycle **−0.019**; 11s car +0.005, truck +0.015,
+motorcycle **−0.027**. I_rt − I bus: +0.004 (11m), +0.009 (11s).
+
+Paired bootstrap (dumps, bus, 1,000): 11m gap0 0.0318 [0.0245, 0.0390], gap_rt 0.0225 [0.0149, 0.0297],
+M→M_rt +0.0142 [0.0076, 0.0202]; 11s gap0 0.0178 [0.0111, 0.0254], gap_rt 0.0125 [0.0047, 0.0199],
+M→M_rt +0.0125 [0.0073, 0.0182].
+
+**Decision: not viable** (both gap0 ≥ 0.015, so conclusive). gap_rt > 0.5 × gap0 on both models, and motorcycle
+of M_rt drops beyond 0.01 on both. Plan step 1b / CCVR-like head calibration is dropped. Even with real labelled
+features of all 15,000 images, re-fitting cv3 leaves about two thirds of the gap and its CI excludes 0: the part
+of the gap a head-only method can reach is about one third; the rest sits upstream of cv3 although the ADR-036
+probe saw no loss of linear bus separability in the neck (a linear probe on centre cells is a weaker test than AP).
+
+A0c readout (descriptive): mean bus score at bus boxes 0.076 (missing) vs 0.290 (ideal) vs 0.264 (COCO init);
+bus wins 0.25 vs 0.52; neck probe delta 0.029 [−0.016, 0.072] (not significant), readout delta 0.214
+[0.202, 0.228]. The hypothesis holds: without KD the missing run's bus score falls far below the COCO score, so
+not-true KD is what anchors P4t1 at 0.267. The score shift in A0c is ~3× P4t1's yet its AP gap is smaller (0.017):
+the shift is mostly a rank-preserving rescale, consistent with AP being insensitive to it.
