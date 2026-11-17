@@ -71,11 +71,17 @@ if not (YOLO_ROOT / "data.yaml").exists():
     subprocess.check_call([sys.executable, str(REPO_ROOT / "scripts" / "prepare_bdd100k.py"),
                            "--data-root", str(find_bdd100k_root()), "--output-root", str(YOLO_ROOT)])
 DATA_YAML = YOLO_ROOT / "data.yaml"
-subprocess.check_call([sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"), "--partition-config",
-                       str(REPO_ROOT / "configs" / "partition" / "s1b5_central_3k_allmoto_seed42.yaml"),
-                       "--yolo-root", str(YOLO_ROOT), "--output-dir", str(PARTITIONS_DIR)])
+for cfg in ("s1b5_bus_3k_allmoto_seed42",       # the central partition re-deals this one's images (ADR-026)
+            "s1b5_central_3k_allmoto_seed42"):
+    subprocess.check_call([sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"), "--partition-config",
+                           str(REPO_ROOT / "configs" / "partition" / f"{cfg}.yaml"),
+                           "--yolo-root", str(YOLO_ROOT), "--output-dir", str(PARTITIONS_DIR)])
 CENTRAL_YAML = PARTITIONS_DIR / "s1b5_central_3k_allmoto_seed42" / "data_C0.yaml"
 assert CENTRAL_YAML.exists(), CENTRAL_YAML
+import yaml
+_imgs = lambda p: sorted(sum(yaml.safe_load((PARTITIONS_DIR / p / "manifest.yaml").read_text())["client_assignments"].values(), []))   # noqa: E731
+assert _imgs("s1b5_central_3k_allmoto_seed42") == _imgs("s1b5_bus_3k_allmoto_seed42"), "central != union of clients"
+print("central partition:", len(_imgs("s1b5_central_3k_allmoto_seed42")), "images = union of the 5 clients")
 CKPTS = Path("/kaggle/input")
 UNZIP = DATA_TMP / "ckpt_zip"
 RUNS = DATA_TMP / "retrain_runs"
