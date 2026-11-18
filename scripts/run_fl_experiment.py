@@ -164,6 +164,8 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     # ADR-021: reference baselines on the COCO-head setting (same model/data/rounds as A0c, P4noKD)
     "A1c":      {"algorithm": "ClassCountFedAvg", "mechanism": "none", "coco_head": True},
     "FedProxc": {"algorithm": "FedProx",          "mechanism": "none", "coco_head": True},
+    # ADR-039: original FedNTD (teacher = the received global model each round) on the same setting
+    "A5c":      {"algorithm": "FedAvg",           "mechanism": "ntd",  "coco_head": True},
 }
 
 # ADR-019, fixed before any run: cosine from lr0 to LR_MIN_FACTOR * lr0 over the run.

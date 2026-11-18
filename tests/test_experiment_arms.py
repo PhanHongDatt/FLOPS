@@ -48,7 +48,7 @@ def _args(**kw) -> argparse.Namespace:
 # ── ablation presets ──────────────────────────────────────────────────────
 def test_every_plan_arm_has_a_preset():
     assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c",
-                               "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD", "P4t1", "P5f", "A1c", "FedProxc",
+                               "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD", "P4t1", "P5f", "A1c", "FedProxc", "A5c",
                                "P4t1AK", "P4t1AKadd", "P4t1AKall", "P4t1AKq1", "P4t1AKl05",
                                "P4t1M1", "P4t1M2", "P4t1M12", "P4t1M123"}
 
@@ -285,6 +285,15 @@ def test_coco_baselines_are_a0c_with_another_server_or_client_algorithm():
     for name, algo in (("A1c", "ClassCountFedAvg"), ("FedProxc", "FedProx")):
         p = dict(_ABLATIONS[name])
         assert p.pop("algorithm") == algo and p == {k: v for k, v in a0c.items() if k != "algorithm"}
+
+
+def test_fedntd_baseline_is_a0c_with_ntd_from_the_received_global_model():
+    """ADR-039: A5c = original FedNTD on the COCO-head setting (teacher = received global, not COCO)."""
+    from src.federated.client_variants import NTDClient
+    p = dict(_ABLATIONS["A5c"])
+    assert p.pop("mechanism") == "ntd" and p == {k: v for k, v in _ABLATIONS["A0c"].items() if k != "mechanism"}
+    algo, m, _ = _resolve_arms(_args(ablation="A5c"))
+    assert _pick_client_class(algo, m) is NTDClient and "teacher_from_init" not in _ABLATIONS["A5c"]
 
 
 def test_absent_kd_arms():

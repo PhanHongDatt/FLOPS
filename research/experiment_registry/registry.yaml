@@ -1893,3 +1893,57 @@ experiments:
   decision_rule: 'ADR-038: gap_rt = AP50_bus(I_rt) - AP50_bus(M_rt) <= 0.5 x gap0 on both models; car/truck/motorcycle of M_rt within 0.01 of M'
   note: 'first push 2026-11-15 (4e00bbd) failed-technical after 7 min: generate_partition for the central re-deal needs the s1b5_bus_3k_allmoto manifest first (notebook 10 did not build it). Fixed in 7d2ca79 (build order + assert central = union of client images), re-pushed 2026-11-17; estimated 3.5-4 h.'
   result: 'NOT VIABLE. 11m: gap0 0.0301 -> gap_rt 0.0194 (0.64 x gap0); 11s: 0.0224 -> 0.0147 (0.66 x). Moto of M_rt drops 0.019 (11m) / 0.027 (11s). Bootstrap gap_rt 11m 0.0225 [0.015, 0.030], 11s 0.0125 [0.005, 0.020]. A0c readout: missing bus score 0.076 vs ideal 0.290 vs COCO 0.264; neck delta 0.029 [-0.016, 0.072].'
+- id: EXP-2026-11-19-S38A-A1c-s5moto-y11m960-seed42
+  gate: 'G10 baselines (ADR-039)'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A1c
+  run_class: main
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s38a-a1c-y11m-960-s5moto-s42
+  decision_rule: 'ADR-039 reading rule: mean of rounds 10/20, descriptive (1 seed)'
+- id: EXP-2026-11-19-S38B-FedProxc-s5moto-y11m960-seed42
+  gate: 'G10 baselines (ADR-039)'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: FedProxc
+  run_class: main
+  status: planned
+  seed: 42
+  kaggle_kernel: phdatt/flops-s38b-fedproxc-y11m-960-s5moto-s42
+  decision_rule: 'ADR-039 reading rule: mean of rounds 10/20, descriptive (1 seed)'
+- id: EXP-2026-11-19-S38C-A5c-s5moto-y11m960-seed42
+  gate: 'G10 baselines (ADR-039)'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A5c
+  run_class: main
+  status: planned
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s38c-a5c-y11m-960-s5moto-s42
+  decision_rule: 'ADR-039 reading rule: mean of rounds 10/20, descriptive (1 seed)'
+- id: EXP-2026-11-19-S38D-A0c-central-y11m960-seed42
+  gate: 'G10 baselines (ADR-039)'
+  scenario: s1b5_central_3k_allmoto (1 client, same 15,000 images), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A0c
+  run_class: main
+  status: planned
+  seed: 42
+  kaggle_kernel: goshihayashi/flops-s38d-a0c-y11m-960-central-s42
+  decision_rule: 'ADR-039 reading rule: mean of rounds 10/20, descriptive (1 seed)'
+- id: EXP-2026-11-19-S38E-P4t1-s5moto-y11m960-seed2024
+  gate: 'G10 main matrix (ADR-033 order 3)'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: main
+  status: planned
+  seed: 2024
+  kaggle_kernel: alexnguyen273/flops-s38e-p4t1-y11m-960-s5moto-s2024
+  decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
+- id: EXP-2026-11-19-S38F-P4t1-s5motopooled-y11m960-seed2024
+  gate: 'G10 main matrix (ADR-033 order 3)'
+  scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: main
+  status: planned
+  seed: 2024
+  kaggle_kernel: alexnguyen273/flops-s38f-p4t1-y11m-960-s5motopooled-s2024
+  decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
