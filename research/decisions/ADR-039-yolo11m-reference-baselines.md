@@ -46,3 +46,22 @@ two sessions per account (phdatt, goshihayashi, alexnguyen273).
 ## Related ADRs
 
 ADR-010 (FedProx), ADR-012 (NTD), ADR-021 (COCO-head baselines), ADR-026 (centralized), ADR-033 (main config).
+
+## Result (s38a-d, seed 42, mean of rounds 10/20, descriptive)
+
+| Arm | mAP50 | car | bus | truck | motorcycle | bus recall |
+|---|---:|---:|---:|---:|---:|---:|
+| A0c FedAvg (S32a) | 0.524 | 0.781 | 0.479 | 0.510 | 0.325 | 0.182 |
+| A1c class-count FedAvg | 0.528 | 0.784 | 0.485 | 0.506 | 0.337 | 0.250 |
+| FedProxc | 0.531 | 0.784 | 0.491 | 0.503 | 0.345 | 0.175 |
+| A5c FedNTD | 0.547 | 0.785 | 0.496 | 0.504 | 0.402 | 0.355 |
+| P4t1 Ours (S26) | 0.642 | 0.821 | 0.602 | 0.622 | 0.523 | 0.469 |
+| A0c centralized | 0.459 | 0.764 | 0.403 | 0.451 | 0.217 | 0.445 |
+
+- P4t1 is highest on every class; over the best baseline (A5c) +0.095 mAP50, bus +0.106, truck +0.118, moto +0.121.
+- A1c and FedProxc stay within 0.02 of A0c on every class: class-count weighting does not explain the gain (§22.6).
+- A5c helps motorcycle (+0.077 vs A0c), not bus or truck; the frozen COCO teacher + cosine LR + RFS of P4t1 add the rest.
+- The centralized A0c falls below its own COCO round 0 (0.486; motorcycle 0.378 -> 0.217): 20 epochs of the plain
+  recipe forget COCO knowledge. It is not a ceiling for P4t1. The fitting ceiling is P4t1 centralized (ADR-026,
+  YOLO11s: federated within 0.006 mAP50); not run on YOLO11m. Recorded against the pre-registered "upper reference" role.
+- s38e/f (P4t1 seed 2024) failed at `git clone` (exit 128, 45 s, no training) and were re-pushed 2026-11-20.
