@@ -1959,3 +1959,13 @@ experiments:
   note: 'pushed 2026-11-19 at commit 6668098; estimated 5.5 h.'
   note2: 'first push failed-technical after 45 s (git clone exit 128, no training); re-pushed 2026-11-20.'
   decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
+- id: EXP-2026-11-20-S38G-P4t1-central-y11m960-seed42
+  gate: 'G10 baselines (ADR-039 addendum)'
+  scenario: s1b5_central_3k_allmoto (1 client, same 15,000 images), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: P4t1
+  run_class: main
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s38g-p4t1-y11m-960-central-s42
+  decision_rule: 'ADR-039 addendum: ceiling - federated P4t1 (S26) per class, mean of rounds 10/20, descriptive (1 seed)'
+  note: 'pushed 2026-11-20; estimated 5.5 h. Replaces the A0c centralized run as the ceiling (that run forgets COCO).'

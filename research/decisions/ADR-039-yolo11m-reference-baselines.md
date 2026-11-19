@@ -65,3 +65,9 @@ ADR-010 (FedProx), ADR-012 (NTD), ADR-021 (COCO-head baselines), ADR-026 (centra
   recipe forget COCO knowledge. It is not a ceiling for P4t1. The fitting ceiling is P4t1 centralized (ADR-026,
   YOLO11s: federated within 0.006 mAP50); not run on YOLO11m. Recorded against the pre-registered "upper reference" role.
 - s38e/f (P4t1 seed 2024) failed at `git clone` (exit 128, 45 s, no training) and were re-pushed 2026-11-20.
+
+## Addendum 2026-11-20: P4t1 centralized ceiling (s38g)
+
+Same protocol as ADR-026 on YOLO11m: P4t1 with one client holding the 15,000 images. Reading rule: ceiling minus
+federated P4t1 seed 42 (S26) per class. Ablation (no KD / no cosine / no RFS) and FedNTD seeds 123/2024 are
+deferred for GPU quota.
