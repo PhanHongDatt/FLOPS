@@ -1966,6 +1966,6 @@ experiments:
   run_class: main
   status: running
   seed: 42
-  kaggle_kernel: goshihayashi/flops-s38g-p4t1-y11m-960-central-s42
+  kaggle_kernel: alexnguyen273/flops-s38g-p4t1-y11m-960-central-s42
   decision_rule: 'ADR-039 addendum: ceiling - federated P4t1 (S26) per class, mean of rounds 10/20, descriptive (1 seed)'
   note: 'pushed 2026-11-20; estimated 5.5 h. Replaces the A0c centralized run as the ceiling (that run forgets COCO).'

@@ -835,7 +835,7 @@ sessions:
 
   s38g:  # ADR-039 addendum: P4t1 centralized ceiling (one client, same 15,000 images), YOLO11m 960 px, seed 42
     slug: flops-s38g-p4t1-y11m-960-central-s42
-    owner: goshihayashi
+    owner: alexnguyen273
     notebook: notebooks/05_convergence_s1b.py
     dataset_sources: [solesensei/solesensei_bdd100k]
     replace:
