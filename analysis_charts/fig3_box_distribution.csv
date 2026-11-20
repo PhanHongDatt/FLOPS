@@ -1,0 +1,61 @@
+scenario,client,class,n_boxes
+Pooled (IID),C0,Bus,525
+Pooled (IID),C0,Xe hoi,31050
+Pooled (IID),C0,Xe tai,1284
+Pooled (IID),C0,Xe may,392
+Pooled (IID),C1,Bus,525
+Pooled (IID),C1,Xe hoi,31050
+Pooled (IID),C1,Xe tai,1284
+Pooled (IID),C1,Xe may,392
+Pooled (IID),C2,Bus,525
+Pooled (IID),C2,Xe hoi,31050
+Pooled (IID),C2,Xe tai,1284
+Pooled (IID),C2,Xe may,392
+Pooled (IID),C3,Bus,525
+Pooled (IID),C3,Xe hoi,31050
+Pooled (IID),C3,Xe tai,1284
+Pooled (IID),C3,Xe may,392
+Pooled (IID),C4,Bus,525
+Pooled (IID),C4,Xe hoi,31050
+Pooled (IID),C4,Xe tai,1284
+Pooled (IID),C4,Xe may,392
+S1b5 (3/5 thieu bus),C0,Bus,0
+S1b5 (3/5 thieu bus),C0,Xe hoi,30840
+S1b5 (3/5 thieu bus),C0,Xe tai,1221
+S1b5 (3/5 thieu bus),C0,Xe may,392
+S1b5 (3/5 thieu bus),C1,Bus,0
+S1b5 (3/5 thieu bus),C1,Xe hoi,30840
+S1b5 (3/5 thieu bus),C1,Xe tai,1221
+S1b5 (3/5 thieu bus),C1,Xe may,392
+S1b5 (3/5 thieu bus),C2,Bus,0
+S1b5 (3/5 thieu bus),C2,Xe hoi,30840
+S1b5 (3/5 thieu bus),C2,Xe tai,1221
+S1b5 (3/5 thieu bus),C2,Xe may,392
+S1b5 (3/5 thieu bus),C3,Bus,875
+S1b5 (3/5 thieu bus),C3,Xe hoi,30840
+S1b5 (3/5 thieu bus),C3,Xe tai,0
+S1b5 (3/5 thieu bus),C3,Xe may,392
+S1b5 (3/5 thieu bus),C4,Bus,1753
+S1b5 (3/5 thieu bus),C4,Xe hoi,31890
+S1b5 (3/5 thieu bus),C4,Xe tai,2758
+S1b5 (3/5 thieu bus),C4,Xe may,395
+Bus1 (4/5 thieu bus),C0,Bus,0
+Bus1 (4/5 thieu bus),C0,Xe hoi,31050
+Bus1 (4/5 thieu bus),C0,Xe tai,1284
+Bus1 (4/5 thieu bus),C0,Xe may,392
+Bus1 (4/5 thieu bus),C1,Bus,0
+Bus1 (4/5 thieu bus),C1,Xe hoi,31050
+Bus1 (4/5 thieu bus),C1,Xe tai,1284
+Bus1 (4/5 thieu bus),C1,Xe may,392
+Bus1 (4/5 thieu bus),C2,Bus,0
+Bus1 (4/5 thieu bus),C2,Xe hoi,31050
+Bus1 (4/5 thieu bus),C2,Xe tai,1284
+Bus1 (4/5 thieu bus),C2,Xe may,392
+Bus1 (4/5 thieu bus),C3,Bus,0
+Bus1 (4/5 thieu bus),C3,Xe hoi,31050
+Bus1 (4/5 thieu bus),C3,Xe tai,1284
+Bus1 (4/5 thieu bus),C3,Xe may,392
+Bus1 (4/5 thieu bus),C4,Bus,2628
+Bus1 (4/5 thieu bus),C4,Xe hoi,31050
+Bus1 (4/5 thieu bus),C4,Xe tai,2285
+Bus1 (4/5 thieu bus),C4,Xe may,395
