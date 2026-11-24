@@ -846,3 +846,9 @@ sessions:
       'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+  s40d:  # ADR-040 run D: D1 bus table + truck FP split (A0c, P4t1 YOLO11m; A0c, P4noKD YOLO11s) and A0c PR dumps, round 20
+    slug: flops-s40d-adr040-diag
+    owner: phdatt
+    notebook: notebooks/11_diag_adr040.py
+    dataset_sources: [solesensei/solesensei_bdd100k, phdatt/flops-ckpt-r20-adr040]

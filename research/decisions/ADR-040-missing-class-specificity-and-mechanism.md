@@ -96,7 +96,7 @@ reported as YOLO11s, not merged with it.
 
 | # | Run | Where | Estimate |
 |---|---|---|---|
-| D | Diagnostic: D1 + truck FP + PR dumps at r20 for A0c (3 seeds × 2 scenarios) and P4t1 (2 seeds × 2), and D1 + bus score for P4noKD YOLO11s (S12c, S13c; labelled YOLO11s) | Kaggle, one session | 1–2 h |
+| D | Diagnostic (round 20 only): D1 + truck FP + PR dumps for A0c (3 seeds × 2 scenarios) and P4t1 (2 seeds × 2), and D1 + bus score for P4noKD YOLO11s (S12c, S13c; labelled YOLO11s) | Kaggle, one session | 1–2 h |
 | R1 | P4noKD YOLO11m t = 1.0, both scenarios, seed 42 | 4090 | about 6–7 h each |
 | R2 | FedNTD + cosine + RFS, missing, seed 42 | 4090 | about 10 h |
 | R3 | FedAvg lr0 lower, missing, seed 42 | 4090 | about 5.5 h |
