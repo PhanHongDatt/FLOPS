@@ -1,6 +1,7 @@
 # %% [markdown]
 # # FLOPS — Notebook 11: ADR-040 diagnostic on saved round-20 checkpoints (no training)
 #
+# D1 runs twice: multi-label NMS (as the global evaluator) and top-1 NMS (as S14).
 # YOLO11m 960 px: D1 bus table + truck FP split for A0c (3 seeds x 2 scenarios) and P4t1 (2 seeds x 2), and
 # per-detection PR dumps for A0c. YOLO11s 640 px (labelled YOLO11s): D1 for A0c / P4noKD on s5, s5bus1 and pooled.
 # Two lanes, one per T4.
@@ -90,10 +91,12 @@ print("runs:", sorted(p.parent.name for p in Y11M.glob("**/environment.json")),
 AE, SS = str(REPO_ROOT / "scripts" / "analyze_errors.py"), str(REPO_ROOT / "scripts" / "eval_size_split.py")
 
 
-def d1(dev: int, root: Path, weights: str, imgsz: int, name: str) -> tuple[str, list[str]]:
+def d1(dev: int, root: Path, weights: str, imgsz: int, name: str, ml: bool) -> tuple[str, list[str]]:
+    """D1 at conf 0.25; ml = multi-label NMS as in the global evaluator, else top-1 class as in S14."""
+    name = f"{name}_{'ml' if ml else 'top1'}"
     return name, [sys.executable, AE, "--data-yaml", str(DATA_YAML), "--roots", str(root), "--round", "20",
                   "--targets", "bus", "truck", "--imgsz", str(imgsz), "--weights", weights, "--batch", "16",
-                  "--device", str(dev), "--out", str(OUT / f"{name}.csv"), "--extract-to", str(DATA_TMP / f"x_{name}")]
+                  "--device", str(dev), "--out", str(OUT / f"{name}.csv"), "--extract-to", str(DATA_TMP / f"x_{name}")] + (["--multi-label"] if ml else [])
 
 
 def dumps(dev: int, root: Path, include: str, name: str) -> tuple[str, list[str]]:
@@ -104,9 +107,11 @@ def dumps(dev: int, root: Path, include: str, name: str) -> tuple[str, list[str]
 
 
 LANES = {
-    0: [d1(0, Y11M, "coco:yolo11m.pt", 960, "d1_y11m_r20")],
+    0: [d1(0, Y11M, "coco:yolo11m.pt", 960, "d1_y11m_r20", True),
+        d1(0, Y11S, "coco:yolo11s.pt", 640, "d1_y11s_r20", True),
+        d1(0, Y11S, "coco:yolo11s.pt", 640, "d1_y11s_r20", False)],
     1: [dumps(1, Y11M, "A0cm960", "ss_a0c_y11m_r20"),
-        d1(1, Y11S, "coco:yolo11s.pt", 640, "d1_y11s_r20")],
+        d1(1, Y11M, "coco:yolo11m.pt", 960, "d1_y11m_r20", False)],
 }
 from src.data.coco_view import ensure_coco_root
 ensure_coco_root(YOLO_ROOT)   # built once here: the two lanes would otherwise race to create it

@@ -116,3 +116,72 @@ Deferred: s38g (P4t1 centralized, likely over the Kaggle session limit) and more
 
 ADR-019 (P4noKD rule), ADR-022 (severity), ADR-026 (centralized), ADR-033 (main config), ADR-034 (evaluator),
 ADR-037/038 (head-only fixes), ADR-039 (baselines).
+
+## Addendum 2026-11-24 (before any s40d result is read)
+
+Changes sections 3 and 5 after review. s40d has not been pushed when this is committed.
+
+**A1. Primary scenario for specificity.** Bus on 1 of 5 clients (`s1b5_bus1`) replaces `s5moto` as the primary
+scenario for any specificity claim; `s5moto` becomes secondary.
+- Already seen, YOLO11s 640, AP50 bus ideal − bus1 per seed: FedAvg 0.041 / 0.053, P4noKD 0.079 / 0.069
+  (ADR-022 data). The section 3 statement "seed spread ≤ 0.004" referred to AP levels; the per-seed gap SD is
+  about 0.009.
+- YOLO11m has no bus1 partition yet. One with every motorcycle image (as `s5moto`) has to be built and checked
+  before runs on it.
+
+**A2. Threshold by formula, per scenario.** `t95 = t(0.975, df) × sqrt(s_ref²/n_ref + s_m²/n_m)`.
+- `s` is the observed SD of per-seed gaps in that scenario.
+- `df` is Welch-Satterthwaite.
+- With `n_m = 1`, use `s_m = s_ref`.
+- The 0.018 of section 3 is this formula for `s5moto` with 3 + 3 seeds, not a fixed constant.
+
+**A3. Two references.**
+
+| Reference | What it is | Used to judge |
+|---|---|---|
+| R0 | FedAvg default (A0c) | recipe vs default FedAvg |
+| R1 | FedAvg + cosine + RFS t = 1.0 (P4noKD) | KD, frozen teacher, and any claim about Ours beyond the recipe |
+
+**A4. Zones renamed and made symmetric.** `d = mean(g_ref) − mean(g_m)`.
+
+| Zone | Condition |
+|---|---|
+| Specific | `d > t95` and `g_m < g_ref` in every seed |
+| Opposite | `−d > t95` and `g_m > g_ref` in every seed |
+| Not supported | otherwise. This replaces "contradicted"; it only means no evidence either way. |
+
+**A5. Mechanism definitions (section 5 made exact).**
+
+D1 for target bus: strong = conf ≥ 0.25, candidate = conf ≥ 0.001, match = IoU ≥ 0.5 (`decompose_image`). The
+categories are assigned in this order:
+
+| Category | Rule |
+|---|---|
+| tp | a strong bus box matches the GT |
+| confused_X | else, the highest-scoring strong box of another class X matches |
+| low_score | else, a bus candidate below 0.25 matches |
+| missed | none of the above |
+
+- **NMS mode.** The primary mode is multi-label NMS (`--multi-label`), which matches the global evaluator (ADR-034).
+  Top-1 NMS is reported for comparison with S14. Top-1 NMS hides a bus score that sits under a higher class on the
+  same box, so it moves GTs from low_score to confused_X. S14 was top-1, and its categories are read with this caveat.
+- **Excess.** `e_k = count_missing − count_ideal` per category, and `L = tp_ideal − tp_missing`. A category's share
+  is `max(e_k, 0) / Σ_j max(e_j, 0)`, over the GT categories only. Negative excesses are reported but not netted.
+
+Reading:
+
+| Reading | Condition |
+|---|---|
+| Confusion + misses | share(confused_car + confused_truck + missed) ≥ 2/3 |
+| Score shift | share(low_score) ≥ 1/2, **or** the bus recall at precision ≥ 0.7 drops by < 0.02 while the recall at conf 0.25 drops by ≥ 0.05 |
+| Mixed | both readings hold, or neither |
+
+**A6. Single-seed rule.** The 0.03 threshold comes from the YOLO11s FedAvg per-seed gap SD of about 0.009. The SD of
+a difference of two single-seed gaps is about 0.009 × √2 ≈ 0.013; 0.03 is about 2.3 × that. It is a heuristic,
+not a test.
+
+**A7. Fixed partition.** Every seed uses the same partition, so seed SDs measure training noise only, not partition
+variability.
+
+**A8. s40d reporting.** Every s40d number is labelled round 20 (not the primary mean of rounds 10/20). Results go
+into the registry under S40D with the file they come from.

@@ -107,3 +107,21 @@ def test_coco_predictions_are_mapped_to_target_indices():
     assert b.tolist() == pb[[0, 2, 3]].tolist() and f.tolist() == [.9, .7, .6]
     assert c.tolist() == [TARGET_CLASSES.index("bus"), TARGET_CLASSES.index("car"), TARGET_CLASSES.index("truck")]
     assert remap_predictions(pb, np.array([1.0]), np.array([.5]), None)[1].tolist() == [1.0]
+
+
+def test_analyze_run_passes_the_multi_label_predictor_to_predict(tmp_path):
+    """ADR-040: --multi-label must reach model.predict (with the evaluator's max_det); default keeps the S14 call."""
+    from scripts.analyze_errors import analyze_run
+
+    calls = []
+
+    class FakeModel:
+        def predict(self, **kwargs):
+            calls.append(kwargs)
+            return iter(())
+
+    sentinel = object()
+    analyze_run(FakeModel(), tmp_path, tmp_path, [1], 0.25, 0.5, 960, "cpu", 4, None, sentinel)
+    analyze_run(FakeModel(), tmp_path, tmp_path, [1], 0.25, 0.5, 960, "cpu", 4, None)
+    assert calls[0]["predictor"] is sentinel and calls[0]["max_det"] == 300
+    assert "predictor" not in calls[1] and "max_det" not in calls[1]

@@ -76,12 +76,13 @@ def remap_predictions(pb, pc, pf, pred_map: dict[int, int] | None):
 
 def analyze_run(model, val_dir: Path, label_dir: Path, targets: list[int], conf_thr: float,
                 iou_thr: float, imgsz: int, device, batch: int,
-                pred_map: dict[int, int] | None = None) -> dict[str, float]:
+                pred_map: dict[int, int] | None = None, predictor=None) -> dict[str, float]:
     gt: dict[int, Counter] = {t: Counter() for t in targets}
     fp: dict[int, Counter] = {t: Counter() for t in targets}
     fn_scores: dict[int, list[float]] = {t: [] for t in targets}
+    extra = {"predictor": predictor, "max_det": 300} if predictor is not None else {}
     for res in model.predict(source=str(val_dir), conf=0.001, iou=0.7, imgsz=imgsz, device=device,
-                             batch=batch, stream=True, verbose=False):
+                             batch=batch, stream=True, verbose=False, **extra):
         h, w = res.orig_shape
         lf = label_dir / (Path(res.path).stem + ".txt")
         lines = lf.read_text(encoding="utf-8").splitlines() if lf.exists() else []
@@ -124,6 +125,9 @@ def main() -> None:
     ap.add_argument("--weights", default="yolov8n.pt",
                     help="architecture to load the checkpoint into; 'coco:yolo11s.pt' = 80-class COCO head")
     ap.add_argument("--extract-to", type=Path, default=Path("/kaggle/tmp/d1_ckpts"))
+    ap.add_argument("--multi-label", action="store_true",
+                    help="NMS keeps every class above conf for a box, as the global evaluator does (ADR-040); "
+                         "default keeps the top class only, as in S14")
     args = ap.parse_args()
 
     from src.experiments.checkpoint import load_global_checkpoint
@@ -136,6 +140,10 @@ def main() -> None:
     targets = [TARGET_CLASSES.index(t) for t in args.targets]
 
     pred_map = coco_to_target_map() if args.weights.startswith("coco:") else None
+    predictor = None
+    if args.multi_label:
+        from eval_size_split import multi_label_predictor   # scripts/ is on sys.path when run as a script
+        predictor = multi_label_predictor()
     runs = find_runs(args.roots, args.round, args.extract_to)
     if not runs:
         raise SystemExit(f"no run with {CKPT.format(r=args.round)} under {args.roots}")
@@ -145,9 +153,9 @@ def main() -> None:
         model = build_model(args.weights)
         set_parameters(model, load_global_checkpoint(ckpt))
         row = {"exp_id": env.get("exp_id"), "partition_id": env.get("partition_id"),
-               "seed": env.get("seed"), "round": args.round}
+               "seed": env.get("seed"), "round": args.round, "multi_label": args.multi_label}
         row.update(analyze_run(model, val_dir, label_dir, targets, args.conf_thr, args.iou_thr,
-                               args.imgsz, args.device, args.batch, pred_map))
+                               args.imgsz, args.device, args.batch, pred_map, predictor))
         print(json.dumps(row))
         rows.append(row)
         args.out.parent.mkdir(parents=True, exist_ok=True)
