@@ -40,7 +40,7 @@ on the same partition. One seed: descriptive only, no claim of a significant dif
 
 ## Cost `[RESOURCE-BUDGET]`
 
-Six sessions on T4 x2, one arm each, about 5.5 h each (A0c/P4t1 YOLO11m took 5.1-5.6 h): about 33 h,
+Six sessions on T4 x2, one arm each, about 5.5 h per FedAvg-cost arm (A0c YOLO11m took 4.8-5.7 h); P4t1 arms take about 10 h (S26, S27, S35a/b 9.8-10.1 h), so s38e/f cost about 20 h, not 11 h (corrected 2026-11-24),
 two sessions per account (phdatt, goshihayashi, alexnguyen273).
 
 ## Related ADRs
