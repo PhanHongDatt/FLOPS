@@ -185,3 +185,46 @@ variability.
 
 **A8. s40d reporting.** Every s40d number is labelled round 20 (not the primary mean of rounds 10/20). Results go
 into the registry under S40D with the file they come from.
+
+## Result s40d (round 20, read 2026-11-25 with `scripts/adr040_read_s40d.py`)
+
+Sanity check: top-1 D1 for P4noKD YOLO11s s5 reproduces S14 exactly (tp 565, car 264, truck 179, low 154,
+missed 435, fp 131).
+
+**Mechanism reading by the A5 rule (FedAvg YOLO11m, multi-label, primary):** **confusion + misses**, 3 of 3 seeds.
+- The share of confused + missed is 0.80 / 0.84 / 1.00; the share of low_score is 0.20 / 0.16 / 0.00.
+- The confusion is mainly bus → car (+251 / +306 / +238).
+- The score-shift alternative fails narrowly: bus recall at precision ≥ 0.7 drops by 0.040 / 0.028 / 0.041, against
+  the < 0.02 the rule needs.
+- YOLO11s FedAvg and P4noKD (s5 and bus1, seed 42) read the same way (share 0.79–1.00).
+- Top-1 NMS moves GTs from low_score to missed, not to confused, so the S14 reading stands.
+
+**Descriptive, not part of the rule.** The threshold-free bus metrics of FedAvg (dumps, ideal → missing):
+
+| Seed | best-F1 threshold | best F1 | recall at best F1 | recall at conf 0.25 |
+|---|---|---|---|---|
+| 42 | 0.379 → 0.039 | 0.538 → 0.517 | 0.487 → 0.468 | 0.533 → 0.203 |
+| 123 | 0.503 → 0.056 | 0.524 → 0.513 | 0.426 → 0.420 | 0.513 → 0.236 |
+| 2024 | 0.395 → 0.022 | 0.527 → 0.513 | 0.463 → 0.496 | 0.517 → 0.217 |
+
+- So most of the recall loss at conf 0.25 is recovered by a per-class threshold. The bus scores of FedAvg drop about
+  10× while their ranking is mostly kept.
+- At conf 0.25, D1 files such a GT under confused_car, because a car box on it scores ≥ 0.25 while its bus score is
+  below 0.25. D1 at a fixed threshold cannot separate "ranked below car" from "lost".
+- The rule's verdict stands as fixed. The calibration component is reported as a descriptive finding.
+- Any criterion built on it is post hoc and must be labelled so.
+
+**Ours (P4t1), 2 seeds:**
+- Mixed by the rule: the low_score share is 0.54 at seed 42 and 0.28 at seed 123.
+- From the earlier dump (seed 42), the best-F1 threshold moves 0.375 → 0.237 and best F1 0.631 → 0.600. Ours keeps
+  the bus scores up (smaller score shift than FedAvg) but loses more ranking (F1 −0.031 against −0.011 to −0.021
+  for FedAvg).
+
+**Truck FP of Ours** (multi-label, as the evaluator):
+- 2,305 / 2,137 in the missing scenario and 2,234 / 2,113 in the ideal one, so it is not a missing-class effect.
+- 60 % of them sit on car GTs (1,390 / 1,243).
+- Under top-1 NMS the truck FP of Ours falls to 1,355 / 1,260, below FedAvg ideal (1,556–1,659). Most of the excess
+  is a second truck label on car boxes.
+- FedAvg makes the opposite error: truck GT confused as car, 1,222–1,412 against 429–451 for Ours.
+- The missing scenario adds about +240 truck FP on bus GTs for Ours (533 against 293); there is no consistent
+  increase for FedAvg.

@@ -1977,8 +1977,9 @@ experiments:
   scenario: 'round-20 checkpoints: YOLO11m 960 A0c (S32a/b, S35c, S36a-c) and P4t1 (S26, S27, S35a/b); YOLO11s 640 A0c and P4noKD on s5, s5bus1, pooled (S12a, S12c, S13c, S18a)'
   method: D1 (scripts/analyze_errors.py, conf 0.25, IoU 0.5, targets bus truck) + PR dumps for A0c (scripts/eval_size_split.py --dump)
   run_class: feasibility
-  status: running
+  status: completed
   seed: '42 / 123 / 2024 (as in the source runs)'
   kaggle_kernel: phdatt/flops-s40d-adr040-diag
   decision_rule: 'ADR-040 section 5 (mechanism reading) on A0c YOLO11m, 2 of 3 seeds; YOLO11s reported separately'
   note: 'checkpoints uploaded as private dataset phdatt/flops-ckpt-r20-adr040 (y11m.zip 715 MB, y11s.zip 202 MB). Round 20 only (round 10 not uploaded). D1 in two NMS modes (multi-label = evaluator, primary; top-1 = S14). Estimated 2-2.5 h on T4 x2. ADR-040 addendum committed before the push (01f4311). Pushed 2026-11-24 on phdatt.'
+  result: 'round 20, scripts/adr040_read_s40d.py. 5 of 5 steps completed, 2.94 h. FedAvg YOLO11m A5 reading: confusion + misses in 3/3 seeds (share 0.80/0.84/1.00, mostly bus -> car); score-shift rule fails narrowly (R@P0.7 drop 0.040/0.028/0.041 vs < 0.02). Descriptive: FedAvg best-F1 bus threshold 0.38-0.50 -> 0.02-0.06 with best F1 -0.011 to -0.021. P4t1 mixed. P4t1 truck FP 60 % on car GTs, present in both scenarios, halves under top-1 NMS. Details in ADR-040 Result s40d.'
