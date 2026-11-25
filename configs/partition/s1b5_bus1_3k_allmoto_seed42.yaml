@@ -1,0 +1,14 @@
+# ADR-040 A1 primary scenario on YOLO11m: exactly the 15,000 images of s1b5_bus_3k_allmoto_seed42 re-dealt over
+# the same 5 clients (3,000 each) so that bus lives on ONE client (absent on 4/5), as s1b5_bus1_3k_moto_seed42 does
+# for s1b5_bus_3k_moto_seed42 (ADR-022). Truck stays absent on C3; motorcycle and car are on every client.
+# The ideal pair is s1b5_pooled_3k_allmoto_seed42 (same images).
+partition_id: s1b5_bus1_3k_allmoto_seed42
+scenario: S1-Redeal
+seed: 42
+num_clients: 5
+reference_manifest: s1b5_bus_3k_allmoto_seed42/manifest.yaml
+absent:
+  bus: [C0, C1, C2, C3]
+  truck: [C3]
+rare_rule_id: pre_registered_rule_v1
+rare_threshold: 50

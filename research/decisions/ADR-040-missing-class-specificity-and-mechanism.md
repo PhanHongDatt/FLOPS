@@ -228,3 +228,38 @@ missed 435, fp 131).
 - FedAvg makes the opposite error: truck GT confused as car, 1,222–1,412 against 429–451 for Ours.
 - The missing scenario adds about +240 truck FP on bus GTs for Ours (533 against 293); there is no consistent
   increase for FedAvg.
+
+## Addendum A9 2026-11-25: R1-R3 arms, bus1 partition for YOLO11m, per-class thresholds (before R1-R3 run)
+
+**Arms** (`scripts/run_fl_experiment.py`, unit-tested to differ from their reference in one component):
+
+| Run | Arm | Definition |
+|---|---|---|
+| R1 | `P4noKDt1` | P4t1 without KD (COCO head + cosine round lr + client RFS t = 1.0) |
+| R2 | `A5cLRt1` | `P4noKDt1` with FedNTD (teacher = received global model) |
+| R3 | `A0clr01` | A0c at lr0 × 0.1 (0.001). The factor is fixed here, before any run. |
+
+**bus1 partition for YOLO11m.** `configs/partition/s1b5_bus1_3k_allmoto_seed42.yaml` re-deals the 15,000
+`s5moto` images, with bus only on C4 and truck absent on C3. It is built in notebook 05 (scenario `s5motobus1`)
+with assertions. Checked locally from `det_20/det_train.json`:
+- Box totals equal the reference (car 155,477, bus 2,657, truck 6,450, motorcycle 3,002).
+- Per client: C0–C2 bus 0; C3 bus 0 and truck 0; C4 bus 2,657, truck 2,415, motorcycle 828. The other clients hold
+  truck 1,338–1,349 and motorcycle 478–648.
+- C4 holds more truck than the others because bus images often hold trucks. This is reported, not corrected.
+- The ideal pair is `s5motopooled`. A0c already has 3 seeds on it.
+
+**Per-class thresholds (descriptive, round 20).** `scripts/adr040_class_thresholds.py` tunes the threshold on one
+half of the val images and applies it to the other half (two-fold cross-fit). Bus F1, ideal / missing:
+
+| Arm | Seed | Fixed conf 0.25 | Per-class threshold |
+|---|---|---|---|
+| FedAvg | 42 | 0.523 / 0.330 | 0.531 / 0.515 |
+| FedAvg | 123 | 0.513 / 0.371 | 0.518 / 0.512 |
+| FedAvg | 2024 | 0.516 / 0.349 | 0.520 / 0.510 |
+| P4t1 | 42 | 0.611 / 0.599 | 0.629 / 0.591 |
+
+- With per-class thresholds, the FedAvg bus F1 gap shrinks from 0.14–0.19 to 0.006–0.016.
+- P4t1's gap is 0.038.
+- P4t1 is still ahead of FedAvg on bus F1 in the missing scenario: +0.08 with per-class thresholds, against +0.25 at
+  conf 0.25.
+- From now on, operating-point comparisons report per-class cross-fit thresholds next to conf 0.25.

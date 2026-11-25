@@ -50,7 +50,8 @@ def test_every_plan_arm_has_a_preset():
     assert set(_ABLATIONS) == {"A0", "A1", "A2a", "A2b", "A3", "A4a", "A4b", "A5", "A6", "A6c",
                                "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD", "P4t1", "P5f", "A1c", "FedProxc", "A5c",
                                "P4t1AK", "P4t1AKadd", "P4t1AKall", "P4t1AKq1", "P4t1AKl05",
-                               "P4t1M1", "P4t1M2", "P4t1M12", "P4t1M123"}
+                               "P4t1M1", "P4t1M2", "P4t1M12", "P4t1M123",
+                               "P4noKDt1", "A5cLRt1", "A0clr01"}
 
 
 def test_coco_head_arms():
@@ -315,3 +316,14 @@ def test_small_object_arms_are_p4t1_plus_blocks():
                         ("P4t1M123", {"small_obj_aug", "moto_copy_paste", "nwd_assign"})):
         p = dict(_ABLATIONS[arm])
         assert set(p.pop("small_objects")) == blocks and p == _ABLATIONS["P4t1"]
+
+
+def test_adr040_arms_differ_from_their_reference_in_one_component():
+    """ADR-040 R1-R3: P4noKDt1 = P4t1 without KD; A5cLRt1 = P4noKDt1 with FedNTD; A0clr01 = A0c at lr0 x 0.1."""
+    from src.federated.client_variants import NTDClient
+    p4t1 = {k: v for k, v in _ABLATIONS["P4t1"].items() if k not in ("mechanism", "teacher_from_init")}
+    assert {**p4t1, "mechanism": "none"} == _ABLATIONS["P4noKDt1"]
+    assert {**_ABLATIONS["P4noKDt1"], "mechanism": "ntd"} == _ABLATIONS["A5cLRt1"]
+    assert {**_ABLATIONS["A0c"], "lr0_scale": 0.1} == _ABLATIONS["A0clr01"]
+    algo, m, _ = _resolve_arms(_args(ablation="A5cLRt1"))
+    assert _pick_client_class(algo, m) is NTDClient

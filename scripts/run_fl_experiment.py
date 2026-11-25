@@ -166,6 +166,10 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     "FedProxc": {"algorithm": "FedProx",          "mechanism": "none", "coco_head": True},
     # ADR-039: original FedNTD (teacher = the received global model each round) on the same setting
     "A5c":      {"algorithm": "FedAvg",           "mechanism": "ntd",  "coco_head": True},
+    # ADR-040 R1-R3: the recipe without KD (t = 1.0 as P4t1), FedNTD on the same recipe, FedAvg at lr0 x 0.1
+    "P4noKDt1": {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr_cosine": True, "rfs_t": 1.0},
+    "A5cLRt1":  {"algorithm": "FedAvg", "mechanism": "ntd",  "coco_head": True, "lr_cosine": True, "rfs_t": 1.0},
+    "A0clr01":  {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr0_scale": 0.1},
 }
 
 # ADR-019, fixed before any run: cosine from lr0 to LR_MIN_FACTOR * lr0 over the run.
@@ -465,6 +469,8 @@ def main() -> None:
             args.global_data_yaml = coco_data_yaml(args.global_data_yaml, view_dir)
         if not str(config["model"]["weights"]).startswith("coco:"):
             config["model"]["weights"] = "coco:" + str(config["model"]["weights"])
+    if preset.get("lr0_scale"):   # before the cosine schedule, whose lr_min follows lr0
+        train_config["lr0"] = float(train_config["lr0"]) * float(preset["lr0_scale"])
     if preset.get("lr_cosine"):
         train_config["lr_schedule"] = {"rounds": int(fed["num_rounds"]),
                                        "lr_min": float(train_config["lr0"]) * LR_MIN_FACTOR}

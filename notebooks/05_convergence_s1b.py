@@ -121,6 +121,21 @@ try:   # never block the other scenarios: an infeasible re-deal only fails the a
     print("bus1 re-deal class counts:", _bus1["class_counts"])
 except Exception as exc:
     print(f"⚠️  s1b5_bus1 partition not available: {exc}")
+S1B5MOTOBUS1 = PARTITIONS_DIR / "s1b5_bus1_3k_allmoto_seed42"   # ADR-040 A1: bus on 1 of 5, s5moto images
+try:
+    subprocess.check_call([
+        sys.executable, str(REPO_ROOT / "scripts" / "generate_partition.py"),
+        "--partition-config", str(REPO_ROOT / "configs" / "partition" / "s1b5_bus1_3k_allmoto_seed42.yaml"),
+        "--yolo-root", str(YOLO_ROOT), "--output-dir", str(PARTITIONS_DIR),
+    ])
+    _refm = yaml.safe_load((S1B5MOTO / "manifest.yaml").read_text())
+    _bus1m = yaml.safe_load((S1B5MOTOBUS1 / "manifest.yaml").read_text())
+    assert sorted(sum(_bus1m["client_assignments"].values(), [])) == sorted(sum(_refm["client_assignments"].values(), []))
+    assert [c for c in sorted(_bus1m["class_counts"]) if _bus1m["class_counts"][c]["bus"] > 0] == ["C4"]
+    assert _bus1m["class_counts"]["C3"]["truck"] == 0
+    print("bus1 allmoto re-deal class counts:", _bus1m["class_counts"])
+except Exception as exc:
+    print(f"⚠️  s1b5_bus1_allmoto partition not available: {exc}")
 s1b = yaml.safe_load((S1B / "manifest.yaml").read_text())
 for cid, cls in (("C0", "bus"), ("C1", "bus"), ("C2", "truck")):
     assert s1b["class_counts"][cid][cls] == 0, f"S1b-2k {cid} {cls} must be 0"
@@ -293,7 +308,7 @@ SESSION_BUDGET_H = 11.0
 ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override
 
 PARTITIONS = {"": S1B, "control": CTRL, "pooled": POOLED, "s5": S1B5, "s5pooled": POOLED5, "s5bus1": S1B5BUS1,
-              "s5moto": S1B5MOTO, "s5motopooled": POOLED5MOTO, "s9bus8": S9BUS8, "central": CENTRAL,
+              "s5moto": S1B5MOTO, "s5motopooled": POOLED5MOTO, "s5motobus1": S1B5MOTOBUS1, "s9bus8": S9BUS8, "central": CENTRAL,
               "s5rare": S1B5RARE, "centralrare": CENTRALRARE}
 EXP_CFG_9C = REPO_ROOT / "configs" / "experiments" / "convergence_9c_y11s_20r_960.yaml"   # ADR-024
 EXP_CFG_1C = REPO_ROOT / "configs" / "experiments" / "central_1c_y11s_20r_960.yaml"   # ADR-026
