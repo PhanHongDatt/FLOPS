@@ -2025,3 +2025,13 @@ experiments:
   kaggle_kernel: phdatt/flops-s41d-a0clr01-y11m-960-s5moto-s42
   decision_rule: 'ADR-040 sections 3-5 and addenda A1-A9 (single seed: differences above 0.03 only)'
   note: 'session defined 2026-11-25; not pushed; estimated about 5.5 h. 4090 preferred (ADR-040 run order).'
+- id: EXP-2026-11-26-S41E-adr040-r1-diagnostic-r20
+  gate: 'ADR-040 R1 secondary metrics (section 4, A9)'
+  scenario: 'round-20 checkpoints of S41A/S41B (P4noKDt1, YOLO11m 960, seed 42, s5moto / s5motopooled)'
+  method: D1 multi-label + top-1 (scripts/analyze_errors.py) + PR dumps (scripts/eval_size_split.py --dump) for per-class cross-fit thresholds
+  run_class: feasibility
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s41e-r1-diag
+  decision_rule: 'ADR-040 A5 (D1 shares), A9 (per-class thresholds); compared with P4t1 seed 42 from s40d and s30e'
+  note: 'checkpoints uploaded as private dataset phdatt/flops-ckpt-r20-r1 (y11m.zip 143 MB, round 20 only). Estimated about 1 h on T4 x2. Pushed 2026-11-26 on phdatt.'

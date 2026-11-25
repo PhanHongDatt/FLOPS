@@ -85,9 +85,11 @@ def size_root(tag: str) -> Path:
     raise FileNotFoundError(f"no {tag} folder or zip under {CKPTS}")
 
 
-Y11M, Y11S = size_root("y11m"), size_root("y11s")
+MODE = "s40d"   # sessions override: "r1" reads only the YOLO11m P4noKDt1 checkpoints (ADR-040 R1)
+Y11M = size_root("y11m")
+Y11S = size_root("y11s") if MODE == "s40d" else None
 print("runs:", sorted(p.parent.name for p in Y11M.glob("**/environment.json")),
-      sorted(p.parent.name for p in Y11S.glob("**/environment.json")))
+      sorted(p.parent.name for p in Y11S.glob("**/environment.json")) if Y11S else [])
 AE, SS = str(REPO_ROOT / "scripts" / "analyze_errors.py"), str(REPO_ROOT / "scripts" / "eval_size_split.py")
 
 
@@ -106,13 +108,20 @@ def dumps(dev: int, root: Path, include: str, name: str) -> tuple[str, list[str]
                   "--extract-to", str(DATA_TMP / f"x_{name}")]
 
 
-LANES = {
-    0: [d1(0, Y11M, "coco:yolo11m.pt", 960, "d1_y11m_r20", True),
-        d1(0, Y11S, "coco:yolo11s.pt", 640, "d1_y11s_r20", True),
-        d1(0, Y11S, "coco:yolo11s.pt", 640, "d1_y11s_r20", False)],
-    1: [dumps(1, Y11M, "A0cm960", "ss_a0c_y11m_r20"),
-        d1(1, Y11M, "coco:yolo11m.pt", 960, "d1_y11m_r20", False)],
-}
+if MODE == "s40d":
+    LANES = {
+        0: [d1(0, Y11M, "coco:yolo11m.pt", 960, "d1_y11m_r20", True),
+            d1(0, Y11S, "coco:yolo11s.pt", 640, "d1_y11s_r20", True),
+            d1(0, Y11S, "coco:yolo11s.pt", 640, "d1_y11s_r20", False)],
+        1: [dumps(1, Y11M, "A0cm960", "ss_a0c_y11m_r20"),
+            d1(1, Y11M, "coco:yolo11m.pt", 960, "d1_y11m_r20", False)],
+    }
+else:   # r1: D1 in both NMS modes on lane 0, PR dumps for the per-class thresholds on lane 1
+    LANES = {
+        0: [d1(0, Y11M, "coco:yolo11m.pt", 960, "d1_r1_y11m_r20", True),
+            d1(0, Y11M, "coco:yolo11m.pt", 960, "d1_r1_y11m_r20", False)],
+        1: [dumps(1, Y11M, "P4noKDt1m960", "ss_r1_y11m_r20")],
+    }
 from src.data.coco_view import ensure_coco_root
 ensure_coco_root(YOLO_ROOT)   # built once here: the two lanes would otherwise race to create it
 status: dict[str, str] = {}

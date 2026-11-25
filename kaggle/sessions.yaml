@@ -877,6 +877,14 @@ sessions:
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
 
+  s41e:  # ADR-040 R1 diagnostic: D1 (multi-label + top-1) and PR dumps on the P4noKDt1 round-20 checkpoints
+    slug: flops-s41e-r1-diag
+    owner: phdatt
+    notebook: notebooks/11_diag_adr040.py
+    dataset_sources: [solesensei/solesensei_bdd100k, phdatt/flops-ckpt-r20-r1]
+    replace:
+      'MODE = "s40d"   # sessions override: "r1" reads only the YOLO11m P4noKDt1 checkpoints (ADR-040 R1)': 'MODE = "r1"'
+
   s41c:  # ADR-040 R2: A5cLRt1 (FedNTD + cosine + RFS t=1.0) @ s5moto, YOLO11m 960 px, seed 42
     slug: flops-s41c-a5clrt1-y11m-960-s5moto-s42
     owner: phdatt
