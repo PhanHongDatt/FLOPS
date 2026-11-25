@@ -1988,21 +1988,23 @@ experiments:
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: P4noKDt1
   run_class: main
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s41a-p4nokdt1-y11m-960-s5moto-s42
   decision_rule: 'ADR-040 sections 3-5 and addenda A1-A9 (single seed: differences above 0.03 only)'
   note: 'pushed 2026-11-25 on phdatt at commit a736664; estimated about 6-7 h. 4090 preferred (ADR-040 run order).'
+  result: 'completed 2026-11-26, 7.3 h. AP50 mean r10/20: bus 0.611, motorcycle 0.483, mAP50 0.639. Read with S41B in ADR-040 Result R1.'
 - id: EXP-2026-11-25-S41B-P4noKDt1-s5motopooled-y11m960-seed42
   gate: 'ADR-040 R1'
   scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
   method: P4noKDt1
   run_class: main
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s41b-p4nokdt1-y11m-960-s5motopooled-s42
   decision_rule: 'ADR-040 sections 3-5 and addenda A1-A9 (single seed: differences above 0.03 only)'
   note: 'pushed 2026-11-25 on phdatt at commit a736664; estimated about 6-7 h. 4090 preferred (ADR-040 run order).'
+  result: 'completed 2026-11-26, 8.2 h. AP50 mean r10/20: bus 0.630, motorcycle 0.469, mAP50 0.641. Bus gap vs S41A 0.019 abs / 0.030 rel: not supported vs A0c (d = -0.002). KD effect vs P4t1 seed 42: motorcycle +0.040/+0.061 (> 0.03), bus gap +0.017 (descriptive). D1 and class thresholds pending.'
 - id: EXP-2026-11-25-S41C-A5cLRt1-s5moto-y11m960-seed42
   gate: 'ADR-040 R2'
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20

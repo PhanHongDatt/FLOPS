@@ -263,3 +263,29 @@ half of the val images and applies it to the other half (two-fold cross-fit). Bu
 - P4t1 is still ahead of FedAvg on bus F1 in the missing scenario: +0.08 with per-class thresholds, against +0.25 at
   conf 0.25.
 - From now on, operating-point comparisons report per-class cross-fit thresholds next to conf 0.25.
+
+## Result R1 (s41a/b, 2026-11-26)
+
+`P4noKDt1`, YOLO11m 960, seed 42, `s5moto` / `s5motopooled`. Runs took 7.3 h and 8.2 h (P4t1 about 10 h).
+AP50, mean of rounds 10/20 (round 20 in brackets).
+
+| Arm | Seed | bus missing | bus ideal | abs gap | rel gap | motorcycle missing / ideal | mAP50 missing / ideal |
+|---|---|---|---|---|---|---|---|
+| A0c | 42 / 123 / 2024 | 0.479 / 0.498 / 0.498 | 0.506 / 0.508 / 0.513 | 0.027 / 0.010 / 0.015 | 0.053 / 0.020 / 0.029 (r20 0.022 / 0.031 / 0.020) | 0.325 / 0.351 (s42) | 0.524 / 0.544 (s42) |
+| P4noKDt1 | 42 | 0.611 (0.633) | 0.630 (0.649) | 0.019 | 0.030 (r20 0.025) | 0.483 / 0.469 | 0.639 / 0.641 |
+| P4t1 | 42 / 123 | 0.602 / 0.601 | 0.638 / 0.642 | 0.036 / 0.041 | 0.056 / 0.064 (r20 0.046 / 0.055) | 0.523 / 0.530 (s42) | 0.642 / 0.656 (s42) |
+
+**Reading (sections 3, A3, A4, A6).**
+- R1 against R0 (A0c), bus gap: d = 0.017 − 0.019 = −0.002 absolute (relative +0.004). **Not supported** either way.
+  The recipe without KD keeps the FedAvg-sized gap while lifting bus AP50 by about 0.13 in both scenarios.
+- KD effect (P4t1 − P4noKDt1, seed 42, single-seed rule 0.03):
+  - motorcycle +0.040 (missing) and +0.061 (ideal): above 0.03, in line with ADR-023 on YOLO11s.
+  - bus −0.009 (missing), +0.008 (ideal); gap 0.036 against 0.019 (+0.017). Below 0.03: descriptive only.
+  - truck −0.017 (missing), −0.007 (ideal); car equal; mAP50 +0.003 (missing), +0.015 (ideal).
+- So, on this seed, the gain over FedAvg on bus comes from the recipe (COCO head + cosine + RFS t = 1.0). KD adds
+  motorcycle AP, not missing-class bus AP.
+
+**Descriptive, operating point at conf 0.25 (round 20, from round_metrics).** Bus recall, missing / ideal: A0c
+0.205 / 0.463, P4noKDt1 0.413 / 0.575, P4t1 0.486 / 0.573. Without KD the bus recall drop is 0.162 against 0.087
+with KD, while AP50 is equal. This points at KD keeping bus scores up (calibration), not ranking. It is not a reading:
+D1 and the per-class cross-fit thresholds for R1 need its checkpoints (section 4, A9) and are still to run.
