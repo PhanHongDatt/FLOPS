@@ -289,3 +289,35 @@ AP50, mean of rounds 10/20 (round 20 in brackets).
 0.205 / 0.463, P4noKDt1 0.413 / 0.575, P4t1 0.486 / 0.573. Without KD the bus recall drop is 0.162 against 0.087
 with KD, while AP50 is equal. This points at KD keeping bus scores up (calibration), not ranking. It is not a reading:
 D1 and the per-class cross-fit thresholds for R1 need its checkpoints (section 4, A9) and are still to run.
+
+### R1 secondary metrics (s41e, round 20)
+
+D1 bus, multi-label (top-1 in brackets), missing − ideal excess, seed 42:
+
+| Arm | TP lost | confused car | confused truck | low score | missed | conf + miss share | A5 reading |
+|---|---|---|---|---|---|---|---|
+| A0c | 528 | 251 | 87 | 106 | 85 | 0.80 | confusion + misses |
+| P4noKDt1 | 293 (285) | 122 | 59 | 79 | 33 | 0.73 (0.93) | confusion + misses |
+| P4t1 | 158 | 19 | 39 | 85 | 15 | 0.46 | mixed |
+
+- P4noKDt1 score-shift rule: R@P0.7 drop 0.573 → 0.531 = 0.042 (needs < 0.02). Not met.
+- Bus best-F1 threshold, ideal → missing: A0c 0.38 → 0.04, P4noKDt1 0.41 → 0.12, P4t1 0.375 → 0.237.
+
+Per-class cross-fit F1 (A9), ideal / missing:
+
+| Arm | bus @0.25 | bus @class thr | motorcycle @class thr | truck @class thr |
+|---|---|---|---|---|
+| A0c | 0.523 / 0.330 | 0.531 / 0.515 | 0.449 / 0.428 | 0.548 / 0.522 |
+| P4noKDt1 | 0.608 / 0.571 | 0.632 / 0.597 | 0.571 / 0.560 | 0.626 / 0.628 |
+| P4t1 | 0.611 / 0.599 | 0.629 / 0.591 | 0.596 / 0.600 | 0.618 / 0.613 |
+
+Truck FP (multi-label), missing / ideal: P4noKDt1 1,130 / 1,840 (on car GTs 449 / 905, on bus GTs 337 / 269);
+P4t1 2,305 / 2,234 (on car 1,390 / 1,482, on bus 533 / 293).
+
+Reading (single seed, descriptive except the A5 line):
+- Without KD the bus loss reads like FedAvg (confusion + misses), at about half the size. KD moves it to "mixed".
+- At per-class thresholds, bus F1 is the same with and without KD (0.597 / 0.591 missing; 0.632 / 0.629 ideal).
+  KD's bus benefit at conf 0.25 (+0.028 missing) is a score-level (calibration) effect, not a ranking one.
+- KD keeps a motorcycle gain at per-class thresholds (+0.025 to +0.040), as in AP50.
+- Most truck FP on car GTs comes with KD (about 1,400 against 450–900 without it). Truck F1 is 0.005–0.015 lower
+  with KD.

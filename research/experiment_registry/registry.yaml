@@ -2030,8 +2030,9 @@ experiments:
   scenario: 'round-20 checkpoints of S41A/S41B (P4noKDt1, YOLO11m 960, seed 42, s5moto / s5motopooled)'
   method: D1 multi-label + top-1 (scripts/analyze_errors.py) + PR dumps (scripts/eval_size_split.py --dump) for per-class cross-fit thresholds
   run_class: feasibility
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s41e-r1-diag
   decision_rule: 'ADR-040 A5 (D1 shares), A9 (per-class thresholds); compared with P4t1 seed 42 from s40d and s30e'
   note: 'checkpoints uploaded as private dataset phdatt/flops-ckpt-r20-r1 (y11m.zip 143 MB, round 20 only). Estimated about 1 h on T4 x2. Pushed 2026-11-26 on phdatt.'
+  result: 'round 20, 3 of 3 steps completed. D1 multi-label: P4noKDt1 loses 293 bus TP (A0c 528, P4t1 158); conf + miss share 0.73, A5 reading confusion + misses (P4t1 mixed). Per-class cross-fit bus F1 ideal/missing 0.632/0.597 vs P4t1 0.629/0.591: KD bus benefit is calibration only. Motorcycle +0.025 to +0.040 with KD. Truck FP on car GTs mostly from KD. Details in ADR-040 R1 secondary metrics.'
