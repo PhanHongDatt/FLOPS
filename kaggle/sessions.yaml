@@ -908,3 +908,57 @@ sessions:
       'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
       'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
       'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+
+  s42a:  # ADR-040 A10: A0clr01 @ s5motopooled (ideal), seed 42
+    slug: flops-s42a-a0clr01-y11m-960-s5motopooled-s42
+    owner: phdatt
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0clr01@s5motopooled"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11m_20r_960.yaml"'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+
+  s42b:  # ADR-040 A10: A1clr01 (class-count FedAvg, lr0 x 0.1) @ s5moto, seed 42
+    slug: flops-s42b-a1clr01-y11m-960-s5moto-s42
+    owner: phdatt
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A1clr01@s5moto"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11m_20r_960.yaml"'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+
+  s42c:  # ADR-040 A10: FedProxclr01 (lr0 x 0.1) @ s5moto, seed 42
+    slug: flops-s42c-fedproxclr01-y11m-960-s5moto-s42
+    owner: phdatt
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["FedProxclr01@s5moto"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11m_20r_960.yaml"'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+
+
+  s42d:  # ADR-040 A10: A0clr01 @ s5moto, seed 123
+    slug: flops-s42d-a0clr01-y11m-960-s5moto-s123
+    owner: phdatt
+    notebook: notebooks/05_convergence_s1b.py
+    dataset_sources: [solesensei/solesensei_bdd100k]
+    replace:
+      'SEED = 42   # training seed; the partition is the same for every seed (CLAUDE.md §14)': 'SEED = 123'
+      'ARMS = ["A0", "FedProx", "A1", "A3", "A2b", "A4b", "A0@control"]   # sessions override this': 'ARMS = ["A0clr01@s5moto"]'
+      'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c.yaml"   # 5 clients (ADR-017)': 'EXP_CFG_5C = REPO_ROOT / "configs" / "experiments" / "convergence_5c_y11m_20r_960.yaml"'
+      'RUN_TAG = ""   # appended to the arm in the run directory name; sessions at 960 px set "i960" (ADR-023)': 'RUN_TAG = "m960"'
+      'ARM_TIMEOUT_H = 5   # sessions with s-tier models raise this (a Kaggle session allows 12 h)': 'ARM_TIMEOUT_H = 11'
+      'ARM_ESTIMATE_H = 3.5   # conservative per-arm estimate; sessions may override': 'ARM_ESTIMATE_H = 1'
+

@@ -2038,3 +2038,43 @@ experiments:
   decision_rule: 'ADR-040 A5 (D1 shares), A9 (per-class thresholds); compared with P4t1 seed 42 from s40d and s30e'
   note: 'checkpoints uploaded as private dataset phdatt/flops-ckpt-r20-r1 (y11m.zip 143 MB, round 20 only). Estimated about 1 h on T4 x2. Pushed 2026-11-26 on phdatt.'
   result: 'round 20, 3 of 3 steps completed. D1 multi-label: P4noKDt1 loses 293 bus TP (A0c 528, P4t1 158); conf + miss share 0.73, A5 reading confusion + misses (P4t1 mixed). Per-class cross-fit bus F1 ideal/missing 0.632/0.597 vs P4t1 0.629/0.591: KD bus benefit is calibration only. Motorcycle +0.025 to +0.040 with KD. Truck FP on car GTs mostly from KD. Details in ADR-040 R1 secondary metrics.'
+- id: EXP-2026-11-28-S42A-A0clr01-s5motopooled-y11m960-seed42
+  gate: 'ADR-040 A10'
+  scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A0clr01
+  run_class: main
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s42a-a0clr01-y11m-960-s5motopooled-s42
+  decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
+  note: 'pushed 2026-11-28 on phdatt; estimated about 5.5 h.'
+- id: EXP-2026-11-28-S42B-A1clr01-s5moto-y11m960-seed42
+  gate: 'ADR-040 A10'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A1clr01
+  run_class: main
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s42b-a1clr01-y11m-960-s5moto-s42
+  decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
+  note: 'pushed 2026-11-28 on phdatt; estimated about 5.5 h.'
+- id: EXP-2026-11-28-S42C-FedProxclr01-s5moto-y11m960-seed42
+  gate: 'ADR-040 A10'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: FedProxclr01
+  run_class: main
+  status: running
+  seed: 42
+  kaggle_kernel: phdatt/flops-s42c-fedproxclr01-y11m-960-s5moto-s42
+  decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
+  note: 'pushed 2026-11-28 on phdatt; estimated about 5.5 h.'
+- id: EXP-2026-11-28-S42D-A0clr01-s5moto-y11m960-seed123
+  gate: 'ADR-040 A10'
+  scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
+  method: A0clr01
+  run_class: main
+  status: running
+  seed: 123
+  kaggle_kernel: phdatt/flops-s42d-a0clr01-y11m-960-s5moto-s123
+  decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
+  note: 'pushed 2026-11-28 on phdatt; estimated about 5.5 h.'

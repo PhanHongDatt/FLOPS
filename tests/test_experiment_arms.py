@@ -51,7 +51,7 @@ def test_every_plan_arm_has_a_preset():
                                "B1", "B2", "P1", "P2", "A0c", "P3", "P3LR", "P4", "P4noKD", "P4t1", "P5f", "A1c", "FedProxc", "A5c",
                                "P4t1AK", "P4t1AKadd", "P4t1AKall", "P4t1AKq1", "P4t1AKl05",
                                "P4t1M1", "P4t1M2", "P4t1M12", "P4t1M123",
-                               "P4noKDt1", "A5cLRt1", "A0clr01"}
+                               "P4noKDt1", "A5cLRt1", "A0clr01", "A1clr01", "FedProxclr01"}
 
 
 def test_coco_head_arms():
@@ -325,5 +325,7 @@ def test_adr040_arms_differ_from_their_reference_in_one_component():
     assert {**p4t1, "mechanism": "none"} == _ABLATIONS["P4noKDt1"]
     assert {**_ABLATIONS["P4noKDt1"], "mechanism": "ntd"} == _ABLATIONS["A5cLRt1"]
     assert {**_ABLATIONS["A0c"], "lr0_scale": 0.1} == _ABLATIONS["A0clr01"]
+    assert {**_ABLATIONS["A1c"], "lr0_scale": 0.1} == _ABLATIONS["A1clr01"]
+    assert {**_ABLATIONS["FedProxc"], "lr0_scale": 0.1} == _ABLATIONS["FedProxclr01"]
     algo, m, _ = _resolve_arms(_args(ablation="A5cLRt1"))
     assert _pick_client_class(algo, m) is NTDClient

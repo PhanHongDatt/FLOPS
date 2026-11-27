@@ -170,6 +170,9 @@ _ABLATIONS: dict[str, dict[str, object]] = {
     "P4noKDt1": {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr_cosine": True, "rfs_t": 1.0},
     "A5cLRt1":  {"algorithm": "FedAvg", "mechanism": "ntd",  "coco_head": True, "lr_cosine": True, "rfs_t": 1.0},
     "A0clr01":  {"algorithm": "FedAvg", "mechanism": "none", "coco_head": True, "lr0_scale": 0.1},
+    # ADR-040 A10: the reference baselines at the same lr0 x 0.1 as A0clr01
+    "A1clr01":  {"algorithm": "ClassCountFedAvg", "mechanism": "none", "coco_head": True, "lr0_scale": 0.1},
+    "FedProxclr01": {"algorithm": "FedProx",      "mechanism": "none", "coco_head": True, "lr0_scale": 0.1},
 }
 
 # ADR-019, fixed before any run: cosine from lr0 to LR_MIN_FACTOR * lr0 over the run.

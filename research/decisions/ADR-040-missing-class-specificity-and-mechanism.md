@@ -351,3 +351,19 @@ Missing scenario (`s5moto`) only, YOLO11m 960, seed 42, AP50 mean of rounds 10/2
 - Baseline comparisons at the default lr0 (A0c, A1c, FedProx, A5c) overstate Ours' lead. Any comparison table must
   show R3 next to A0c, and claims about Ours over FedAvg use R3 as the FedAvg reference.
 - R3 and R2 have no ideal-scenario pair, so their missing-class gaps are unknown.
+
+## Addendum A10 2026-11-28: low-lr baselines (before s42a-d run)
+
+R3 showed the default lr0 0.01 baseline is weak. The reference baselines are rerun at the same lr0 × 0.1:
+
+| Session | Arm | Scenario | Seed | Purpose |
+|---|---|---|---|---|
+| s42a | `A0clr01` | `s5motopooled` | 42 | missing-class gap of FedAvg at low lr |
+| s42b | `A1clr01` (class-count FedAvg, lr0 × 0.1) | `s5moto` | 42 | class-count control at low lr |
+| s42c | `FedProxclr01` (FedProx μ 0.01, lr0 × 0.1) | `s5moto` | 42 | FedProx at low lr |
+| s42d | `A0clr01` | `s5moto` | 123 | second seed for the Ours − R3 lead |
+
+- The factor 0.1 is not tuned further; no other lr is tried for any arm, Ours included.
+- Reading: single-seed rule 0.03 (A6). With s42d, Ours − A0clr01 on `s5moto` has 2 seeds per arm; the zone rules
+  of A2/A4 apply with the Welch threshold.
+- The low-lr FedAvg (A0clr01) replaces A0c as the FedAvg reference in comparison tables; A0c stays reported.
