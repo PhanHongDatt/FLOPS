@@ -2010,21 +2010,23 @@ experiments:
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A5cLRt1
   run_class: main
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s41c-a5clrt1-y11m-960-s5moto-s42
   decision_rule: 'ADR-040 sections 3-5 and addenda A1-A9 (single seed: differences above 0.03 only)'
   note: 'session defined 2026-11-25; not pushed; estimated about 10 h; close to the 11 h arm timeout. 4090 preferred (ADR-040 run order). Pushed 2026-11-26 on phdatt at commit 3f36633 (no 4090 available yet).'
+  result: 'completed 2026-11-28, 9.04 h. AP50 mean r10/20: mAP50 0.633, bus 0.588, truck 0.618, motorcycle 0.502. vs P4t1: all differences below 0.03 (frozen COCO teacher not supported over global teacher). vs R1: bus -0.023, motorcycle +0.019 (descriptive). ADR-040 Result R2, R3.'
 - id: EXP-2026-11-25-S41D-A0clr01-s5moto-y11m960-seed42
   gate: 'ADR-040 R3'
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0clr01
   run_class: main
-  status: running
+  status: completed
   seed: 42
   kaggle_kernel: phdatt/flops-s41d-a0clr01-y11m-960-s5moto-s42
   decision_rule: 'ADR-040 sections 3-5 and addenda A1-A9 (single seed: differences above 0.03 only)'
   note: 'session defined 2026-11-25; not pushed; estimated about 5.5 h. 4090 preferred (ADR-040 run order). Pushed 2026-11-26 on phdatt at commit 3f36633 (no 4090 available yet).'
+  result: 'completed 2026-11-28, 5.35 h. AP50 mean r10/20: mAP50 0.604, bus 0.569, truck 0.579, motorcycle 0.475; vs A0c +0.080 / +0.090 / +0.069 / +0.150: default lr0 0.01 baseline is weak. Ours vs R3: mAP50 +0.038, bus +0.033. ADR-040 Result R2, R3.'
 - id: EXP-2026-11-26-S41E-adr040-r1-diagnostic-r20
   gate: 'ADR-040 R1 secondary metrics (section 4, A9)'
   scenario: 'round-20 checkpoints of S41A/S41B (P4noKDt1, YOLO11m 960, seed 42, s5moto / s5motopooled)'

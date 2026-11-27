@@ -321,3 +321,33 @@ Reading (single seed, descriptive except the A5 line):
 - KD keeps a motorcycle gain at per-class thresholds (+0.025 to +0.040), as in AP50.
 - Most truck FP on car GTs comes with KD (about 1,400 against 450–900 without it). Truck F1 is 0.005–0.015 lower
   with KD.
+
+## Result R2, R3 (s41c, s41d, 2026-11-28)
+
+Missing scenario (`s5moto`) only, YOLO11m 960, seed 42, AP50 mean of rounds 10/20. Runs took 9.04 h (R2) and 5.35 h (R3).
+
+| Arm | mAP50 | car | bus | truck | motorcycle | bus recall / precision r20 | truck FP r20 |
+|---|---|---|---|---|---|---|---|
+| A0c (FedAvg) | 0.524 | 0.781 | 0.479 | 0.510 | 0.325 | 0.205 / 0.860 | 851 |
+| R3 A0clr01 (FedAvg, lr0 0.001) | 0.604 | 0.793 | 0.569 | 0.579 | 0.475 | 0.389 / 0.778 | 1,109 |
+| A5c (FedNTD) | 0.547 | 0.785 | 0.496 | 0.504 | 0.402 | 0.390 / 0.730 | 2,426 |
+| R2 A5cLRt1 (FedNTD + cosine + RFS) | 0.633 | 0.822 | 0.588 | 0.618 | 0.502 | 0.497 / 0.765 | 2,613 |
+| R1 P4noKDt1 | 0.639 | 0.821 | 0.611 | 0.639 | 0.483 | 0.413 / 0.844 | 1,358 |
+| P4t1 (Ours) | 0.642 | 0.821 | 0.602 | 0.622 | 0.523 | 0.486 / 0.768 | 2,758 |
+
+**Reading (section 2 questions, single-seed rule 0.03).**
+- *Is the default baseline weak?* **Yes.** R3 − A0c: mAP50 +0.080, bus +0.090, truck +0.069, motorcycle +0.150, all
+  above 0.03. lr0 0.01 is too high for fine-tuning from COCO. About two thirds of Ours' mAP50 lead over A0c (0.118)
+  is reached by lowering lr0 alone. Ours − R3: mAP50 +0.038, bus +0.033, truck +0.043, motorcycle +0.048 (just above
+  0.03).
+- *Does the frozen COCO teacher beat the received global teacher?* **Not supported.** P4t1 − R2: mAP50 +0.009, bus
+  +0.014, truck +0.004, motorcycle +0.021, all below 0.03.
+- *Does FedNTD add to the recipe?* R2 − R1: mAP50 −0.006, bus −0.023, motorcycle +0.019. Below 0.03; descriptive.
+- Descriptive: both KD arms (R2, P4t1) show higher bus recall at conf 0.25 than R1 (0.497 / 0.486 against 0.413) and
+  about twice the truck FP (2,613 / 2,758 against 1,358). The calibration effect and the truck FP come with KD in
+  general, not with the COCO teacher in particular.
+
+**Consequences.**
+- Baseline comparisons at the default lr0 (A0c, A1c, FedProx, A5c) overstate Ours' lead. Any comparison table must
+  show R3 next to A0c, and claims about Ours over FedAvg use R3 as the FedAvg reference.
+- R3 and R2 have no ideal-scenario pair, so their missing-class gaps are unknown.
