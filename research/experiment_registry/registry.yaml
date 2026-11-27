@@ -2043,38 +2043,38 @@ experiments:
   scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0clr01
   run_class: main
-  status: running
+  status: planned
   seed: 42
   kaggle_kernel: phdatt/flops-s42a-a0clr01-y11m-960-s5motopooled-s42
   decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
-  note: 'pushed 2026-11-28 on phdatt; estimated about 5.5 h.'
+  note: 'push refused 2026-11-28: phdatt weekly GPU quota (30 h) reached; estimated about 5.5 h.'
 - id: EXP-2026-11-28-S42B-A1clr01-s5moto-y11m960-seed42
   gate: 'ADR-040 A10'
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A1clr01
   run_class: main
-  status: running
+  status: planned
   seed: 42
   kaggle_kernel: phdatt/flops-s42b-a1clr01-y11m-960-s5moto-s42
   decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
-  note: 'pushed 2026-11-28 on phdatt; estimated about 5.5 h.'
+  note: 'push refused 2026-11-28: phdatt weekly GPU quota (30 h) reached; estimated about 5.5 h.'
 - id: EXP-2026-11-28-S42C-FedProxclr01-s5moto-y11m960-seed42
   gate: 'ADR-040 A10'
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: FedProxclr01
   run_class: main
-  status: running
+  status: planned
   seed: 42
   kaggle_kernel: phdatt/flops-s42c-fedproxclr01-y11m-960-s5moto-s42
   decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
-  note: 'pushed 2026-11-28 on phdatt; estimated about 5.5 h.'
+  note: 'push refused 2026-11-28: phdatt weekly GPU quota (30 h) reached; estimated about 5.5 h.'
 - id: EXP-2026-11-28-S42D-A0clr01-s5moto-y11m960-seed123
   gate: 'ADR-040 A10'
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0clr01
   run_class: main
-  status: running
+  status: planned
   seed: 123
   kaggle_kernel: phdatt/flops-s42d-a0clr01-y11m-960-s5moto-s123
   decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
-  note: 'pushed 2026-11-28 on phdatt; estimated about 5.5 h.'
+  note: 'push refused 2026-11-28: phdatt weekly GPU quota (30 h) reached; estimated about 5.5 h.'
