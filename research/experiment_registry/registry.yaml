@@ -2045,7 +2045,7 @@ experiments:
   run_class: main
   status: planned
   seed: 42
-  kaggle_kernel: phdatt/flops-s42a-a0clr01-y11m-960-s5motopooled-s42
+  kaggle_kernel: goshihayashi/flops-s42a-a0clr01-y11m-960-s5motopooled-s42
   decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
   note: 'push refused 2026-11-28: phdatt weekly GPU quota (30 h) reached; estimated about 5.5 h.'
 - id: EXP-2026-11-28-S42B-A1clr01-s5moto-y11m960-seed42
@@ -2055,7 +2055,7 @@ experiments:
   run_class: main
   status: planned
   seed: 42
-  kaggle_kernel: phdatt/flops-s42b-a1clr01-y11m-960-s5moto-s42
+  kaggle_kernel: goshihayashi/flops-s42b-a1clr01-y11m-960-s5moto-s42
   decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
   note: 'push refused 2026-11-28: phdatt weekly GPU quota (30 h) reached; estimated about 5.5 h.'
 - id: EXP-2026-11-28-S42C-FedProxclr01-s5moto-y11m960-seed42
@@ -2065,7 +2065,7 @@ experiments:
   run_class: main
   status: planned
   seed: 42
-  kaggle_kernel: phdatt/flops-s42c-fedproxclr01-y11m-960-s5moto-s42
+  kaggle_kernel: goshihayashi/flops-s42c-fedproxclr01-y11m-960-s5moto-s42
   decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
   note: 'push refused 2026-11-28: phdatt weekly GPU quota (30 h) reached; estimated about 5.5 h.'
 - id: EXP-2026-11-28-S42D-A0clr01-s5moto-y11m960-seed123
@@ -2075,6 +2075,6 @@ experiments:
   run_class: main
   status: planned
   seed: 123
-  kaggle_kernel: phdatt/flops-s42d-a0clr01-y11m-960-s5moto-s123
+  kaggle_kernel: goshihayashi/flops-s42d-a0clr01-y11m-960-s5moto-s123
   decision_rule: 'ADR-040 A10 (single seed: differences above 0.03; s42d with S41D: A2/A4 zones)'
   note: 'push refused 2026-11-28: phdatt weekly GPU quota (30 h) reached; estimated about 5.5 h.'

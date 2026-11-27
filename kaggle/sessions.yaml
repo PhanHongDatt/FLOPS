@@ -912,7 +912,7 @@ sessions:
 
   s42a:  # ADR-040 A10: A0clr01 @ s5motopooled (ideal), seed 42
     slug: flops-s42a-a0clr01-y11m-960-s5motopooled-s42
-    owner: phdatt
+    owner: goshihayashi
     notebook: notebooks/05_convergence_s1b.py
     dataset_sources: [solesensei/solesensei_bdd100k]
     replace:
@@ -925,7 +925,7 @@ sessions:
 
   s42b:  # ADR-040 A10: A1clr01 (class-count FedAvg, lr0 x 0.1) @ s5moto, seed 42
     slug: flops-s42b-a1clr01-y11m-960-s5moto-s42
-    owner: phdatt
+    owner: goshihayashi
     notebook: notebooks/05_convergence_s1b.py
     dataset_sources: [solesensei/solesensei_bdd100k]
     replace:
@@ -938,7 +938,7 @@ sessions:
 
   s42c:  # ADR-040 A10: FedProxclr01 (lr0 x 0.1) @ s5moto, seed 42
     slug: flops-s42c-fedproxclr01-y11m-960-s5moto-s42
-    owner: phdatt
+    owner: goshihayashi
     notebook: notebooks/05_convergence_s1b.py
     dataset_sources: [solesensei/solesensei_bdd100k]
     replace:
@@ -951,7 +951,7 @@ sessions:
 
   s42d:  # ADR-040 A10: A0clr01 @ s5moto, seed 123
     slug: flops-s42d-a0clr01-y11m-960-s5moto-s123
-    owner: phdatt
+    owner: goshihayashi
     notebook: notebooks/05_convergence_s1b.py
     dataset_sources: [solesensei/solesensei_bdd100k]
     replace:
