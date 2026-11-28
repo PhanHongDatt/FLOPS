@@ -1942,13 +1942,13 @@ experiments:
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
   method: P4t1
   run_class: main
-  status: failed-technical
+  status: running
   seed: 2024
   kaggle_kernel: phdatt/flops-s38e-p4t1-y11m-960-s5moto-s2024
   note: 'pushed 2026-11-19 at commit 6668098; estimated 5.5 h.'
   note2: 'first push failed-technical after 45 s (git clone exit 128, no training); re-pushed 2026-11-20.'
   note3: 'alexnguyen273 session has no internet on 2026-11-20 (git clone: Could not resolve host github.com), failed in under 1 min, no training. phdatt and goshihayashi weekly quota reached; re-push after the reset.'
-  note4: 'moved to phdatt 2026-11-28 (ADR-040 A11); P4t1 takes about 10 h.'
+  note4: 'moved to phdatt 2026-11-28 (ADR-040 A11); P4t1 takes about 10 h. Pushed 2026-11-28 on phdatt at commit 79f66c3.'
   decision_rule: 'ADR-033: mean of rounds 10/20 per class; mean +/- std over seeds once 3 seeds exist'
 - id: EXP-2026-11-19-S38F-P4t1-s5motopooled-y11m960-seed2024
   gate: 'G10 main matrix (ADR-033 order 3)'
@@ -2087,11 +2087,11 @@ experiments:
   scenario: S1b5-pooled-allmoto-3k (ideal), YOLO11m 960 px, 20 rounds, eval 10/20
   method: A0clr01
   run_class: main
-  status: planned
+  status: running
   seed: 123
   kaggle_kernel: phdatt/flops-s43a-a0clr01-y11m-960-s5motopooled-s123
   decision_rule: 'ADR-040 A11 (3 seeds per arm, A2/A4 zones)'
-  note: 'defined 2026-11-28; estimated about 5.5 h.'
+  note: 'defined 2026-11-28; estimated about 5.5 h. Pushed 2026-11-28 on phdatt at commit 79f66c3.'
 - id: EXP-2026-11-28-S43B-A0clr01-s5moto-y11m960-seed2024
   gate: 'ADR-040 A11'
   scenario: S1b5-allmoto-3k (missing), YOLO11m 960 px, 20 rounds, eval 10/20
