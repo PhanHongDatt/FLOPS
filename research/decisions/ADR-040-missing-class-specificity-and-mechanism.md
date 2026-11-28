@@ -367,3 +367,39 @@ R3 showed the default lr0 0.01 baseline is weak. The reference baselines are rer
 - Reading: single-seed rule 0.03 (A6). With s42d, Ours − A0clr01 on `s5moto` has 2 seeds per arm; the zone rules
   of A2/A4 apply with the Welch threshold.
 - The low-lr FedAvg (A0clr01) replaces A0c as the FedAvg reference in comparison tables; A0c stays reported.
+
+## Result A10 part 1 (s42a, s42d, 2026-11-28)
+
+`A0clr01` (FedAvg, lr0 0.001), YOLO11m 960. s42a 5.34 h, s42d 5.62 h. AP50 mean of rounds 10/20.
+
+| Arm | Seed | Scenario | mAP50 | bus | truck | motorcycle | bus recall / precision r20 |
+|---|---|---|---|---|---|---|---|
+| A0clr01 | 42 | missing | 0.604 | 0.569 | 0.579 | 0.475 | 0.389 / 0.778 |
+| A0clr01 | 123 | missing | 0.602 | 0.559 | 0.579 | 0.477 | 0.372 / 0.771 |
+| A0clr01 | 42 | ideal | 0.600 | 0.570 | 0.572 | 0.461 | 0.516 / 0.620 |
+| P4t1 | 42 / 123 | missing | 0.642 / 0.643 | 0.602 / 0.601 | 0.622 / 0.622 | 0.523 / 0.526 | 0.486 / 0.470 |
+
+**Ours − A0clr01 on `s5moto`, 2 seeds per arm (A2/A4, Welch df).**
+
+| Metric | per-seed difference (42 / 123) | d | t95 | Zone |
+|---|---|---|---|---|
+| mAP50 | +0.038 / +0.041 | +0.040 | 0.007 | Ours higher |
+| bus | +0.033 / +0.042 | +0.037 | 0.061 | not supported (df about 1) |
+| truck | +0.043 / +0.043 | +0.043 | < 0.01 | Ours higher |
+| motorcycle | +0.048 / +0.049 | +0.048 | 0.009 | Ours higher |
+
+- With two seeds per arm the Welch df is about 1 for bus (t = 12.7), so bus does not clear the threshold even though
+  both per-seed differences exceed 0.03. Reported as not supported.
+
+**Missing-class gap of FedAvg at low lr (seed 42, single-seed rule).**
+- Bus AP50 gap, ideal − missing: A0clr01 +0.001, A0c +0.027, P4noKDt1 +0.019, P4t1 +0.036.
+- At lr0 0.001 the FedAvg bus AP50 gap is gone; truck and motorcycle are higher in the missing scenario.
+- Bus recall at conf 0.25 still drops (0.516 → 0.389): the operating-point effect remains, the ranking effect does not.
+- P4t1 − A0clr01 gap: +0.035, above 0.03. Descriptively Ours has a larger missing-class bus gap than low-lr FedAvg.
+
+**Consequences.**
+- H1 at the AP level depends on the learning rate: with lr0 0.001, missing bus on 3 of 5 clients costs no bus AP50
+  (one seed; s42a seed 123 would confirm).
+- What remains of the missing-class effect is score compression at a fixed threshold.
+- Ours' lead over a tuned FedAvg is about +0.04 mAP50 and is general (car, truck, motorcycle too), not missing-class
+  specific.
