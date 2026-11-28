@@ -403,3 +403,19 @@ R3 showed the default lr0 0.01 baseline is weak. The reference baselines are rer
 - What remains of the missing-class effect is score compression at a fixed threshold.
 - Ours' lead over a tuned FedAvg is about +0.04 mAP50 and is general (car, truck, motorcycle too), not missing-class
   specific.
+
+## Addendum A11 2026-11-28: three seeds for Ours and the low-lr FedAvg reference (before s43a-c, s38e/f run)
+
+| Session | Arm | Scenario | Seed |
+|---|---|---|---|
+| s43a | `A0clr01` | `s5motopooled` | 123 |
+| s43b | `A0clr01` | `s5moto` | 2024 |
+| s43c | `A0clr01` | `s5motopooled` | 2024 |
+| s38e | `P4t1` | `s5moto` | 2024 (re-push on phdatt) |
+| s38f | `P4t1` | `s5motopooled` | 2024 (re-push on phdatt) |
+
+- With these, `A0clr01` and `P4t1` have 3 seeds in both scenarios. The A2/A4 zones (Welch df) are read for the bus
+  gap (`P4t1` against `A0clr01`) and for the missing-scenario lead (mAP50 and per class).
+- No arm, seed or scenario is added or dropped after the results are seen. Technical failures are re-pushed once and
+  logged.
+- P4t1 takes about 10 h per run (not 5.5 h as first noted for s38e/f).
